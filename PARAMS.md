@@ -1,0 +1,96 @@
+--! Likely to change
+--- @field Gender string?
+--- @field GameStateRequirements table?
+--- @field Color table?
+--- @field NarrativeTextColor table?
+--- @field NameplateSpeakerNameColor table?
+--- @field NameplateDescriptionColor table?
+--- @field LightingColor table?
+--- @field LootColor table?
+--- @field SubtitleColor table?
+--- @field LoadPackages table?
+--- @field SFX_Portrait string?
+--- @field UpgradeSelectedSound string?
+--- @field FlavorTextIds table?
+--- @field WeaponUpgrades table?
+--- @field Traits table?
+--- @field FirstSpawnVoiceLines table?
+--- @field OnSpawnVoiceLines table?
+--- @field UpgradeMenuOpenVoiceLines table?
+--- @field DuoPickupTextLines table?
+--- @field InteractTextLineSets table?
+--- @field BoughtTextLines table?
+--- @field BoughtTextLinesRequirements table?
+--- @field RejectionTextLines table?
+--- @field RejectionVoiceLines table?
+--- @field MakeUpTextLines table?
+--- @field GiftTextLineSets table?
+--- @field GiftGivenVoiceLines table?
+--- @field FullSuperActivatedVoiceLines table?
+--- @field DeathTauntVoiceLines table?
+--- @field RarityUpgradeVoiceLines table?
+--- @field BlindBoxOpenedVoiceLines table?
+--! Unlikely to change, and have default values
+--- @field BackgroundAnimation string?
+--- @field GoldifyValue integer?
+--- @field GoldConversionEligible boolean?
+--- @field ReplaceSpecialForGoldify boolean?
+--- @field Weight integer?
+--- @field NarrativeContextArtFlippable boolean?
+--- @field CanReceiveGift boolean?
+--- @field TextLinesIgnoreQuests boolean?
+--- @field UsePromptOffsetX integer?
+--- @field AlwaysShowDefaultUseText boolean?
+--- @field DestroyOnPickup boolean?
+--- @field SelectionSound string?
+--- @field ConfirmSound string?
+--- @field OnUsedFunctionArgs table?
+--- @field BanUnpickedBoonsEligible boolean?
+--- @field LastRewardEligible boolean?
+--- @field AnimOffsetZ integer?
+--- @field LootRejectionAnimation string?
+--- @field NarrativeContextArt string?
+--- @field BoxAnimation string?
+--- @field BoxExitAnimation string?
+--- @field RequireUseToGift boolean?
+--- @field ManualRecordUse boolean?
+--- @field UsePromptOffsetY integer?
+--- @field ColorGrade string?
+--- @field UseText string?
+--- @field OnUsedFunctionName string?
+--- @field UseTextTalkAndGift string?
+--- @field UseTextTalkAndSpecial string?
+--- @field BlockedLootInteractionText string?
+--- @field UseTextTalkGiftAndSpecial string?
+--- @field Consumables table?
+--- @field EmoteOffsetX integer?
+--- @field EmoteOffsetY integer?
+
+
+--- Adds a set of SJSON needed to create a Droppable God.
+--- @param godName string (required) - The name of the God | e.g "Artemis", "Apollo" etc
+--- @param godType string (required) - The type of God | eg "god" or "npcgod" (God = Zeus, NPC = Hermes)
+--- @param sjson SJSONConfig (required) - SJSON configuration parameters
+--- @class PortraitOptions
+--- @field includePortraits boolean? (optional) - Whether to create custom portraits (default: false)
+--- @field portraitData PortraitData? (optional) - Portrait configuration if includePortraits is true
+--- @class SJSONConfig
+--- @field iconPath string (required) - Path to the main icon file
+--- @field iconPathAngle string (required) - Path to the angled icon file for BoonInfo
+--- @field iconSpinPath string (required) - Path to the spinning icon file
+--- @field previewPath string (required) - Path to the preview icon file
+--- @field colorA table (required) - RGB color values for BoonDropA layer {Red, Green, Blue}
+--- @field colorB table (required) - RGB color values for BoonDropB layer {Red, Green, Blue}
+--- @field colorC table (required) - RGB color values for BoonDropC layer {Red, Green, Blue}
+--- @field OffsetZ number? (optional) - Z-offset for icon positioning
+--- @field OffsetY number? (optional) - Y-offset for icon positioning
+--- @field Scale number? (optional) - Scale factor for icons
+--- @field Hue number? (optional) - Hue adjustment for icons
+--- @field Sound string? (optional) - Sound effect path
+--- @field AmbientSound string? (optional) - Ambient sound path
+--- @class PortraitData
+--- @field imagePath string (required) - Path to the portrait image file
+--- @field InheritFrom string? (optional) - Portrait inheritance (default: "PortraitBase")
+--- @field DefaultEmote string? (optional) - Default emote (default: "PortraitEmoteNeutral")
+--- @field Frames number? (optional) - Number of frames (default: 1)
+--- @field FramesPerSecond number? (optional) - FPS for animation (default: 1)
