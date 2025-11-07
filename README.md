@@ -5,8 +5,7 @@ You should only install it if another mod requires it, or if you will be using t
 > *Currently, this library only supports adding in **Olympian** Gods eg. Zeus and **NPC**-type Gods eg. Hermes.* <br>
 > NPC Type means that they will not fill up the `MetGods` table during a run - meaning you can have `Zeus, Aphrodite, Hera, Hestia` and meet `Hermes` and `Your God`.
 
-> I would like to add Spells and proper NPC's such as Dionysus/Athena/Arachne during runs, and Hub NPCS such as Hecate/Hypnos.
-> However, there are a lot of functions that are hard-coded to `SpellDrop`. 
+- I would like to add Spells and proper NPC's such as Dionysus/Athena/Arachne during runs, and Hub NPCS such as Hecate/Hypnos.<br> However, there are a lot of functions that are hard-coded to `SpellDrop`, and I am unsure about the state of adding 3D models.
 
 <br>
 
