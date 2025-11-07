@@ -603,10 +603,10 @@ function public.CreateOlympianSJSONData(sjsonData)
 			InheritFrom = "BoonDropGold",
 			ChildAnimation = "BoonDropA-" .. sjsonData.godName,
 		},
-		["BoonDropA-" .. sjsonData.godName] = {
+		["BoonDropA-" .. sjsonData.godName] = { -- This one is outer field, IDK why they did it this way, but I will assign colourB to it instead.
 			InheritFrom = "BoonDropA",
 			ChildAnimation = "BoonDropB-" .. sjsonData.godName,
-			Color = sjsonData.colorA,
+			Color = sjsonData.colorB,
 			CreateAnimations = { {
 				Name = "BoonDropBackGlow",
 			}, {
@@ -616,7 +616,7 @@ function public.CreateOlympianSJSONData(sjsonData)
 		["BoonDropB-" .. sjsonData.godName] = {
 			InheritFrom = "BoonDropB",
 			ChildAnimation = "BoonDropC-" .. sjsonData.godName,
-			Color = sjsonData.colorB,
+			Color = sjsonData.colorA,
 			CreateAnimations = { {
 				Name = "BoonDropBackGlow",
 			}, {

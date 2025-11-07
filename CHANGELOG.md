@@ -1,7 +1,7 @@
 # Changelog
 
 ## [Unreleased]
-- Update ReadME
+- Update ReadME/Params
 
 ## [1.0.0] - 2025-11-07
 

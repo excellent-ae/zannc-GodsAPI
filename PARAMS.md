@@ -1,30 +1,27 @@
 # InitializeGod parameters:
 
-### Likely to change
+### **Likely to change**
 - `godName` string **(required)** - The name of the God | eg "Ares", "Zeus" etc.
 - `godType` string **(required)** - The type of God | eg "god" or "npcgod" (God = Zeus, NPC = Hermes)
-- `SpawnLikeHermes` boolean **(optional)** - Commonly used with a NPCGod, which creates requirements for the god to spawn, just like Hermes.
--
+- `SpawnLikeHermes` boolean **(optional)** - Commonly used with a NPCGod, which creates requirements for the god to spawn, just like Hermes. <br><br>
 - `GameStateRequirements` table
-- `Gender` string eg "F"
-- For all colours below, eg { 91, 255, 100, 255 } 
-- `Color` table 
-- `NarrativeTextColor` table
-- `NameplateSpeakerNameColor` table
-- `NameplateDescriptionColor` table
-- `LightingColor` table
-- `LootColor` table
-- `SubtitleColor` table
-- 
-- `LoadPackages` table eg {"Apollo"}
-- `SFX_Portrait` string eg "SFX/Sound"
-- `UpgradeSelectedSound` string eg "SFX/Sound"
-- 
-- `FlavorTextIds` table eg {"FlavourText1", "FlavourTex2"}
-- 
-- `WeaponUpgrades` table eg {"ApolloWeaponBoon", "ApolloCastBoon"}
-- `Traits` table eg  {"PerfectDamageBonusBoon", "BlindChanceBoon"}
-- For Voice Lines/Dialogue, refer to any LootData file
+- `Gender` string - eg "F"
+#### Colours support `RGB 0-255` ({ 255, 0, 150, 255 }) or `RGB 0-1` { 1.0, 0 ,0.3, 1.0 }.**
+- `NarrativeTextColor` table - default of `{ 32, 32, 30, 255 }`
+- `NameplateSpeakerNameColor` table - default of `{24, 24, 24, 255}`
+- `NameplateDescriptionColor` table - default of `{ 145, 45, 90, 255 }`
+- `SubtitleColor` table - default of `{ 255, 255, 205, 255 }`<br><br>
+- `Color` table - IDK - default of `{ 250, 250, 215, 255 }`
+- `LightingColor` table - In the Upgrade Choice menu - default of `{ 1, 0.91, 0.54, 1 }`
+- `LootColor` table - The glow that the Physical Drop gives off - default of `{ 255, 128, 32, 255 }`
+- img <br><br>
+- `LoadPackages` table - eg `{"Apollo"}`
+- `SFX_Portrait` string - eg `"SFX/Sound"`
+- `UpgradeSelectedSound` string - eg `"SFX/Sound"` <br><br>
+- `FlavorTextIds` table - eg `{"FlavourText1", "FlavourTex2" "FlavourTex3"}` <br><br>
+- `WeaponUpgrades` table - eg `{"ApolloWeaponBoon", "ApolloCastBoon"}`
+- `Traits` table - eg `{"PerfectDamageBonusBoon", "BlindChanceBoon"}`
+#### For Voice Lines/Dialogue, refer to any LootData file
 - `FirstSpawnVoiceLines` table
 - `OnSpawnVoiceLines` table
 - `UpgradeMenuOpenVoiceLines` table
@@ -42,7 +39,7 @@
 - `RarityUpgradeVoiceLines` table
 - `BlindBoxOpenedVoiceLines` table
 
-### Unlikely to change, and have default values
+#### Unlikely to change, and have default values
 - `BackgroundAnimation` string
 - `GoldifyValue` integer
 - `GoldConversionEligible` boolean
@@ -76,31 +73,28 @@
 - `UseTextTalkGiftAndSpecial` string
 - `Consumables` table
 - `EmoteOffsetX` integer
-- `EmoteOffsetY` integer
+- `EmoteOffsetY` integer <br>
 
 # CreateOlympianSJSONData parameters:
 - `godName` string
 - `godType` string
 - `skipBoonSelectSymbol` boolean
-- `AmbientSound` string - The ambient sound of the boon drop
-- 
-- The colours of the physical boon drop
-- `colorA` table
-- `colorB` table
-- `colorC` table
--  
-- `OffsetZBoonDrop` integer
-- `BoonDropIconScale` float
-- `BoonDropIconHue` float
--
+- `AmbientSound` string - The ambient sound of the boon drop <br><br>
+- The colours of the physical boon drop - with the inside colour always being white.
+- Supports `RGB 0-255` ({ Red = 255, Green = 0, Blue = 150 }) or `RGB 0-1` { Red = 1.0, Green = 0, Blue = 0.3 }, as well as an Opacity field.
+    - `colorA` table - Inner Ring eg. { Red = 255, Green = 0, Blue = 150, Opacity = 0.7 }
+    - `colorB` table - Outer Ring
+    - `colorC` table - Flare Shootoffs
+    - img <br><br>
+- `OffsetZBoonDrop` integer - Negative or Positive offset.
+- `BoonDropIconScale` float - 0.0 through to 1.0
+- `BoonDropIconHue` float - Negative or Positive. <br><br>
 - `OffsetZBoonPreview` integer - physical boon drop icon offset
-- `BoonPreviewScale` float - physical boon drop icon scale
-- 
+- `BoonPreviewScale` float - physical boon drop icon scale <br><br>
 - `iconSpinPath` string - The series of images which create the little animation of the physical boon
 - `previewPath` string - Door Icons
 - `boonSelectSymbolPath` string - Upgrade Menu Icon
-- `boonSelectSymbolOffsetY` integer
--
+- `boonSelectSymbolOffsetY` integer <br><br>
 - `portraitData` table
     - `skipNeutralPortrait` boolean
     - `NeutralPortraitFilePath` string
