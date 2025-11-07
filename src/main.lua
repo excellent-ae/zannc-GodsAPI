@@ -571,7 +571,7 @@ function public.CreateOlympianSJSONData(sjsonData)
 		rom.log.error("You must first Initialize your plugin guid, please use `GodsAPI.Initialize`")
 	end
 
-	local requiredFields = { "godName", "godType", "boonSymbolAngledPath", "iconSpinPath", "previewPath", "colorA", "colorB", "colorC" }
+	local requiredFields = { "godName", "godType", "iconSpinPath", "previewPath", "colorA", "colorB", "colorC" }
 	if not sjsonData.skipBoonSelectSymbol then
 		table.insert(requiredFields, 3, "boonSelectSymbolPath")
 	end
@@ -1028,23 +1028,17 @@ function registerEntityData(entityName, entityType, entityData)
 	end
 
 	entityData.TraitIndex = traitDictionary
-
-	if entityType == "god" or entityType == "npcgod" then
-		modstate.Gods[entityName] = true
-		-- elseif entityType == "npc" then
-		-- 	modstate.NPCs[entityName] = true
-		-- elseif entityType == "spell" then
-		-- 	modstate.Spell[entityName] = true
-	end
 end
 
--- Extra funcs for testing or function checsk
-function public.IsGodRegistered(godName)
-	-- local isRegistered = modstate.Gods[godName] == true
-	-- rom.log.warning("IsGodRegistered: " .. godName .. " = " .. tostring(isRegistered))
-	-- return isRegistered
+-- Extra func for testing or function checsk
+function public.IsGodRegistered(godName, debug)
+	if debug then
+		local isRegistered = game.LootData[godName .. "Upgrade"] ~= nil
+		rom.log.warning("IsGodRegistered: " .. godName .. " = " .. tostring(isRegistered))
+		return isRegistered
+	end
 
-	return game.LootData[godName .. "Upgrade"] == true
+	return game.LootData[godName .. "Upgrade"] ~= nil
 end
 
 modutil.once_loaded.game(function()

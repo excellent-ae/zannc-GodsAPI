@@ -27,7 +27,8 @@ function GodsAPI.CreateOlympianSJSONData(sjsonData) end
 
 --- Checks if a God is registered.
 --- @param godName string (required) - The name of the God to check
+--- @param debug boolean (optional) - Enable Debug Prints
 --- @return boolean - True if the God is registered
-function GodsAPI.IsGodRegistered(godName) end
+function GodsAPI.IsGodRegistered(godName, debug) end
 
 return GodsAPI
