@@ -102,14 +102,15 @@ If you wish to add SJSON content, such as the boon drop icons, door preview icon
     * `godType` (string) **(required)** - The type of God | eg "god" or "npcgod" (God = Zeus, NPC = Hermes)
     * `skipBoonSelectSymbol` (boolean) **(optional)** - If there is already a Boon Select Symbol (In upgrade screen), you can pass this to skip the creation of one.
 
-    <details>
-    <summary><strong>Optional Parameters</strong></summary>
-
 	* `iconSpinPath` (string) - The animation of the physical boon drop.
 	* `previewPath` (string) - The icon to display on doors.
   	* `colorA` (table) - The colours of the physical boon drop
 	* `colorB` (table)
 	* `colorC` (table)
+
+    <details>
+    <summary><strong>Optional Parameters</strong></summary>
+
 	* `portraitData` (table) **(optional)** 
 		* `skipNeutralPortrait` (boolean) **(optional)** - If there is already a neutral portrait for the character in the game.
         * `AnnoyedPortraitFilePath` (string)
