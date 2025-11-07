@@ -125,7 +125,7 @@ If you wish to add SJSON content, such as the boon drop icons, door preview icon
 #### For a full list of parameters, please refer to the [PARAMS.md](https://github.com/excellent-ae/zannc-GodsAPI/blob/main/PARAMS.md) file.
 
 # Checking Implementation
-If you need to check if the God you created is currently registered, or need to use an `if statement` to check if a god is enabled/disabled per config, you can use `gods.IsGodRegistered("GODNAME")` - returning **true or false**.<br>
+If you need to check if the God you created is currently registered, or need to use an `if statement` to check if a god is enabled/disabled per config, you can use `gods.IsGodRegistered("GODNAME", debug)` - returning **true or false**. If you pass in debug (true), it will return a warning print for confirmation of creation.<br>
 
 # Examples
 This will add a new God: `Artemis` with the **internal** name `ArtemisUpgrade`.
