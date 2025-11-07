@@ -1,7 +1,7 @@
 A library to make it easy for developers to add new Gods/NPC Gods/NPCs. It does nothing by itself.
 You should only install it if another mod requires it, or if you will be using this library to create Gods.
 
-### Notes
+>[!IMPORTANT]
 > *Currently, this library only supports adding in **Olympian** Gods eg. Zeus and **NPC**-type Gods eg. Hermes.* <br>
 > NPC Type means that they will not fill up the `MetGods` table during a run - meaning you can have `Zeus, Aphrodite, Hera, Hestia` and meet `Hermes` and `Your God`.
 
@@ -89,7 +89,6 @@ While this is not a definitive list, these are the most common that will need to
     * `BlindBoxOpenedVoiceLines` (table)
     </details>
     </details>
-    <br>
 
 ### SJSON Paramaters
 If you wish to add SJSON content, such as the boon drop icons, door preview icons or portraits, you must call `gods.CreateOlympianSJSONData(sjsonData)`
@@ -102,25 +101,24 @@ If you wish to add SJSON content, such as the boon drop icons, door preview icon
     <details>
     <summary><strong>Optional Parameters</strong></summary>
 
-	* `boonSymbolAngledPath` (string)
 	* `iconSpinPath` (string) - The animation of the physical boon drop.
 	* `previewPath` (string) - The icon to display on doors.
-  	* `colorA` (table) - The colours of the physical boon drop.
+  	* `colorA` (table) - The colours of the physical boon drop
 	* `colorB` (table)
 	* `colorC` (table)
 	* `portraitData` (table) **(optional)** 
 		* `skipNeutralPortrait` (boolean) **(optional)** - If there is already a neutral portrait for the character in the game.
         * `AnnoyedPortraitFilePath` (string)
         * `DialogueEntrance` (boolean) **(optional)** - If you wish to create animations during a portrait entrance.
-            * `RedStart` (integer)
-    		* `StartGreen` (integer)
-    		* `StartBlue` (integer)
-    		* `EndRed` (integer)
-    		* `EndGreen` (integer)
-    		* `EndBlue` (integer)
+            * `RedStart` (float) - The starting colour for the animations. eg. 1.0
+    		* `StartGreen` (float)
+    		* `StartBlue` (float)
+    		* `EndRed` (float) - The starting colour for the animations. eg. 0.1
+    		* `EndGreen` (float)
+    		* `EndBlue` (float)
     </details>
 
-### For a full list of paramaters, please refer to the PARAMS.md file.
+#### For a full list of parameters, please refer to the [PARAMS.md](https://github.com/excellent-ae/zannc-GodsAPI/blob/main/PARAMS.md) file.
 
 # Checking Implementation
 If you need to check if the God you created is currently registered, or need to use an `if statement` to check if a god is enabled/disabled per config, you can use `gods.IsGodRegistered("GODNAME")` - returning **true or false**.<br>
@@ -151,7 +149,6 @@ This will add a new God: `Artemis` with the **internal** name `ArtemisUpgrade`.
         godName = "Artemis",
         godType = "god",
         skipBoonSelectSymbol = true,
-        -- boonSymbolAngledPath = "Items\\Loot\\Boon\\ArtemisIconSpin\\ArtemisIconSpin0015",
         iconSpinPath = "Items\\Loot\\Boon\\ArtemisIconSpin\\ArtemisIconSpin",
         previewPath = "Items\\Loot\\Boon\\ArtemisIconSpin\\ArtemisPreview",
         colorA = { Red = 0.42, Green = 0.62, Blue = 0.21 },
@@ -161,4 +158,79 @@ This will add a new God: `Artemis` with the **internal** name `ArtemisUpgrade`.
             skipNeutralPortrait = true,
         },
     })
+```
+
+This will add a new NPC God: `Athena` with the **internal** name `AthenaUpgrade`, and function like Hermes does.
+
+```lua
+gods.InitializeGod({
+	godName = "Athena",
+	godType = "npcGOD",
+	SpawnLikeHermes = true,
+
+	Gender = "F",
+	LoadPackages = { "Athena" },
+	FlavorTextIds = { "AthenaUpgrade_FlavorText01", "AthenaUpgrade_FlavorText02", "AthenaUpgrade_FlavorText03" },
+
+	Traits = game.EnemyData.NPC_Athena_01.Traits,
+
+    SubtitleColor = Color.AthenaVoice,
+	Color = { 91, 255, 100, 255 },
+	LootColor = { 175, 157, 255, 255 },
+	LightingColor = { 175, 157, 255, 255 },
+})
+
+gods.CreateOlympianSJSONData({
+	godName = "Athena",
+	godType = "npcGOD",
+	skipBoonSelectSymbol = true,
+
+	iconSpinPath = "Items\\Loot\\Boon\\AthenaIconSpin\\AthenaIconSpin",
+	previewPath = "Items\\Loot\\Boon\\AthenaIconSpin\\AthenaPreview",
+	colorA = { Red = 0.76, Green = 0.64, Blue = 0.16 },
+	colorB = { Red = 0.68, Green = 0.57, Blue = 0.12 },
+	colorC = { Red = 0.60, Green = 0.51, Blue = 0.19 },
+	portraitData = {
+		NeutralPortraitFilePath = "Portraits\\Portrait1",
+		AnnoyedPortraitFilePath = "Portraits\\Portrait2",
+    
+        DialogueAnimations = {
+            DialogueEntrance = {
+                RedStart = 1.0,
+                GreenStart =  0.7,
+                BlueStart = 0.1,
+                RedEnd = 0.3,
+                GreenEnd = 0.4,
+                BlueEnd = 1.0,
+            }
+
+            DialogueEntranceStreaks = {
+                RedStart = 0.5,
+                GreenStart =  0.8,
+                BlueStart = 0.3,
+                RedEnd = 0.2,
+                GreenEnd = 0.1,
+                BlueEnd = 0.1,
+            }
+
+            DialogueEntranceParticles = {
+                RedStart = 0.5,
+                GreenStart =  0.8,
+                BlueStart = 0.3,
+                RedEnd = 0.2,
+                GreenEnd = 0.1,
+                BlueEnd = 0.1,
+            }
+
+            DialogueEntranceParticleBurst = {
+                RedStart = 0.5,
+                GreenStart =  0.8,
+                BlueStart = 0.3,
+                RedEnd = 0.2,
+                GreenEnd = 0.1,
+                BlueEnd = 0.1,
+            }
+        }
+	},
+})
 ```

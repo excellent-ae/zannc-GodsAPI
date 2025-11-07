@@ -1,96 +1,137 @@
---! Likely to change
---- @field Gender string?
---- @field GameStateRequirements table?
---- @field Color table?
---- @field NarrativeTextColor table?
---- @field NameplateSpeakerNameColor table?
---- @field NameplateDescriptionColor table?
---- @field LightingColor table?
---- @field LootColor table?
---- @field SubtitleColor table?
---- @field LoadPackages table?
---- @field SFX_Portrait string?
---- @field UpgradeSelectedSound string?
---- @field FlavorTextIds table?
---- @field WeaponUpgrades table?
---- @field Traits table?
---- @field FirstSpawnVoiceLines table?
---- @field OnSpawnVoiceLines table?
---- @field UpgradeMenuOpenVoiceLines table?
---- @field DuoPickupTextLines table?
---- @field InteractTextLineSets table?
---- @field BoughtTextLines table?
---- @field BoughtTextLinesRequirements table?
---- @field RejectionTextLines table?
---- @field RejectionVoiceLines table?
---- @field MakeUpTextLines table?
---- @field GiftTextLineSets table?
---- @field GiftGivenVoiceLines table?
---- @field FullSuperActivatedVoiceLines table?
---- @field DeathTauntVoiceLines table?
---- @field RarityUpgradeVoiceLines table?
---- @field BlindBoxOpenedVoiceLines table?
---! Unlikely to change, and have default values
---- @field BackgroundAnimation string?
---- @field GoldifyValue integer?
---- @field GoldConversionEligible boolean?
---- @field ReplaceSpecialForGoldify boolean?
---- @field Weight integer?
---- @field NarrativeContextArtFlippable boolean?
---- @field CanReceiveGift boolean?
---- @field TextLinesIgnoreQuests boolean?
---- @field UsePromptOffsetX integer?
---- @field AlwaysShowDefaultUseText boolean?
---- @field DestroyOnPickup boolean?
---- @field SelectionSound string?
---- @field ConfirmSound string?
---- @field OnUsedFunctionArgs table?
---- @field BanUnpickedBoonsEligible boolean?
---- @field LastRewardEligible boolean?
---- @field AnimOffsetZ integer?
---- @field LootRejectionAnimation string?
---- @field NarrativeContextArt string?
---- @field BoxAnimation string?
---- @field BoxExitAnimation string?
---- @field RequireUseToGift boolean?
---- @field ManualRecordUse boolean?
---- @field UsePromptOffsetY integer?
---- @field ColorGrade string?
---- @field UseText string?
---- @field OnUsedFunctionName string?
---- @field UseTextTalkAndGift string?
---- @field UseTextTalkAndSpecial string?
---- @field BlockedLootInteractionText string?
---- @field UseTextTalkGiftAndSpecial string?
---- @field Consumables table?
---- @field EmoteOffsetX integer?
---- @field EmoteOffsetY integer?
+# InitializeGod parameters:
 
+### Likely to change
+- `godName` string **(required)** - The name of the God | eg "Ares", "Zeus" etc.
+- `godType` string **(required)** - The type of God | eg "god" or "npcgod" (God = Zeus, NPC = Hermes)
+- `SpawnLikeHermes` boolean **(optional)** - Commonly used with a NPCGod, which creates requirements for the god to spawn, just like Hermes.
+-
+- `GameStateRequirements` table
+- `Gender` string eg "F"
+- For all colours below, eg { 91, 255, 100, 255 } 
+- `Color` table 
+- `NarrativeTextColor` table
+- `NameplateSpeakerNameColor` table
+- `NameplateDescriptionColor` table
+- `LightingColor` table
+- `LootColor` table
+- `SubtitleColor` table
+- 
+- `LoadPackages` table eg {"Apollo"}
+- `SFX_Portrait` string eg "SFX/Sound"
+- `UpgradeSelectedSound` string eg "SFX/Sound"
+- 
+- `FlavorTextIds` table eg {"FlavourText1", "FlavourTex2"}
+- 
+- `WeaponUpgrades` table eg {"ApolloWeaponBoon", "ApolloCastBoon"}
+- `Traits` table eg  {"PerfectDamageBonusBoon", "BlindChanceBoon"}
+- For Voice Lines/Dialogue, refer to any LootData file
+- `FirstSpawnVoiceLines` table
+- `OnSpawnVoiceLines` table
+- `UpgradeMenuOpenVoiceLines` table
+- `DuoPickupTextLines` table
+- `InteractTextLineSets` table
+- `BoughtTextLines` table
+- `BoughtTextLinesRequirements` table
+- `RejectionTextLines` table
+- `RejectionVoiceLines` table
+- `MakeUpTextLines` table
+- `GiftTextLineSets` table
+- `GiftGivenVoiceLines` table
+- `FullSuperActivatedVoiceLines` table
+- `DeathTauntVoiceLines` table
+- `RarityUpgradeVoiceLines` table
+- `BlindBoxOpenedVoiceLines` table
 
---- Adds a set of SJSON needed to create a Droppable God.
---- @param godName string (required) - The name of the God | e.g "Artemis", "Apollo" etc
---- @param godType string (required) - The type of God | eg "god" or "npcgod" (God = Zeus, NPC = Hermes)
---- @param sjson SJSONConfig (required) - SJSON configuration parameters
---- @class PortraitOptions
---- @field includePortraits boolean? (optional) - Whether to create custom portraits (default: false)
---- @field portraitData PortraitData? (optional) - Portrait configuration if includePortraits is true
---- @class SJSONConfig
---- @field iconPath string (required) - Path to the main icon file
---- @field iconPathAngle string (required) - Path to the angled icon file for BoonInfo
---- @field iconSpinPath string (required) - Path to the spinning icon file
---- @field previewPath string (required) - Path to the preview icon file
---- @field colorA table (required) - RGB color values for BoonDropA layer {Red, Green, Blue}
---- @field colorB table (required) - RGB color values for BoonDropB layer {Red, Green, Blue}
---- @field colorC table (required) - RGB color values for BoonDropC layer {Red, Green, Blue}
---- @field OffsetZ number? (optional) - Z-offset for icon positioning
---- @field OffsetY number? (optional) - Y-offset for icon positioning
---- @field Scale number? (optional) - Scale factor for icons
---- @field Hue number? (optional) - Hue adjustment for icons
---- @field Sound string? (optional) - Sound effect path
---- @field AmbientSound string? (optional) - Ambient sound path
---- @class PortraitData
---- @field imagePath string (required) - Path to the portrait image file
---- @field InheritFrom string? (optional) - Portrait inheritance (default: "PortraitBase")
---- @field DefaultEmote string? (optional) - Default emote (default: "PortraitEmoteNeutral")
---- @field Frames number? (optional) - Number of frames (default: 1)
---- @field FramesPerSecond number? (optional) - FPS for animation (default: 1)
+### Unlikely to change, and have default values
+- `BackgroundAnimation` string
+- `GoldifyValue` integer
+- `GoldConversionEligible` boolean
+- `ReplaceSpecialForGoldify` boolean
+- `Weight` integer - The chance of it spawning in the shop
+- `NarrativeContextArtFlippable` boolean
+- `CanReceiveGift` boolean
+- `TextLinesIgnoreQuests` boolean
+- `UsePromptOffsetX` integer
+- `AlwaysShowDefaultUseText` boolean
+- `DestroyOnPickup` boolean
+- `SelectionSound` string
+- `ConfirmSound` string
+- `OnUsedFunctionArgs` table
+- `BanUnpickedBoonsEligible` boolean
+- `LastRewardEligible` boolean
+- `AnimOffsetZ` integer
+- `LootRejectionAnimation` string
+- `NarrativeContextArt` string
+- `BoxAnimation` string
+- `BoxExitAnimation` string
+- `RequireUseToGift` boolean
+- `ManualRecordUse` boolean
+- `UsePromptOffsetY` integer
+- `ColorGrade` string
+- `UseText` string
+- `OnUsedFunctionName` string
+- `UseTextTalkAndGift` string
+- `UseTextTalkAndSpecial` string
+- `BlockedLootInteractionText` string
+- `UseTextTalkGiftAndSpecial` string
+- `Consumables` table
+- `EmoteOffsetX` integer
+- `EmoteOffsetY` integer
+
+# CreateOlympianSJSONData parameters:
+- `godName` string
+- `godType` string
+- `skipBoonSelectSymbol` boolean
+- `AmbientSound` string - The ambient sound of the boon drop
+- 
+- The colours of the physical boon drop
+- `colorA` table
+- `colorB` table
+- `colorC` table
+-  
+- `OffsetZBoonDrop` integer
+- `BoonDropIconScale` float
+- `BoonDropIconHue` float
+-
+- `OffsetZBoonPreview` integer - physical boon drop icon offset
+- `BoonPreviewScale` float - physical boon drop icon scale
+- 
+- `iconSpinPath` string - The series of images which create the little animation of the physical boon
+- `previewPath` string - Door Icons
+- `boonSelectSymbolPath` string - Upgrade Menu Icon
+- `boonSelectSymbolOffsetY` integer
+-
+- `portraitData` table
+    - `skipNeutralPortrait` boolean
+    - `NeutralPortraitFilePath` string
+    - `AnnoyedPortraitFilePath` string
+    - `SeriousPortraitFilePath` string
+    - `DialogueAnimations` table
+        - `DialogueEntrance` table
+            * `RedStart` float - The starting colour for the animations. eg. 1.0
+    		* `StartGreen` float
+    		* `StartBlue` float
+    		* `EndRed` float - The starting colour for the animations. eg. 0.1
+    		* `EndGreen` float
+    		* `EndBlue` float
+        - `DialogueEntranceStreaks` table
+            * `RedStart` float
+    		* `StartGreen` float
+    		* `StartBlue` float
+    		* `EndRed` float
+    		* `EndGreen` float
+    		* `EndBlue` float
+        - `DialogueEntranceParticles` table
+            * `RedStart` float
+    		* `StartGreen` float
+    		* `StartBlue` float
+    		* `EndRed` float
+    		* `EndGreen` float
+    		* `EndBlue` float
+        - `DialogueEntranceParticleBurst` table
+          * `RedStart` float
+    		* `StartGreen` float
+    		* `StartBlue` float
+    		* `EndRed` float
+    		* `EndGreen` float
+    		* `EndBlue` float

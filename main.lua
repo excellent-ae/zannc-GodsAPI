@@ -637,17 +637,17 @@ function public.CreateOlympianSJSONData(sjsonData)
 			InheritFrom = "BoonDropIcon",
 			FilePath = rom.path.combine(modstate.pluginGuid, sjsonData.iconSpinPath),
 			OffsetZ = sjsonData.OffsetZBoonDrop,
-			Scale = sjsonData.Scale,
-			Hue = sjsonData.Hue,
+			Scale = sjsonData.BoonDropIconScale,
+			Hue = sjsonData.BoonDropIconHue,
 		},
 		["BoonDrop" .. sjsonData.godName .. "Preview"] = {
 			InheritFrom = "BoonDropRoomRewardIconPreviewBase",
 			FilePath = rom.path.combine(modstate.pluginGuid, sjsonData.previewPath),
-			OffsetZ = sjsonData.OffsetZBoonDropPreview or 0,
-			Scale = sjsonData.BoonDropPreviewScale,
+			OffsetZ = sjsonData.OffsetZBoonPreview or 0,
+			Scale = sjsonData.BoonPreviewScale,
 			ColorFromOwner = "Maintain",
 			AngleFromOwner = "Ignore",
-			Sound = sjsonData.Sound,
+			Sound = sjsonData.AmbientSound,
 		},
 		["BoonDrop" .. sjsonData.godName .. "UpgradedPreview"] = {
 			InheritFrom = "BoonDrop" .. sjsonData.godName .. "Preview",
@@ -686,7 +686,7 @@ function public.CreateOlympianSJSONData(sjsonData)
 			InheritFrom = "BoonSymbolBase",
 			FilePath = rom.path.combine(modstate.pluginGuid, sjsonData.boonSelectSymbolPath),
 			Scale = 1,
-			OffsetY = sjsonData.OffsetY or 0,
+			OffsetY = sjsonData.boonSelectSymbolOffsetY or 0,
 		}, IconOrder)
 
 		sjson.hook(GUIScreensVFXFile, function(data)
@@ -738,7 +738,7 @@ function public.CreateOlympianSJSONData(sjsonData)
 		table.insert(data.Texts, mod["UpgradeChoiceMenu_" .. sjsonData.godName])
 	end)
 
-	if string.lower(sjsonData.godType) == "npc" then
+	if string.lower(sjsonData.godType) == "npcgod" then
 		mod[sjsonData.godName .. "UpgradePreview"] = sjson.to_object({
 			InheritFrom = "BoonSymbolBaseIsometric",
 			FilePath = rom.path.combine(modstate.pluginGuid, sjsonData.previewPath),
@@ -816,52 +816,65 @@ function public.CreateOlympianSJSONData(sjsonData)
 		}
 
 		--* Dialogue Entrance Anim, like the bling bling
-		if sjsonData.portraitData.DialogueEntrance then
+		if sjsonData.portraitData.DialogueAnimations then
 			portraitConfigs["OlympianDialogueEntrance_" .. sjsonData.godName] = {
 				InheritFrom = "OlympianDialogueEntrance_Base",
-				StartRed = sjsonData.portraitData.DialogueEntrance.RedStart,
-				StartGreen = sjsonData.portraitData.DialogueEntrance.GreenStart,
-				StartBlue = sjsonData.portraitData.DialogueEntrance.BlueStart,
-				EndRed = sjsonData.portraitData.DialogueEntrance.RedEnd,
-				EndGreen = sjsonData.portraitData.DialogueEntrance.GreenEnd,
-				EndBlue = sjsonData.portraitData.DialogueEntrance.BlueEnd,
-				CreateAnimations = {
-					{ Name = "OlympianDialogueEntranceStreaks_" .. sjsonData.godName },
-					{ Name = "OlympianDialogueEntranceParticleBurst_" .. sjsonData.godName },
-					{ Name = "OlympianDialogueEntranceParticleBurst_" .. sjsonData.godName .. "_Flip" },
-				},
-			}
-
-			portraitConfigs["OlympianDialogueEntranceParticleBurst_" .. sjsonData.godName .. "_Flip"] = {
-				InheritFrom = "OlympianDialogueEntranceParticleBurst_Base_Flip",
-				StartRed = sjsonData.portraitData.DialogueEntranceBurst.RedStart,
-				StartGreen = sjsonData.portraitData.DialogueEntranceBurst.GreenStart,
-				StartBlue = sjsonData.portraitData.DialogueEntranceBurst.BlueStart,
-				EndRed = sjsonData.portraitData.DialogueEntranceBurst.RedEnd,
-				EndGreen = sjsonData.portraitData.DialogueEntranceBurst.GreenEnd,
-				EndBlue = sjsonData.portraitData.DialogueEntranceBurst.BlueEnd,
+				StartRed = sjsonData.portraitData.DialogueAnimations.DialogueEntrance.RedStart,
+				StartGreen = sjsonData.portraitData.DialogueAnimations.DialogueEntrance.GreenStart,
+				StartBlue = sjsonData.portraitData.DialogueAnimations.DialogueEntrance.BlueStart,
+				EndRed = sjsonData.portraitData.DialogueAnimations.DialogueEntrance.RedEnd,
+				EndGreen = sjsonData.portraitData.DialogueAnimations.DialogueEntrance.GreenEnd,
+				EndBlue = sjsonData.portraitData.DialogueAnimations.DialogueEntrance.BlueEnd,
+				CreateAnimations = {},
 			}
 
 			portraitConfigs["OlympianDialogueEntranceStreaks_" .. sjsonData.godName] = {
 				InheritFrom = "OlympianDialogueEntranceStreaks_Base",
-				StartRed = sjsonData.portraitData.DialogueEntranceStreaks.RedStart,
-				StartGreen = sjsonData.portraitData.DialogueEntranceStreaks.GreenStart,
-				StartBlue = sjsonData.portraitData.DialogueEntranceStreaks.BlueStart,
-				EndRed = sjsonData.portraitData.DialogueEntranceStreaks.RedEnd,
-				EndGreen = sjsonData.portraitData.DialogueEntranceStreaks.GreenEnd,
-				EndBlue = sjsonData.portraitData.DialogueEntranceStreaks.BlueEnd,
+				StartRed = sjsonData.portraitData.DialogueAnimations.DialogueEntranceStreaks.RedStart,
+				StartGreen = sjsonData.portraitData.DialogueAnimations.DialogueEntranceStreaks.GreenStart,
+				StartBlue = sjsonData.portraitData.DialogueAnimations.DialogueEntranceStreaks.BlueStart,
+				EndRed = sjsonData.portraitData.DialogueAnimations.DialogueEntranceStreaks.RedEnd,
+				EndGreen = sjsonData.portraitData.DialogueAnimations.DialogueEntranceStreaks.GreenEnd,
+				EndBlue = sjsonData.portraitData.DialogueAnimations.DialogueEntranceStreaks.BlueEnd,
 				VisualFx = "OlympianDialogueEntranceParticle_" .. sjsonData.godName,
 			}
 
 			portraitConfigs["OlympianDialogueEntranceParticle_" .. sjsonData.godName] = {
 				InheritFrom = "OlympianDialogueEntranceParticles_Base",
-				StartRed = sjsonData.portraitData.DialogueEntranceParticles.RedStart,
-				StartGreen = sjsonData.portraitData.DialogueEntranceParticles.GreenStart,
-				StartBlue = sjsonData.portraitData.DialogueEntranceParticles.BlueStart,
-				EndRed = sjsonData.portraitData.DialogueEntranceParticles.RedEnd,
-				EndGreen = sjsonData.portraitData.DialogueEntranceParticles.GreenEnd,
-				EndBlue = sjsonData.portraitData.DialogueEntranceParticles.BlueEnd,
+				StartRed = sjsonData.portraitData.DialogueAnimations.DialogueEntranceParticles.RedStart,
+				StartGreen = sjsonData.portraitData.DialogueAnimations.DialogueEntranceParticles.GreenStart,
+				StartBlue = sjsonData.portraitData.DialogueAnimations.DialogueEntranceParticles.BlueStart,
+				EndRed = sjsonData.portraitData.DialogueAnimations.DialogueEntranceParticles.RedEnd,
+				EndGreen = sjsonData.portraitData.DialogueAnimations.DialogueEntranceParticles.GreenEnd,
+				EndBlue = sjsonData.portraitData.DialogueAnimations.DialogueEntranceParticles.BlueEnd,
 			}
+
+			portraitConfigs["OlympianDialogueEntranceParticleBurst_" .. sjsonData.godName] = {
+				InheritFrom = "OlympianDialogueEntranceParticleBurst_Base",
+				StartRed = sjsonData.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.RedStart,
+				StartGreen = sjsonData.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.GreenStart,
+				StartBlue = sjsonData.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.BlueStart,
+				EndRed = sjsonData.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.RedEnd,
+				EndGreen = sjsonData.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.GreenEnd,
+				EndBlue = sjsonData.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.BlueEnd,
+			}
+
+			portraitConfigs["OlympianDialogueEntranceParticleBurst_" .. sjsonData.godName .. "_Flip"] = {
+				InheritFrom = "OlympianDialogueEntranceParticleBurst_Base_Flip",
+				StartRed = sjsonData.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.RedStart,
+				StartGreen = sjsonData.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.GreenStart,
+				StartBlue = sjsonData.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.BlueStart,
+				EndRed = sjsonData.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.RedEnd,
+				EndGreen = sjsonData.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.GreenEnd,
+				EndBlue = sjsonData.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.BlueEnd,
+			}
+
+			if sjsonData.portraitData.DialogueAnimations.DialogueEntranceStreaks then
+				table.insert(portraitConfigs["OlympianDialogueEntrance_" .. sjsonData.godName].CreateAnimations, { Name = "OlympianDialogueEntranceStreaks_" .. sjsonData.godName })
+			elseif sjsonData.portraitData.DialogueAnimations.DialogueEntranceParticleBurst then
+				table.insert(portraitConfigs["OlympianDialogueEntrance_" .. sjsonData.godName].CreateAnimations, { Name = "OlympianDialogueEntranceParticleBurst_" .. sjsonData.godName })
+				table.insert(portraitConfigs["OlympianDialogueEntrance_" .. sjsonData.godName].CreateAnimations, { Name = "OlympianDialogueEntranceParticleBurst_" .. sjsonData.godName .. "_Flip" })
+			end
 		end
 
 		for name, config in pairs(portraitConfigs) do
@@ -942,7 +955,7 @@ function registerEntityData(entityName, entityType, entityData)
 	local upgradeName = entityName .. "Upgrade"
 
 	if game.LootData[upgradeName] then
-		rom.log.warning("Warning: " .. entityName .. " is already registered, skipping creation.")
+		rom.log.warning(entityName .. " is already registered, skipping creation.")
 		return
 	end
 
