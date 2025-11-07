@@ -6,7 +6,12 @@ You should only install it if another mod requires it, or if you will be using t
 > NPC Type means that they will not fill up the `MetGods` table during a run - meaning you can have `Zeus, Aphrodite, Hera, Hestia` and meet `Hermes` and `Your God`.
 
 > I would like to add Spells and proper NPC's such as Dionysus/Athena/Arachne during runs, and Hub NPCS such as Hecate/Hypnos.
-> However, there are a lot of functions that are hard-coded to `SpellDrop`.
+> However, there are a lot of functions that are hard-coded to `SpellDrop`. 
+
+<br>
+
+> [!NOTE]
+> If there are any requests, anything I missed, or anything working incorrectly, [post an issue](https://github.com/excellent-ae/zannc-GodsAPI/issues/new), or create a help thread in the [Hades Modding Discord](https://discord.gg/AHk3D48WYD).
 
 # Developer Documentation
 
@@ -126,43 +131,47 @@ If you need to check if the God you created is currently registered, or need to 
 # Examples
 This will add a new God: `Artemis` with the **internal** name `ArtemisUpgrade`.
 ```lua
-    gods.InitializeGod({
-        godName = "Artemis",
-        godType = "GOD",
-        Gender = "F",
-        LoadPackages = { "Artemis" },
-        FlavorTextIds = { "ArtemisUpgrade_FlavorText01", "ArtemisUpgrade_FlavorText02", "ArtemisUpgrade_FlavorText03" },
+gods.Initialize(_PLUGIN.guid)
 
-        SpawnSound = "/SFX/ArtemisBoonArrow",
-        PortraitEnterSound = "/SFX/ArtemisBoonArrow",
+gods.InitializeGod({
+    godName = "Artemis",
+    godType = "GOD",
+    Gender = "F",
+    LoadPackages = { "Artemis" },
+    FlavorTextIds = { "ArtemisUpgrade_FlavorText01", "ArtemisUpgrade_FlavorText02", "ArtemisUpgrade_FlavorText03" },
 
-        WeaponUpgrades = game.EnemyData.NPC_Artemis_Field_01.WeaponUpgrades,
-        Traits = game.EnemyData.NPC_Artemis_Field_01.Traits,
+    SpawnSound = "/SFX/ArtemisBoonArrow",
+    PortraitEnterSound = "/SFX/ArtemisBoonArrow",
 
-        Color = { 91, 255, 100, 255 },
-        LightingColor = { 210, 255, 97, 190 },
-        LootColor = { 110, 255, 0, 180 },
-        SubtitleColor = Color.ArtemisVoice,
-    })
+    WeaponUpgrades = game.EnemyData.NPC_Artemis_Field_01.WeaponUpgrades,
+    Traits = game.EnemyData.NPC_Artemis_Field_01.Traits,
 
-    gods.CreateOlympianSJSONData({
-        godName = "Artemis",
-        godType = "god",
-        skipBoonSelectSymbol = true,
-        iconSpinPath = "Items\\Loot\\Boon\\ArtemisIconSpin\\ArtemisIconSpin",
-        previewPath = "Items\\Loot\\Boon\\ArtemisIconSpin\\ArtemisPreview",
-        colorA = { Red = 0.42, Green = 0.62, Blue = 0.21 },
-        colorB = { Red = 0.35, Green = 0.51, Blue = 0.12 },
-        colorC = { Red = 0.23, Green = 0.57, Blue = 0.31 },
-        portraitData = {
-            skipNeutralPortrait = true,
-        },
-    })
+    Color = { 91, 255, 100, 255 },
+    LightingColor = { 210, 255, 97, 190 },
+    LootColor = { 110, 255, 0, 180 },
+    SubtitleColor = Color.ArtemisVoice,
+})
+
+gods.CreateOlympianSJSONData({
+    godName = "Artemis",
+    godType = "god",
+    skipBoonSelectSymbol = true,
+    iconSpinPath = "Items\\Loot\\Boon\\ArtemisIconSpin\\ArtemisIconSpin",
+    previewPath = "Items\\Loot\\Boon\\ArtemisIconSpin\\ArtemisPreview",
+    colorA = { Red = 0.42, Green = 0.62, Blue = 0.21 },
+    colorB = { Red = 0.35, Green = 0.51, Blue = 0.12 },
+    colorC = { Red = 0.23, Green = 0.57, Blue = 0.31 },
+    portraitData = {
+        skipNeutralPortrait = true,
+    },
+})
 ```
 
 This will add a new NPC God: `Athena` with the **internal** name `AthenaUpgrade`, and function like Hermes does.
 
 ```lua
+gods.Initialize(_PLUGIN.guid)
+
 gods.InitializeGod({
 	godName = "Athena",
 	godType = "npcGOD",
