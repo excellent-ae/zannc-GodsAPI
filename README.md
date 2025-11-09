@@ -167,8 +167,6 @@ gods.CreateOlympianSJSONData({
 This will add a new NPC God: `Athena` with the **internal** name `AthenaUpgrade`, and function/spawn like Hermes does.
 
 ```lua
-gods.Initialize(_PLUGIN.guid)
-
 gods.InitializeGod({
 	godName = "Athena",
 	godType = "npcGOD",
