@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- No longer need to call `gods.Initialize()`, just pass the _PLUGIN.guid into SJSON creation.
 
 ## [1.0.1] - 2025-11-07
 

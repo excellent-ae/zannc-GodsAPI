@@ -36,9 +36,7 @@ You should only install it if another mod requires it, or if you will be using t
     gods = mods["zannc-GodsAPI"]
     ```
 
-3. In a file called through `on_ready()` or in `modutil.once_loaded.game()` (or directly in those), call `gods.Initialize(_PLUGIN.guid)`. This will allow for the API to use your plugin guid for SJSON hooks for Portraits/Icons.
-
-4. To create a god, you must call `gods.InitializeGod(params)`, followed by `gods.CreateOlympianSJSONData(sjsonData)` and provide the required paramaters / sjson paramaters. <br>
+3. To create a god, you must call `gods.InitializeGod(params)`, and optionally followed by `gods.CreateOlympianSJSONData(sjsonData)` and provide the required paramaters / sjson paramaters. <br>
 
 ### Parameters
 While this is not a definitive list, these are the most common that will need to be changed.
@@ -98,6 +96,7 @@ While this is not a definitive list, these are the most common that will need to
 If you wish to add SJSON content, such as the boon drop icons, door preview icons or portraits, you must call `gods.CreateOlympianSJSONData(sjsonData)`
 
 * `sjsonData` (table) - A set of options to create the name, colour, text, gender, spawn sound etc.
+    * `pluginGUID` (string) **(required)** - Your plugins GUID, commonly passed with `_PLUGIN.guid`
     * `godName` (string) **(required)** - The name of the God | eg "Ares", "Zeus" etc.
     * `godType` (string) **(required)** - The type of God | eg "god" or "npcgod" (God = Zeus, NPC = Hermes)
     * `skipBoonSelectSymbol` (boolean) **(optional)** - If there is already a Boon Select Symbol (In upgrade screen), you can pass this to skip the creation of one.
@@ -131,8 +130,6 @@ If you need to check if the God you created is currently registered, or need to 
 # Examples
 This will add a new God: `Artemis` with the **internal** name `ArtemisUpgrade`.
 ```lua
-gods.Initialize(_PLUGIN.guid)
-
 gods.InitializeGod({
     godName = "Artemis",
     godType = "GOD",
@@ -140,8 +137,7 @@ gods.InitializeGod({
     LoadPackages = { "Artemis" },
     FlavorTextIds = { "ArtemisUpgrade_FlavorText01", "ArtemisUpgrade_FlavorText02", "ArtemisUpgrade_FlavorText03" },
 
-    SpawnSound = "/SFX/ArtemisBoonArrow",
-    PortraitEnterSound = "/SFX/ArtemisBoonArrow",
+    SFX_Portrait = "/SFX/ArtemisBoonArrow",
 
     WeaponUpgrades = game.EnemyData.NPC_Artemis_Field_01.WeaponUpgrades,
     Traits = game.EnemyData.NPC_Artemis_Field_01.Traits,
@@ -153,6 +149,7 @@ gods.InitializeGod({
 })
 
 gods.CreateOlympianSJSONData({
+    pluginGUID = _PLUGIN.guid
     godName = "Artemis",
     godType = "god",
     skipBoonSelectSymbol = true,
@@ -167,7 +164,7 @@ gods.CreateOlympianSJSONData({
 })
 ```
 
-This will add a new NPC God: `Athena` with the **internal** name `AthenaUpgrade`, and function like Hermes does.
+This will add a new NPC God: `Athena` with the **internal** name `AthenaUpgrade`, and function/spawn like Hermes does.
 
 ```lua
 gods.Initialize(_PLUGIN.guid)
@@ -190,6 +187,7 @@ gods.InitializeGod({
 })
 
 gods.CreateOlympianSJSONData({
+    pluginGUID = _PLUGIN.guid
 	godName = "Athena",
 	godType = "npcGOD",
 	skipBoonSelectSymbol = true,

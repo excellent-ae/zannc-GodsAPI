@@ -13,8 +13,7 @@
 - `SubtitleColor` table - default of `{ 255, 255, 205, 255 }`<br><br>
 - `Color` table - IDK - default of `{ 250, 250, 215, 255 }`
 - `LightingColor` table - In the Upgrade Choice menu - default of `{ 1, 0.91, 0.54, 1 }`
-- `LootColor` table - The glow that the Physical Drop gives off - default of `{ 255, 128, 32, 255 }` <br><br> <img width="300" height="245" alt="Hades2_2krkFu7Mj6" src="https://github.com/user-attachments/assets/f53178a0-7dd8-422c-b2d4-cb933fae0123" />
-<br><br>
+- `LootColor` table - The glow that the Physical Drop gives off - default of `{ 255, 128, 32, 255 }` <br><br> <img width="300" height="245" alt="Hades2_2krkFu7Mj6" src="https://github.com/user-attachments/assets/f53178a0-7dd8-422c-b2d4-cb933fae0123" /><br><br>
 - `LoadPackages` table - eg `{"Apollo"}`
 - `SFX_Portrait` string - eg `"SFX/Sound"`
 - `UpgradeSelectedSound` string - eg `"SFX/Sound"` <br><br>
@@ -76,12 +75,13 @@
 - `EmoteOffsetY` integer <br>
 
 # CreateOlympianSJSONData parameters:
-- `godName` string
-- `godType` string
+- `pluginGUID` string **(required)** 
+- `godName` string **(required)** 
+- `godType` string **(required)** 
 - `skipBoonSelectSymbol` boolean
 - `AmbientSound` string - The ambient sound of the boon drop <br><br>
 - The colours of the physical boon drop - with the inside colour always being white.
-- Supports `RGB 0-255` ({ Red = 255, Green = 0, Blue = 150 }) or `RGB 0-1` { Red = 1.0, Green = 0, Blue = 0.3 }, as well as an Opacity field.
+- Supports `RGB 0-255` ({ Red = 255, Green = 0, Blue = 150 }) or `RGB 0-1` { Red = 1.0, Green = 0, Blue = 0.3 }, as well as an Opacity field. **(required)** 
     - `colorA` table - Inner Ring eg. { Red = 255, Green = 0, Blue = 150, Opacity = 0.7 }
     - `colorB` table - Outer Ring
     - `colorC` table - Flare Shootoffs <br><br> <img width="322" height="232" alt="Hades2_SNP4G6SaZi" src="https://github.com/user-attachments/assets/2df94b31-27f1-4fac-ac4a-45175a426499" />
@@ -90,8 +90,8 @@
 - `BoonDropIconHue` float - Negative or Positive. <br><br>
 - `OffsetZBoonPreview` integer - physical boon drop icon offset
 - `BoonPreviewScale` float - physical boon drop icon scale <br><br>
-- `iconSpinPath` string - The series of images which create the little animation of the physical boon
-- `previewPath` string - Door Icons
+- `iconSpinPath` string **(required)**  - The series of images which create the little animation of the physical boon
+- `previewPath` string **(required)**  - Door Icons
 - `boonSelectSymbolPath` string - Upgrade Menu Icon
 - `boonSelectSymbolOffsetY` integer <br><br>
 - `portraitData` table

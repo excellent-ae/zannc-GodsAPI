@@ -1,9 +1,8 @@
 --- @class GodsAPI
 local GodsAPI = {}
 
---- Initializes the GodsAPI library with your plugin GUID >> Must be called before any other functions.
---- @param pluginGUID string (required) - Your plugin's GUID >> input `_PLUGIN.guid`
-function GodsAPI.Initialize(pluginGUID) end
+--- Initializes the GodsAPI library with your plugin GUID >> Must be called before any other functions. [DEFUNCT]
+function GodsAPI.Initialize() end
 
 --- @class params
 --- @field godName string (required) - The name of the God | eg "Ares", "Zeus" etc
