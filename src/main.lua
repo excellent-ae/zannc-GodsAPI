@@ -18,8 +18,9 @@ local ItemsGeneralVFX = rom.path.combine(rom.paths.Content, "Game/Animations/Ite
 local ScreenText = rom.path.combine(rom.paths.Content, "Game/Text/en/ScreenText.en.sjson")
 local TraitTextFile = rom.path.combine(rom.paths.Content, "Game/Text/en/TraitText.en.sjson")
 local PortraitFile = rom.path.combine(rom.paths.Content, "Game/Animations/GUI_Portraits_VFX.sjson")
+local GUIBoonsVFXFile = rom.path.combine(rom.paths.Content, "Game/Animations/GUI_Boons_VFX.sjson")
 
-local TextOrder = { "Id", "DisplayName", "Description" }
+local TextOrder = { "Id", "InheritFrom", "DisplayName", "Description" }
 local IconOrder = { "Name", "InheritFrom", "FilePath", "OffsetY", "OffsetZ", "Scale", "Hue" }
 local GameplayOrder = { "Name", "InheritFrom", "DisplayInEditor", "Thing" }
 local VFXMainOrder = { "Name", "InheritFrom", "ChildAnimation", "CreateAnimations", "Color", "NumFrames", "FilePath", "OffsetZ", "Scale", "ColorFromOwner", "AngleFromOwner", "Sound" }
@@ -32,10 +33,9 @@ function public.Initialize()
 end
 
 -- Gods like Zeus/Ares/etc or NPC Gods like Hermes.
---TODO Document that you need to add spawn requirements if NPC God
 function public.InitializeGod(params)
 	if not params then
-		rom.log.error("InitializeGod: Missing parameter 'params''")
+		rom.log.error("InitializeGod: Missing parameter 'params'")
 		return nil
 	end
 
@@ -43,12 +43,19 @@ function public.InitializeGod(params)
 	for _, field in ipairs(requiredList) do
 		if not params[field] then
 			rom.log.error("InitializeGod: Missing required parameter '" .. field .. "'")
+			return nil
 		end
 	end
 
 	local upgradeName = params.godName .. "Upgrade"
+	local lowGodType = string.lower(params.godType)
 
-	local baseGod = {
+	if game.LootData[upgradeName] then
+		rom.log.warning(params.godName .. " is already registered, skipping creation.")
+		return
+	end
+
+	game.LootData[upgradeName] = {
 		Name = upgradeName,
 		Speaker = "NPC_" .. params.godName .. "_01",
 		SpeakerName = params.godName,
@@ -78,7 +85,7 @@ function public.InitializeGod(params)
 		LootColor = params.LootColor or { 255, 128, 32, 255 },
 		SubtitleColor = params.SubtitleColor or { 255, 255, 205, 255 },
 
-		LoadPackages = params.LoadPackages or {}, -- Need it for the animations for in person
+		LoadPackages = params.LoadPackages or {}, -- Need it for the animations for in person, maybe, idk.
 		SpawnSound = params.SFX_Portrait,
 		PortraitEnterSound = params.SFX_Portrait,
 		UpgradeSelectedSound = params.UpgradeSelectedSound, -- These are different.
@@ -159,29 +166,20 @@ function public.InitializeGod(params)
 		EmoteOffsetY = params.EmoteOffsetY or -320,
 	}
 
-	local lowGodType = string.lower(params.godType)
-
 	if lowGodType == "npcgod" then
-		local addToBase = {
-			--! Stuff for NPC Gods like Hermes
-			SpecialInteractFunctionName = "SpecialInteractSalute",
-			SpecialInteractGameStateRequirements = {
-				{
-					PathTrue = { "GameState", "UseRecord", upgradeName },
-				},
+		--! Stuff for NPC Gods like Hermes
+		game.LootData[upgradeName].SpecialInteractFunctionName = "SpecialInteractSalute"
+		game.LootData[upgradeName].SpecialInteractGameStateRequirements = {
+			{
+				PathTrue = { "GameState", "UseRecord", upgradeName },
 			},
-			SpecialInteractCooldown = 60,
-
-			GodLoot = false,
-			TreatAsGodLootByShops = true,
-			BoonInfoTitleText = "UpgradeChoiceMenu_" .. params.godName,
-			SurfaceShopIcon = "BoonInfoSymbol" .. params.godName .. "Icon",
-			SurfaceShopText = upgradeName .. "_Store",
 		}
-
-		for k, v in pairs(addToBase) do
-			baseGod[k] = v
-		end
+		game.LootData[upgradeName].SpecialInteractCooldown = 60
+		game.LootData[upgradeName].GodLoot = false
+		game.LootData[upgradeName].TreatAsGodLootByShops = true
+		game.LootData[upgradeName].BoonInfoTitleText = "UpgradeChoiceMenu_" .. params.godName
+		game.LootData[upgradeName].SurfaceShopIcon = "BoonInfoSymbol" .. params.godName .. "Icon"
+		game.LootData[upgradeName].SurfaceShopText = upgradeName .. "_Store"
 
 		if params.SpawnLikeHermes then
 			game.NamedRequirementsData[upgradeName .. "Requirements"] = {
@@ -291,11 +289,7 @@ function public.InitializeGod(params)
 		end
 	end
 
-	for k, v in pairs(params) do
-		baseGod[k] = v
-	end
-
-	registerEntityData(params.godName, lowGodType, baseGod)
+	registerEntityData(params.godName, lowGodType, game.LootData[upgradeName])
 end
 
 --#region npc
@@ -552,7 +546,22 @@ function public.CreateOlympianSJSONData(sjsonData)
 	for _, field in ipairs(requiredFields) do
 		if not sjsonData[field] then
 			rom.log.error("CreateOlympianSJSONData: Missing required field '" .. field .. "' for god " .. sjsonData.godName)
+			return nil
 		end
+	end
+
+	local pluginGUID = sjsonData.pluginGUID
+
+	local function cleanFilePath(filePath)
+		local prefix1 = pluginGUID .. "/"
+		local prefix2 = pluginGUID .. "\\"
+
+		if filePath:sub(1, #prefix1) == prefix1 then
+			return filePath:sub(#prefix1 + 1)
+		elseif filePath:sub(1, #prefix2) == prefix2 then
+			return filePath:sub(#prefix2 + 1)
+		end
+		return filePath or ""
 	end
 
 	--! The actual boon drop
@@ -609,14 +618,14 @@ function public.CreateOlympianSJSONData(sjsonData)
 		},
 		["BoonDrop" .. sjsonData.godName .. "Icon"] = {
 			InheritFrom = "BoonDropIcon",
-			FilePath = rom.path.combine(sjsonData.pluginGUID, sjsonData.iconSpinPath),
+			FilePath = rom.path.combine(pluginGUID, cleanFilePath(sjsonData.iconSpinPath)),
 			OffsetZ = sjsonData.OffsetZBoonDrop,
 			Scale = sjsonData.BoonDropIconScale,
 			Hue = sjsonData.BoonDropIconHue,
 		},
 		["BoonDrop" .. sjsonData.godName .. "Preview"] = {
 			InheritFrom = "BoonDropRoomRewardIconPreviewBase",
-			FilePath = rom.path.combine(sjsonData.pluginGUID, sjsonData.previewPath),
+			FilePath = rom.path.combine(pluginGUID, cleanFilePath(sjsonData.previewPath)),
 			OffsetZ = sjsonData.OffsetZBoonPreview or 0,
 			Scale = sjsonData.BoonPreviewScale,
 			ColorFromOwner = "Maintain",
@@ -651,14 +660,14 @@ function public.CreateOlympianSJSONData(sjsonData)
 	local boonInfoIcon = sjson.to_object({
 		Name = "BoonInfoSymbol" .. sjsonData.godName .. "Icon",
 		InheritFrom = "BoonInfoSymbolBase",
-		FilePath = rom.path.combine(sjsonData.pluginGUID, sjsonData.previewPath),
+		FilePath = rom.path.combine(pluginGUID, cleanFilePath(sjsonData.previewPath)),
 	}, IconOrder)
 
 	if not sjsonData.skipBoonSelectSymbol then
 		local boonSymbol = sjson.to_object({
 			Name = "BoonSymbol" .. sjsonData.godName,
 			InheritFrom = "BoonSymbolBase",
-			FilePath = rom.path.combine(sjsonData.pluginGUID, sjsonData.boonSelectSymbolPath),
+			FilePath = rom.path.combine(pluginGUID, cleanFilePath(sjsonData.boonSelectSymbolPath)),
 			Scale = 1,
 			OffsetY = sjsonData.boonSelectSymbolOffsetY or 0,
 		}, IconOrder)
@@ -703,19 +712,43 @@ function public.CreateOlympianSJSONData(sjsonData)
 	end)
 
 	mod["UpgradeChoiceMenu_" .. sjsonData.godName] = sjson.to_object({
-		Id = "UpgradeChoiceMenu_" .. sjsonData.godName,
+		-- Id = "UpgradeChoiceMenu_" .. sjsonData.godName,
 		DisplayName = "Boons of " .. sjsonData.godName,
 		Description = nil,
 	}, TextOrder)
 
+	mod[sjsonData.godName .. "Upgrade"] = sjson.to_object({
+		DisplayName = sjsonData.godName,
+		Description = sjson.godDescriptionText,
+	}, TextOrder)
+
+	mod[sjsonData.godName .. "Upgrade_FlavorText01"] = sjson.to_object({
+		DisplayName = sjsonData.godName,
+		Description = sjson.godDescriptionTextFlavour01,
+	}, TextOrder)
+
+	mod[sjsonData.godName .. "Upgrade_FlavorText02"] = sjson.to_object({
+		DisplayName = sjsonData.godName,
+		Description = sjson.godDescriptionTextFlavour02,
+	}, TextOrder)
+
+	mod[sjsonData.godName .. "Upgrade_FlavorText3"] = sjson.to_object({
+		DisplayName = sjsonData.godName,
+		Description = sjson.godDescriptionTextFlavour03,
+	}, TextOrder)
+
 	sjson.hook(ScreenText, function(data)
 		table.insert(data.Texts, mod["UpgradeChoiceMenu_" .. sjsonData.godName])
+		table.insert(data.Texts, mod[sjsonData.godName .. "Upgrade"])
+		table.insert(data.Texts, mod[sjsonData.godName .. "Upgrade_FlavorText01"])
+		table.insert(data.Texts, mod[sjsonData.godName .. "Upgrade_FlavorText02"])
+		table.insert(data.Texts, mod[sjsonData.godName .. "Upgrade_FlavorText03"])
 	end)
 
 	if string.lower(sjsonData.godType) == "npcgod" then
 		mod[sjsonData.godName .. "UpgradePreview"] = sjson.to_object({
 			InheritFrom = "BoonSymbolBaseIsometric",
-			FilePath = rom.path.combine(sjsonData.pluginGUID, sjsonData.previewPath),
+			FilePath = rom.path.combine(pluginGUID, cleanFilePath(sjsonData.previewPath)),
 		}, VFXMainOrder)
 
 		mod[sjsonData.godName .. "UpgradeShop"] = sjson.to_object({
@@ -750,7 +783,7 @@ function public.CreateOlympianSJSONData(sjsonData)
 		if not sjsonData.portraitData.skipNeutralPortrait then
 			portraitConfigs["Portrait_" .. sjsonData.godName .. "_Default_01"] = {
 				InheritFrom = "Portrait_God_01",
-				FilePath = rom.path.combine(sjsonData.pluginGUID, sjsonData.portraitData.NeutralPortraitFilePath or ""),
+				FilePath = rom.path.combine(pluginGUID, cleanFilePath(sjsonData.portraitData.NeutralPortraitFilePath or "")),
 				ChildAnimation = "PortraitGodRayEmitter_Athena",
 				EndFrame = 1,
 				StartFrame = 1,
@@ -761,7 +794,7 @@ function public.CreateOlympianSJSONData(sjsonData)
 
 		portraitConfigs["Portrait_" .. sjsonData.godName .. "_Default_01_Exit"] = {
 			InheritFrom = "Portrait_God_01_Exit",
-			FilePath = rom.path.combine(sjsonData.pluginGUID, sjsonData.portraitData.NeutralPortraitFilePath or ""),
+			FilePath = rom.path.combine(pluginGUID, cleanFilePath(sjsonData.portraitData.NeutralPortraitFilePath or "")),
 			EndFrame = 1,
 			StartFrame = 1,
 			Sound = "/Leftovers/World Sounds/MapZoomInShortHigh",
@@ -769,24 +802,24 @@ function public.CreateOlympianSJSONData(sjsonData)
 
 		portraitConfigs["Portrait_" .. sjsonData.godName .. "_Default_01_Wrath"] = {
 			InheritFrom = "Portrait_God_01_Wrath",
-			FilePath = rom.path.combine(sjsonData.pluginGUID, sjsonData.portraitData.NeutralPortraitFilePath or ""),
+			FilePath = rom.path.combine(pluginGUID, cleanFilePath(sjsonData.portraitData.NeutralPortraitFilePath or "")),
 			EndFrame = 1,
 			StartFrame = 1,
 		}
 
 		portraitConfigs["Portrait_" .. sjsonData.godName .. "_Displeased_01"] = {
 			InheritFrom = "Portrait_" .. sjsonData.godName .. "_Default_01",
-			FilePath = rom.path.combine(sjsonData.pluginGUID, sjsonData.portraitData.AnnoyedPortraitFilePath or ""),
+			FilePath = rom.path.combine(pluginGUID, cleanFilePath(sjsonData.portraitData.AnnoyedPortraitFilePath or "")),
 		}
 
 		portraitConfigs["Portrait_" .. sjsonData.godName .. "_Serious_01"] = {
 			InheritFrom = "Portrait_" .. sjsonData.godName .. "_Default_01",
-			FilePath = rom.path.combine(sjsonData.pluginGUID, sjsonData.portraitData.SeriousPortraitFilePath or ""),
+			FilePath = rom.path.combine(pluginGUID, cleanFilePath(sjsonData.portraitData.SeriousPortraitFilePath or "")),
 		}
 
 		portraitConfigs["Portrait_" .. sjsonData.godName .. "_Serious_01_Exit"] = {
 			InheritFrom = "Portrait_" .. sjsonData.godName .. "_Default_01_Exit",
-			FilePath = rom.path.combine(sjsonData.pluginGUID, sjsonData.portraitData.SeriousPortraitFilePath or ""),
+			FilePath = rom.path.combine(pluginGUID, cleanFilePath(sjsonData.portraitData.SeriousPortraitFilePath or "")),
 		}
 
 		--* Dialogue Entrance Anim, like the bling bling
@@ -946,13 +979,6 @@ end
 function registerEntityData(entityName, entityType, entityData)
 	local upgradeName = entityName .. "Upgrade"
 
-	if game.LootData[upgradeName] then
-		rom.log.warning(entityName .. " is already registered, skipping creation.")
-		return
-	end
-
-	game.LootData[upgradeName] = entityData
-
 	game.CodexData.OlympianGods.Entries[upgradeName] = {
 		Entries = {
 			{
@@ -1038,181 +1064,264 @@ modutil.once_loaded.game(function()
 	mod = modutil.mod.Mod.Register(_PLUGIN.guid)
 end)
 
----[[[
----
---- basically, get a god name for gift data, else, pluginGUID.name = whatever
---- then do the entire keepsake, see like wtf is up with all the gaw damn trait texts and stuff, and make sure i can pass in custom stuff
---- then sjson
----
----]]]
+--[[
+basically, get a god name for gift data, else, pluginGUID.name = whatever
+then do the entire keepsake, see like wtf is up with all the gaw damn trait texts and stuff, and make sure i can pass in custom stuff
+then sjson
+--]]
+function public.CreateKeepsake(params)
+	if not params then
+		rom.log.error("CreateKeepsake: Missing parameter 'params'")
+		return nil
+	end
 
--- function public.CreateKeepsake(params)
--- 	--? IDK!!!!
--- 	if params.characterName then
--- 		game.GiftData[params.characterName .. "Upgrade"] = {
--- 			InheritFrom = { "DefaultGiftData" },
--- 			MaxedRequirement = {
--- 				{
--- 					PathTrue = { "GameState", "TextLinesRecord", game.LootData[params.characterName .. "Upgrade"][-1] },
--- 				},
--- 			},
--- 			MaxedIcon = "Keepsake_Demeter_Corner",
--- 			MaxedSticker = "Keepsake_Demeter",
--- 			[1] = {
--- 				GameStateRequirements = {
--- 					{
--- 						PathTrue = { "GameState", "TextLinesRecord", "DemeterGift01" },
--- 					},
--- 				},
--- 				Gift = "ForceDemeterBoonKeepsake",
--- 			},
--- 		}
--- 	end
+	local requiredFields = { "pluginGUID", "characterName", "internalKeepsakeName", "RarityLevels", "Keepsake" }
+	for _, field in ipairs(requiredFields) do
+		if not params[field] then
+			rom.log.error("CreateKeepsake: Missing required field '" .. field .. "' for character " .. params.characterName)
+			return nil
+		end
+	end
 
--- 	game.TraitData[params.KeepsakeName] = {
--- 		Icon = params.Icons.IconName,
--- 		Name = params.KeepsakeName, -- req
+	local pluginGUID = params.pluginGUID
 
--- 		-- find out
--- 		InRackTitle = "SpellTalentKeepsake_Rack",
--- 		ZeroBonusTrayText = "SpellTalentKeepsake_Expired",
--- 		PartialActiveTrayText = "SpellTalentKeepsake_Inactive",
--- 		BlockedByEnding = true,
--- 		--???
--- 		UnequippedKeepsakeTitle = "BonusMoneyKeepsake_Rack",
--- 		CustomTrayNameWhileDead = "BonusMoneyKeepsake",
+	local function cleanFilePath(filePath)
+		local prefix1 = pluginGUID .. "/"
+		local prefix2 = pluginGUID .. "\\"
 
--- 		ShowInHUD = true,
--- 		Ordered = true,
--- 		HUDScale = params.HUDScale,
--- 		PriorityDisplay = true,
--- 		ChamberThresholds = { 25, 50 },
--- 		HideInRunHistory = true,
--- 		Slot = "Keepsake",
--- 		InfoBackingAnimation = "KeepsakeSlotBase",
--- 		RecordCacheOnEquip = true,
--- 		TraitOrderingValueCache = -1,
--- 		ActiveSlotOffsetIndex = 0,
+		if filePath:sub(1, #prefix1) == prefix1 then
+			return filePath:sub(#prefix1 + 1)
+		elseif filePath:sub(1, #prefix2) == prefix2 then
+			return filePath:sub(#prefix2 + 1)
+		end
+		return filePath or ""
+	end
 
--- 		TrayTextBackingAnimation = "TraitTray_LevelBacking_Alt",
--- 		TrayTextBackingOffsetY = 9,
--- 		TrayTextOffsetY = -10,
--- 		NewTraitHighlightAnimation = "NewTraitHighlightKeepsake",
--- 		PinAnimationIn = "TraitPinIn_Keepsake",
--- 		PinAnimationOut = "TraitPinOut_Keepsake",
--- 		TrayHighlightAnimScale = 1.2,
--- 		PreCreateActiveOverlay = true,
+	game.TraitData[params.internalKeepsakeName] = {
+		Icon = params.internalKeepsakeName, --! req
+		Name = params.internalKeepsakeName,
 
--- 		EquipSound = params.EquipSound,
--- 		EquipVoiceLines = params.EquipVoiceLines, -- table
--- 		SpeakerNames = params.SpeakerNames, -- table
+		ShowInHUD = true,
+		Ordered = true,
+		HUDScale = params.HUDScale or 0.435, --? Opt
+		PriorityDisplay = true,
+		ChamberThresholds = { 25, 50 },
+		HideInRunHistory = true,
+		Slot = "Keepsake",
+		InfoBackingAnimation = "KeepsakeSlotBase",
+		RecordCacheOnEquip = true,
+		TraitOrderingValueCache = -1,
+		ActiveSlotOffsetIndex = 0,
 
--- 		FrameRarities = {
--- 			Common = "Frame_Keepsake_Rank1",
--- 			Rare = "Frame_Keepsake_Rank2",
--- 			Epic = "Frame_Keepsake_Rank3",
--- 			Heroic = "Frame_Keepsake_Rank4",
--- 		},
+		TrayTextBackingAnimation = "TraitTray_LevelBacking_Alt",
+		TrayTextBackingOffsetY = 9,
+		TrayTextOffsetY = -10,
+		NewTraitHighlightAnimation = "NewTraitHighlightKeepsake",
+		PinAnimationIn = "TraitPinIn_Keepsake",
+		PinAnimationOut = "TraitPinOut_Keepsake",
+		TrayHighlightAnimScale = 1.2,
+		PreCreateActiveOverlay = true,
 
--- 		CustomRarityLevels = {
--- 			"TraitLevel_Keepsake1",
--- 			"TraitLevel_Keepsake2",
--- 			"TraitLevel_Keepsake3",
--- 			"TraitLevel_Keepsake4",
--- 		},
+		FrameRarities = {
+			Common = "Frame_Keepsake_Rank1",
+			Rare = "Frame_Keepsake_Rank2",
+			Epic = "Frame_Keepsake_Rank3",
+			Heroic = "Frame_Keepsake_Rank4",
+		},
 
--- 		--! Same issue as gift data, IDK!
--- 		SignOffData = {
--- 			{
--- 				GameStateRequirements = {
--- 					{
--- 						PathTrue = { "GameState", "TextLinesRecord", "EurydiceGift08" },
--- 					},
--- 				},
--- 				Text = "SignoffEurydice_Max",
--- 			},
--- 			{
--- 				Text = "SignoffEurydice",
--- 			},
--- 		},
+		CustomRarityLevels = {
+			"TraitLevel_Keepsake1",
+			"TraitLevel_Keepsake2",
+			"TraitLevel_Keepsake3",
+			"TraitLevel_Keepsake4",
+		},
 
--- 		--* Then whatever they wanna add
--- 		RarityLevels = {
--- 			Common = { Multiplier = config.Eurydice.a_KeepsakeCommon },
--- 			Rare = { Multiplier = config.Eurydice.b_KeepsakeRare },
--- 			Epic = { Multiplier = config.Eurydice.c_KeepsakeEpic },
--- 			Heroic = { Multiplier = config.Eurydice.d_KeepsakeHeroic },
--- 		},
--- 	}
+		--* Then whatever they wanna add
+		RarityLevels = { -- !req
+			Common = { Multiplier = params.RarityLevels.Common },
+			Rare = { Multiplier = params.RarityLevels.Rare },
+			Epic = { Multiplier = params.RarityLevels.Epic },
+			Heroic = { Multiplier = params.RarityLevels.Heroic },
+		},
 
--- 	table.insert(game.ScreenData.KeepsakeRack.ItemOrder, params.KeepsakeName)
+		EquipSound = params.EquipSound, --? Opt
+		EquipVoiceLines = params.EquipVoiceLines, -- table --? Opt
 
--- 	-- SJSON stuff now
--- 	if params.Keepsake then
--- 		local keepsakerack_char = sjson.to_object({
--- 			Id = params.KeepsakeName,
--- 			InheritFrom = "BaseBoonMultiline",
--- 			DisplayName = params.Keepsake.DisplayName,
--- 			Description = params.Keepsake.Description,
--- 		}, Order)
--- 	end
+		--* like, just say they can pass wahtever, or else ill be here foreve
+		-- SpeakerNames = params.SpeakerNames, -- table --? Opt
+		-- BlockedByEnding = params.BlockedByEnding, -- this is like... if the god would be fighting typhon? or what.  --? Opt
 
--- 	if params.trayDescription then
--- 		local keepsake_char = sjson.to_object({
--- 			Id = params.KeepsakeName .. "_Tray",
--- 			InheritFrom = params.KeepsakeName,
--- 			Description = params.trayDescription.Description,
--- 		}, Order)
--- 	end
+		-- find out
+		CustomTrayText = "SisyphusVanillaKeepsake_Tray", -- When you equip it
+		ZeroBonusTrayText = params.internalKeepsakeName .. "_Expired",
+		--???
+		-- InRackTitle = params.internalKeepsakeName .. "_Rack", -- Literally! Unused! Why!
+		-- UnequippedKeepsakeTitle = params.internalKeepsakeName .. "_Rack", -- ? Also no reason.
+		-- CustomTrayNameWhileDead = params.internalKeepsakeName, --? There is literally no reason to do this though.
+	}
 
--- 	if params.signOff then
--- 		local signoff_char = sjson.to_object({
--- 			Id = "Signoff" .. params.characterName,
--- 			DisplayName = "From " .. params.characterName,
--- 		}, Order)
--- 	end
+	--? IDK!!!!
+	-- * document the if GodLoot, else do params (basically, if god exists, dev do nothing, otherwise, smile.)
+	-- if params.createGiftData then
+	--     if params.characterName then
 
--- 	if params.signOffMax then
--- 		local signoff_charmax = sjson.to_object({
--- 			Id = "Signoff" .. params.characterName .. "_Max",
--- 			DisplayName = params.signOffMax.Description,
--- 		}, Order)
--- 	end
+	--[[
+    really ugly code, but if god exists, do gift text lines for max gift, otherwise, user args for what is max and min req.
+    ]]
+	if game.LootData[params.characterName .. "Upgrade"] then
+		local lootGiftPath = game.LootData[params.characterName .. "Upgrade"].GiftTextLineSets
+		game.GiftData[params.characterName .. "Upgrade"] = {
+			InheritFrom = { "DefaultGiftData" },
+			MaxedRequirement = {
+				{
+					PathTrue = { "GameState", "TextLinesRecord", lootGiftPath[#lootGiftPath] },
+				},
+			},
+			MaxedIcon = "Keepsake_" .. params.characterName .. "_Corner",
+			MaxedSticker = "Keepsake_" .. params.characterName,
+			[1] = {
+				GameStateRequirements = {
+					{
+						PathTrue = { "GameState", "TextLinesRecord", game.LootData[params.characterName .. "Upgrade"][1] },
+					},
+				},
+				Gift = params.internalKeepsakeName,
+			},
+		}
+		game.TraitData[params.internalKeepsakeName].SignOffData = {
+			{
+				GameStateRequirements = {
+					{
+						PathTrue = { "GameState", "TextLinesRecord", lootGiftPath[#lootGiftPath] },
+					},
+				},
+				Text = "Signoff" .. params.characterName .. "_Max",
+			},
+			{
+				Text = "Signoff" .. params.characterName,
+			},
+		}
+	else
+		game.GiftData[params.characterName .. "Upgrade"] = {
+			InheritFrom = { "DefaultGiftData" },
+			MaxedRequirement = params.maxRequirement,
+			MaxedIcon = "Keepsake_" .. params.characterName .. "_Corner",
+			MaxedSticker = "Keepsake_" .. params.characterName,
+			[1] = {
+				GameStateRequirements = params.minRequirement,
+				Gift = params.internalKeepsakeName,
+			},
+		}
+		game.TraitData[params.internalKeepsakeName].SignOffData = {
+			{
+				GameStateRequirements = params.maxRequirement,
+				Text = "Signoff" .. params.characterName .. "_Max",
+			},
+			{
+				Text = "Signoff" .. params.characterName,
+			},
+		}
+	end
 
--- 	if params.Icons then
--- 		local keepsakeicon_char = sjson.to_object({
--- 			Name = params.IconName,
--- 			InheritFrom = "KeepsakeIcon",
--- 			FilePath = rom.path.combine(params.pluginGUID, params.Icons.iconPath),
--- 		}, IconOrder)
+	if params.ExtraFields then
+		for k, v in pairs(params.ExtraFields) do
+			game.TraitData[params.internalKeepsakeName][k] = v
+		end
+	end
 
--- 		if params.Icons.maxCornerIcon then
--- 			local keepsakemaxCorner_char = sjson.to_object({
--- 				Name = "Keepsake_" .. params.characterName .. "_Corner",
--- 				InheritFrom = "KeepsakeMax_Corner",
--- 				FilePath = rom.path.combine(params.pluginGUID, params.Icons.iconPath),
--- 			}, IconOrder)
--- 		end
+	table.insert(game.ScreenData.KeepsakeRack.ItemOrder, params.internalKeepsakeName)
 
--- 		if params.Icons.maxIcon then
--- 			local keepsakemax_char = sjson.to_object({
--- 				Name = "Keepsake_" .. params.characterName,
--- 				InheritFrom = "KeepsakeMax",
--- 				FilePath = rom.path.combine(params.pluginGUID, params.Icons.maxIcon),
--- 			}, IconOrder)
--- 		end
--- 	end
+	local textsins = {}
+	local vfxins = {}
 
--- 	sjson.hook(TraitTextFile, function(data)
--- 		table.insert(data.Texts, keepsake_eurydice)
--- 		table.insert(data.Texts, keepsakerack_eurydice)
--- 		table.insert(data.Texts, signoff_eurydice)
--- 		table.insert(data.Texts, signoff_eurydicemax)
--- 	end)
+	-- SJSON stuff now
+	if params.Keepsake then --! Req
+		local keepsakeRack = sjson.to_object({
+			Id = params.internalKeepsakeName,
+			InheritFrom = "BaseBoonMultiline",
+			DisplayName = params.Keepsake.displayName,
+			Description = params.Keepsake.description,
+		}, TextOrder)
+		table.insert(textsins, keepsakeRack)
+	end
 
--- 	sjson.hook(GUIBoonsVFXFile, function(data)
--- 		table.insert(data.Animations, keepsakeicon_eurydice)
--- 		table.insert(data.Animations, keepsakemaxCorner_eurydice)
--- 		table.insert(data.Animations, keepsakemax_eurydice)
--- 	end)
--- end
+	if params.Keepsake.trayDescription then
+		local keepsakeTray = sjson.to_object({
+			Id = params.internalKeepsakeName .. "_Tray",
+			InheritFrom = params.internalKeepsakeName,
+			Description = params.Keepsake.trayDescription,
+		}, TextOrder)
+		table.insert(textsins, keepsakeTray)
+	end
+
+	if params.Keepsake.trayExpired then
+		local keepsakeExpired = sjson.to_object({
+			Id = params.internalKeepsakeName .. "_Expired",
+			InheritFrom = params.internalKeepsakeName,
+			Description = params.Keepsake.trayExpired,
+		}, TextOrder)
+		table.insert(textsins, keepsakeExpired)
+	end
+
+	local signoff = sjson.to_object({
+		Id = "Signoff" .. params.characterName,
+		DisplayName = "From " .. params.characterName,
+	}, TextOrder)
+	table.insert(textsins, signoff)
+
+	local signoffMax = sjson.to_object({
+		Id = "Signoff" .. params.characterName .. "_Max",
+		DisplayName = params.Keepsake.signoffMax or ("Max Friendship Signoff not implemented for " .. params.characterName),
+	}, TextOrder)
+	table.insert(textsins, signoffMax)
+
+	if params.Icons then
+		local keepsakeIcon = sjson.to_object({
+			Name = params.internalKeepsakeName,
+			InheritFrom = "KeepsakeIcon",
+			FilePath = rom.path.combine(params.pluginGUID, cleanFilePath(params.Icons.iconPath)),
+		}, IconOrder)
+		table.insert(vfxins, keepsakeIcon)
+
+		if params.Icons.maxIcon then
+			local keepsakeMax = sjson.to_object({
+				Name = "Keepsake_" .. params.characterName,
+				InheritFrom = "KeepsakeMax",
+				FilePath = rom.path.combine(params.pluginGUID, cleanFilePath(params.Icons.maxIcon)),
+			}, IconOrder)
+			table.insert(vfxins, keepsakeMax)
+		end
+
+		if params.Icons.maxCornerIcon then
+			local keepsakeCorner = sjson.to_object({
+				Name = "Keepsake_" .. params.characterName .. "_Corner",
+				InheritFrom = "KeepsakeMax_Corner",
+				FilePath = rom.path.combine(params.pluginGUID, cleanFilePath(params.Icons.maxCornerIcon)),
+			}, IconOrder)
+			table.insert(vfxins, keepsakeCorner)
+		end
+	end
+
+	if textsins then
+		sjson.hook(TraitTextFile, function(data)
+			for _, ins in ipairs(textsins) do
+				table.insert(data.Texts, ins)
+			end
+		end)
+	end
+
+	if vfxins then
+		sjson.hook(GUIBoonsVFXFile, function(data)
+			for _, ins in ipairs(vfxins) do
+				table.insert(data.Animations, ins)
+			end
+		end)
+	end
+end
+
+--! Help text
+-- {
+--   Id = "NPC_Artemis_Field_01"
+--   DisplayName = "Artemis"
+--   Description = "Goddess of the Hunt"
+-- }
