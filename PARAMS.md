@@ -12,7 +12,7 @@
 - `NameplateDescriptionColor` table - default of `{ 145, 45, 90, 255 }`
 - `SubtitleColor` table - default of `{ 255, 255, 205, 255 }`<br><br>
 - `Color` table - IDK - default of `{ 250, 250, 215, 255 }`
-- `LightingColor` table - In the Upgrade Choice menu - default of `{ 1, 0.91, 0.54, 1 }`
+- `LightingColor` table - In the Upgrade Choice menu, its the colour behind hte boon icon - default of `{ 1, 0.91, 0.54, 1 }`
 - `LootColor` table - The glow that the Physical Drop gives off - default of `{ 255, 128, 32, 255 }` <br><br> <img width="300" height="245" alt="Hades2_2krkFu7Mj6" src="https://github.com/user-attachments/assets/f53178a0-7dd8-422c-b2d4-cb933fae0123" /><br><br>
 - `LoadPackages` table - eg `{"Apollo"}`
 - `SFX_Portrait` string - eg `"SFX/Sound"`
@@ -90,8 +90,8 @@
 - `BoonDropIconHue` float - Negative or Positive. <br><br>
 - `OffsetZBoonPreview` integer - physical boon drop icon offset
 - `BoonPreviewScale` float - physical boon drop icon scale <br><br>
-- `iconSpinPath` string **(required)**  - The series of images which create the little animation of the physical boon
-- `previewPath` string **(required)**  - Door Icons
+- `iconSpinPath` string **(required)**  - The series of images which create the little animation of the physical boon, must end in 0001, followed by 0010, 0100, 1000, and have a minimum of 2
+- `previewPath` string **(required)**  - Door Icons, Upgrade Icon
 - `boonSelectSymbolPath` string - Upgrade Menu Icon
 - `boonSelectSymbolOffsetY` integer <br><br>
 - `portraitData` table

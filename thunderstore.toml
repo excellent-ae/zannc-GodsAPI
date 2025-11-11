@@ -5,13 +5,13 @@ schemaVersion = "0.0.1"
 [package]
 namespace = "zannc"
 name = "GodsAPI"
-versionNumber = "1.0.3"
+versionNumber = "1.0.4"
 description = "A library for developers to easily add new Gods / NPC Gods to the game without having to dig through files."
 websiteUrl = "https://github.com/excellent-ae/zannc-GodsAPI"
 containsNsfwContent = false
 
 [package.dependencies]
-Hell2Modding-Hell2Modding = "1.0.70"
+Hell2Modding-Hell2Modding = "1.0.77"
 SGG_Modding-ModUtil = "4.0.1"
 LuaENVY-ENVY = "1.2.0"
 SGG_Modding-Chalk = "2.1.1"
