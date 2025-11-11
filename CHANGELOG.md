@@ -1,6 +1,11 @@
 # Changelog
 
 ## [Unreleased]
+- Fixed Upgrade Choice Screen Text `Boons of GodName`
+- Fixed Icon Pathing being broken
+- Added Scale and OffsetX/Y to portraits
+- Added optional BoonDrop frames - so you dont have to do 50 frames to get the icon spin
+- DEV: Cleaned up code
 
 ## [1.0.3] - 2025-11-10
 

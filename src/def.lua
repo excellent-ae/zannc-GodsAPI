@@ -31,7 +31,7 @@ function GodsAPI.InitializeGod(params) end
 --- @param sjsonData sjsonData
 function GodsAPI.CreateOlympianSJSONData(sjsonData) end
 
---- Adds a set of SJSON needed to create a Droppable God.
+--- Creates Keepsakes
 --- @class keepsakeparams
 --- @field pluginGUID string (required) - Your _PLUGIN.guid.
 --- @field characterName string (required) - name of the Characte to attach to the Keepsake, same as godName if attached to a god.
@@ -43,9 +43,15 @@ function GodsAPI.CreateOlympianSJSONData(sjsonData) end
 function GodsAPI.CreateKeepsake(keepsakeparams) end
 
 --- Checks if a God is registered.
---- @param godName string (required) - The name of the God to check
+--- @param godName string (required) - The internal name of the Keepsake to check
+--- @param debug boolean (optional) - Enable Debug Prints
+--- @return boolean - True if the Keepsake is registered
+function GodsAPI.IsGodRegistered(godName, debug) end
+
+--- Checks if a Keepsake is registered.
+--- @param internalKeepsakeName string (required) - The name of the God to check
 --- @param debug boolean (optional) - Enable Debug Prints
 --- @return boolean - True if the God is registered
-function GodsAPI.IsGodRegistered(godName, debug) end
+function GodsAPI.IsKeepsakeRegistered(internalKeepsakeName, debug) end
 
 return GodsAPI
