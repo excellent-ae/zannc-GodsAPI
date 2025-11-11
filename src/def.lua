@@ -43,9 +43,9 @@ function GodsAPI.CreateOlympianSJSONData(sjsonData) end
 function GodsAPI.CreateKeepsake(keepsakeparams) end
 
 --- Checks if a God is registered.
---- @param godName string (required) - The name of the God to check
+--- @param godName string (required) - The internal name of the Keepsake to check
 --- @param debug boolean (optional) - Enable Debug Prints
---- @return boolean - True if the God is registered
+--- @return boolean - True if the Keepsake is registered
 function GodsAPI.IsGodRegistered(godName, debug) end
 
 --- Checks if a Keepsake is registered.
