@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [1.0.4] - 2025-11-11
+
 - Fixed Upgrade Choice Screen Text `Boons of GodName`
 - Fixed Icon Pathing being broken
 - Added Scale and OffsetX/Y to portraits
@@ -27,7 +30,8 @@
 
 - Initial Release.
 
-[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.3...HEAD
+[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.4...HEAD
+[1.0.4]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.3...1.0.4
 [1.0.3]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.2...1.0.3
 [1.0.2]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.1...1.0.2
 [1.0.1]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.0...1.0.1
