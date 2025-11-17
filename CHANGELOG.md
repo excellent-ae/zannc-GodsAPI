@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [1.0.6] - 2025-11-17
+
 - Readme update.
 
 ## [1.0.5] - 2025-11-17
@@ -37,7 +40,8 @@
 
 - Initial Release.
 
-[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.5...HEAD
+[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.6...HEAD
+[1.0.6]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.5...1.0.6
 [1.0.5]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.4...1.0.5
 [1.0.4]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.3...1.0.4
 [1.0.3]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.2...1.0.3
