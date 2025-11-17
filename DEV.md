@@ -1,120 +1,27 @@
-Just moving stuff around for now, will update with more information later.
+### For a full list of parameters, please refer to the [PARAMS.md](https://github.com/excellent-ae/zannc-GodsAPI/blob/main/PARAMS.md) file.
 
-#### For a full list of parameters, please refer to the [PARAMS.md](https://github.com/excellent-ae/zannc-GodsAPI/blob/main/PARAMS.md) file.
+>[!NOTE]
+A lot of values have default values to remove errors if not manually filled, there are paramaters to manually fill multiple fields, however, unless directly specified are **NOT** required for the basic creation to work.
 
-## Parameters
-While this is not a definitive list, these are the most common that will need to be changed.
-
-<details>
-<summary><strong>Parameters</strong></summary>
-
-### InitializeGod Paramaters
-* `params` (table) - A set of options to create the name, colour, text, gender, spawn sound etc.
-    * `godName` (string) **(required)** - The name of the God | eg "Ares", "Zeus" etc.
-    * `godType` (string) **(required)** - The type of God | eg "god" or "npcgod" (God = Zeus, NPC = Hermes)
-    * `SpawnLikeHermes` (boolean) **(optional)** - Commonly used with a NPCGod, which creates requirements for the god to spawn, just like Hermes.
-
-    <details>
-    <summary><strong>Optional Parameters</strong></summary>
-
-    * `GameStateRequirements` (table)
-    * `Gender` (string)
-    * `LoadPackages` (table)
-    * `FlavorTextIds` (table)
-    * `SFX_Portrait` (string)
-    * `UpgradeSelectedSound` (string)
-    * `WeaponUpgrades` (table)
-    * `Traits` (table)
-
-    <details>
-    <summary><strong>Colours</strong></summary>
-
-    * `Color` (table)
-    * `NarrativeTextColor` (table)
-    * `NameplateSpeakerNameColor` (table)
-    * `NameplateDescriptionColor` (table)
-    * `LightingColor` (table)
-    * `LootColor` (table)
-    * `SubtitleColor` (table)
-    </details>
-
-    <details>
-    <summary><strong>Dialogue/Text</strong></summary>
-
-    * `FirstSpawnVoiceLines` (table)
-    * `OnSpawnVoiceLines` (table)
-    * `UpgradeMenuOpenVoiceLines` (table)
-    * `DuoPickupTextLines` (table)
-    * `InteractTextLineSets` (table)
-    * `BoughtTextLines` (table)
-    * `BoughtTextLinesRequirements` (table)
-    * `RejectionTextLines` (table)
-    * `RejectionVoiceLines` (table)
-    * `MakeUpTextLines` (table)
-    * `GiftTextLineSets` (table)
-    * `GiftGivenVoiceLines` (table)
-    * `FullSuperActivatedVoiceLines` (table)
-    * `DeathTauntVoiceLines` (table)
-    * `RarityUpgradeVoiceLines` (table)
-    * `BlindBoxOpenedVoiceLines` (table)
-    </details>
-    </details>
-
-### CreateOlympianSJSONData Paramaters
-If you wish to add SJSON content, such as the boon drop icons, door preview icons or portraits, you must call `gods.CreateOlympianSJSONData(sjsonData)`
+<br>
 
 >[!IMPORTANT]
-> When passing in your Icon Paths, you do not need to provide your `_PLUGIN.guid`. <br>
-> `Example:` deppth2 provides: `zannc-GodsAPI\\Icons\\Boons\\img.png`, however you only need to provide `Icons\\Boons\\img.png`.
-> Passing in your `_PLUGIN.guid` will not break anything, but it is not necessary.
+> This is still a work in progress, and needs to be cleaned up/ written with better examples for SJSON/Keepsake & Traits.
 
-* `sjsonData` (table) - A set of options to create the name, colour, text, gender, spawn sound etc.
-    * `pluginGUID` (string) **(required)** - Your plugins GUID, commonly passed with `_PLUGIN.guid`
-    * `godName` (string) **(required)** - The name of the God | eg "Ares", "Zeus" etc.
-    * `godType` (string) **(required)** - The type of God | eg "god" or "npcgod" (God = Zeus, NPC = Hermes)
-    * `skipBoonSelectSymbol` (boolean) **(optional)** - If there is already a Boon Select Symbol (In upgrade screen), you can pass this to skip the creation of one.
-	* `iconSpinPath` (string) - The animation of the physical boon drop.
-	* `previewPath` (string) - The icon to display on doors.
-  	* `colorA` (table) - The colours of the physical boon drop
-	* `colorB` (table)
-	* `colorC` (table)<br><br>
-	* `godDescriptionText` (string) **(optional)** - The subtitle when picking up a boon eg... `Artemis, Goddess of the Hunt`
-	* `godDescriptionTextFlavour01` (string) **(optional)** The subtitle at the top, when the boons are selected eg... `Boons of Artemis, she moves through the woods like...`
-	* `godDescriptionTextFlavour02` (string) **(optional)** 
-	* `godDescriptionTextFlavour03` (string) **(optional)** 
-
-    <details>
-    <summary><strong>Optional Parameters</strong></summary>
-
-	* `portraitData` (table) **(optional)** 
-		* `skipNeutralPortrait` (boolean) **(optional)** - If there is already a neutral portrait for the character in the game.
-        * `AnnoyedPortraitFilePath` (string)
-        * `DialogueEntrance` (boolean) **(optional)** - If you wish to create animations during a portrait entrance.
-            * `RedStart` (float) - The starting colour for the animations. eg. 1.0
-    		* `StartGreen` (float)
-    		* `StartBlue` (float)
-    		* `EndRed` (float) - The starting colour for the animations. eg. 0.1
-    		* `EndGreen` (float)
-    		* `EndBlue` (float)
-    </details>
-</details>
-
-#### For a full list of parameters, please refer to the [PARAMS.md](https://github.com/excellent-ae/zannc-GodsAPI/blob/main/PARAMS.md) file.
-
-# Checking Implementation
-If you need to check if the God you created is currently registered, or need to use an `if statement` to check if a god is enabled/disabled per config, you can use `gods.IsGodRegistered("GODNAME", debug)` - returning **true or false**. If you pass in debug (true), it will return a warning print for confirmation of creation.<br>
-
-# Examples
-This will add a new God: `Artemis` with the **internal** name `ArtemisUpgrade`.
+### InitializeGod Examples
 ```lua
+--[[
+This will add a new God: `Artemis` with the **internal** name `ArtemisUpgrade`.
+]]
 gods.InitializeGod({
     godName = "Artemis",
     godType = "GOD",
     Gender = "F",
     LoadPackages = { "Artemis" },
-    FlavorTextIds = { "ArtemisUpgrade_FlavorText01", "ArtemisUpgrade_FlavorText02", "ArtemisUpgrade_FlavorText03" },
+    FlavorTextIds = { "ArtemisUpgrade_FlavorText01", "ArtemisUpgrade_FlavorText02", "ArtemisUpgrade_FlavorText03" }, -- Defined later in SJSON
 
     SFX_Portrait = "/SFX/ArtemisBoonArrow",
+    UpgradeSelectedSound = "/SFX/ArtemisBoonArrow",
 
     WeaponUpgrades = game.EnemyData.NPC_Artemis_Field_01.WeaponUpgrades,
     Traits = game.EnemyData.NPC_Artemis_Field_01.Traits,
@@ -123,8 +30,89 @@ gods.InitializeGod({
     LightingColor = { 210, 255, 97, 190 },
     LootColor = { 110, 255, 0, 180 },
     SubtitleColor = Color.ArtemisVoice,
+
+    OnSpawnVoiceLines = {
+		BreakIfPlayed = true,
+		RandomRemaining = true,
+		PlayOnceFromTableThisRun = true,
+		PreLineWait = 0.85,
+		SuccessiveChanceToPlay = 0.25,
+		GameStateRequirements = {
+			NamedRequirements = { "OlympianOnSpawnVoiceLinesAllowed" },
+		},
+
+		{
+			Cue = "/VO/Melinoe_1472",
+			Text = "It's her.",
+		},
+		{
+			Cue = "/VO/Melinoe_1477",
+			Text = "She's back.",
+		},
+		{
+			Cue = "/VO/ArtemisKeepsake_0214",
+			Text = "Hey Sister.",
+		},
+	},
+})
+```
+
+<br>
+
+```lua
+--[[
+This will add a new npc type God: `Tyche` with the **internal** name `TycheUpgrade`.
+]]
+
+--[[ 
+Pretending as if there is a config for users to change how the god will spawn.
+If this is set to false, the god will spawn like other gods, however it will not add to the MetGod pool.
+]]
+local spawnrequirements = false
+if config.Tyche.requirements then
+	spawnrequirements = true
+end
+
+gods.InitializeGod({
+    godName = "Tyche",
+    godType = "npcGOD",
+    SpawnLikeHermes = spawnrequirements
+    Traits = {
+        "TycheMoneyBoon",
+        "OutWithABangBoon",
+    },
 })
 
+--[[
+If we want to get around the MetGod pool not being applied, you can modify the code above to something like this.
+]]
+local spawnrequirements = false
+local typeofGod = "GOD"
+if config.Tyche.requirements then
+	spawnrequirements = true
+	typeofGod = "NPCGOD"
+end
+
+gods.InitializeGod({
+    godName = "Tyche",
+    godType = typeofGod,
+    SpawnLikeHermes = spawnrequirements
+    Traits = {
+        "TycheMoneyBoon",
+        "OutWithABangBoon",
+    },
+})
+
+--[[
+It is possible to also limit the spawning of the God to function like hermes, but still apply to the MetGods table (by using godType = GOD).
+Doing so however would severly limit the users' to see an additional god.
+]]
+```
+
+### CreateOlympianSJSONData Examples
+#### WIP, following InitializeGod creation
+
+```lua
 gods.CreateOlympianSJSONData({
     pluginGUID = _PLUGIN.guid
     godName = "Artemis",
@@ -141,26 +129,9 @@ gods.CreateOlympianSJSONData({
 })
 ```
 
-This will add a new NPC God: `Athena` with the **internal** name `AthenaUpgrade`, and function/spawn like Hermes does.
+<br>
 
 ```lua
-gods.InitializeGod({
-	godName = "Athena",
-	godType = "npcGOD",
-	SpawnLikeHermes = true,
-
-	Gender = "F",
-	LoadPackages = { "Athena" },
-	FlavorTextIds = { "AthenaUpgrade_FlavorText01", "AthenaUpgrade_FlavorText02", "AthenaUpgrade_FlavorText03" },
-
-	Traits = game.EnemyData.NPC_Athena_01.Traits,
-
-    SubtitleColor = Color.AthenaVoice,
-	Color = { 91, 255, 100, 255 },
-	LootColor = { 175, 157, 255, 255 },
-	LightingColor = { 175, 157, 255, 255 },
-})
-
 gods.CreateOlympianSJSONData({
     pluginGUID = _PLUGIN.guid
 	godName = "Athena",
@@ -217,11 +188,9 @@ gods.CreateOlympianSJSONData({
 })
 ```
 
-
-# Example Keepsake
-
+### Example Keepsake
+#### WIP
 ```lua
-
 gods.CreateKeepsake({
 	pluginGUID = _PLUGIN.guid,
 	characterName = "Spike",
@@ -261,5 +230,58 @@ gods.CreateKeepsake({
 		},
 	},
 })
-
 ```
+
+```lua
+--[[ 
+uid, internal, charactername ,legendary, rarity, slot, blockstacking,  statlines, extractval, elements, displayName
+extrafields, boonIconPath, requirements, flavourtext
+]]
+gods.CreateBoon({
+	pluginGUID = _PLUGIN.guid,
+	internalBoonName = "AwesomeWeaponBoon",  -- eg TycheWeaponBoon
+	isLegendary = false,
+    Elements = {"Air"},
+    characterName = "Tyche",
+    --? Optional
+    Slot = "Special",
+    BlockStacking = false,
+    StatLines = { "NearbyDamageStatDisplay1" },
+    ExtractValues = {
+        {
+            Key = "ReportedWeaponMultiplier",
+            ExtractAs = "TooltipBonus",
+            Format = "PercentDelta",
+            SkipAutoExtract = true,
+		},
+    }, -- refer to traits, or make your own from extra fields
+    displayName = "Awesome!",
+    description = "Awesome Description!",
+    flavourText = "Legendary Flavour Text!",
+	requirements = { OneOf = { "ApolloWeaponBoon" } },
+    boonIconPath = "path\\to\\boonIcon",
+    RarityLevels = {
+        Common = { Multiplier = 1.0 },
+        Rare = { Multiplier = 1.5 },
+        Epic = { Multiplier = 2.0 },
+        Heroic = { Multiplier = 2.5 },
+    },
+
+    --[[
+    This is basically where you do all your funky stuff that you want the boon to do, there are a -
+        lot of fields you can look at by using existing traits, or even make your own new ones.
+    ]]
+    ExtraFields = {
+		AddOutgoingDamageModifiers = {
+			VengeanceMultiplier = {
+				BaseValue = 1.20,
+				SourceIsMultiplier = true,
+			},
+			ReportValues = { ReportedWeaponMultiplier = "VengeanceMultiplier" },
+		},
+	},
+})
+```
+
+# Checking Implementation
+If you need to check if the God you created is currently registered, or need to use an `if statement` to check if a god is enabled/disabled per config, you can use `gods.IsGodRegistered("GODNAME", debug)` - returning **true or false**. If you pass in debug (true), it will return a warning print for confirmation of creation.<br>

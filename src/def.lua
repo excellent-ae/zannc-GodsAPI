@@ -1,57 +1,134 @@
---- @class GodsAPI
-local GodsAPI = {}
+---@meta zannc-GodsAPI
+local gods = {}
 
---- Initializes the GodsAPI library with your plugin GUID >> Must be called before any other functions. [DEFUNCT]
-function GodsAPI.Initialize() end
+---@alias GodType "god" | "npcgod"
 
---- @class params
---- @field godName string (required) - The name of the God | eg "Ares", "Zeus" etc
---- @field godType string (required) - The type of God | eg "god" or "npcgod" (God = Zeus, NPC = Hermes)
+--- [DEFUNCT]
+function gods.Initialize() end
 
---- @param params params
-function GodsAPI.InitializeGod(params) end
+--! not done
+--[[
+    Creates the main LootData for a god, contains trais, dialogue, game spawn requirements, colours. <br>
+    Refer to the docs for all available fields: "https://github.com/excellent-ae/zannc-GodsAPI/blob/main/PARAMS.md"
 
--- --- @param godName string (required) - The name of the NPC | eg "Dionysus", "Athena" etc
--- --- @class params (optional) - A set of options to create colour, text, gender, spawn sound etc.
--- function GodsAPI.InitializeNPC(godName, params) end
+    Basic Usage:
+        gods.InitializeGod({
+            
+        })
+--]]
+---@class GodParams
+---@field godName string
+---@field godType GodType
+function gods.InitializeGod(params) end
 
---- Adds a set of SJSON needed to create a Droppable God.
---- @class sjsonData
---- @field pluginGUID string(required) - Your _PLUGIN.guid.
---- @field godName string (required) - The name of the God | e.g "Artemis", "Apollo" etc
---- @field godType string (required) - The type of God | eg "god" or "npcgod" (God = Zeus, NPC = Hermes)
---- @field skipBoonSelectSymbol boolean? (optional) - If the select symbol already exists in the game (Artemis, Hermes, Athena etc.)
---- @field iconSpinPath string (required) -
---- @field previewPath string (required) -
---- @field boonSelectSymbolPath string (required* if you do not set skipBoonSelectSymbol to true) -
---- @field colorA table (required) -
---- @field colorB table (required) -
---- @field colorC table (required) -
+--! not done
+--[[
+    Creates SJSON data for a God. <br>
+    Refer to the docs for all available fields: "https://github.com/excellent-ae/zannc-GodsAPI/blob/main/PARAMS.md"
 
---- @param sjsonData sjsonData
-function GodsAPI.CreateOlympianSJSONData(sjsonData) end
+    Basic Usage:
+        gods.CreateOlympianSJSONData({
+            godName = "Artemis",
+            godType = "god",
+        })
+--]]
+---@class SJSONData
+---@field pluginGUID string
+---@field godName string
+---@field godType GodType
+---@field skipBoonSelectSymbol boolean?
+---@field iconSpinPath string
+---@field previewPath string
+---@field boonSelectSymbolPath string?
+---@field colorA table
+---@field colorB table
+---@field colorC table
+function gods.CreateOlympianSJSONData(params) end
 
---- Creates Keepsakes
---- @class keepsakeparams
---- @field pluginGUID string (required) - Your _PLUGIN.guid.
---- @field characterName string (required) - name of the Characte to attach to the Keepsake, same as godName if attached to a god.
---- @field internalKeepsakeName string (required) - The internal name for the keepsake | eg "ForceHephaestusBoonKeepsake".
---- @field RarityLevels table (required) - The multipliers for your keepsake.
---- @field Keepsake table (required) - The information about the keepsake, such as display name, the signoff and descriptions.
+--[[
+    Creates a Keepsake for a character, doesn't have to be related to a specific God/Character in the game already. <br>
+    Refer to the docs for all available fields: "https://github.com/excellent-ae/zannc-GodsAPI/blob/main/PARAMS.md"
 
---- @param keepsakeparams keepsakeparams
-function GodsAPI.CreateKeepsake(keepsakeparams) end
+    Usage:
+        gods.CreateKeepsake({
+            pluginGUID = _PLUGIN.guid,
+            characterName = "Hephaestus",
+            internalKeepsakeName = "ForceHephaestusBoonKeepsake",
+            RarityLevels = {Common = 1.0, Rare = 1.5, Epic = 2.0, Heroic = 2.5},
+            ExtraFields = { -- This is where you do all the functionality of the keepsake.
+                AddOutgoingDamageMultiplier = { ... }
+            }
+        })
+--]]
+---@class KeepsakeParams
+---@field pluginGUID string
+---@field characterName string
+---@field internalKeepsakeName string
+---@field RarityLevels table
+---@field Keepsake table?
+---@field Icons table?
+---@field ExtraFields table?
+function gods.CreateKeepsake(params) end
 
---- Checks if a God is registered.
---- @param godName string (required) - The internal name of the Keepsake to check
---- @param debug boolean (optional) - Enable Debug Prints
---- @return boolean - True if the Keepsake is registered
-function GodsAPI.IsGodRegistered(godName, debug) end
+--! not done
+--[[
+    Creates a Boon for a God/Character. <br>
+    Refer to the docs for all available fields: "https://github.com/excellent-ae/zannc-GodsAPI/blob/main/PARAMS.md"
 
---- Checks if a Keepsake is registered.
---- @param internalKeepsakeName string (required) - The name of the God to check
---- @param debug boolean (optional) - Enable Debug Prints
---- @return boolean - True if the God is registered
-function GodsAPI.IsKeepsakeRegistered(internalKeepsakeName, debug) end
+    Basic Usage:
+        gods.CreateBoon({
+            pluginGUID = _PLUGIN.guid,
+            internalBoonName = "Hephaestus",
+            Slot = "Melee",
+            BlockStacking = false,
+            isLegendary = false,
+            RarityLevels = {Common = 1.0, Rare = 1.5, Epic = 2.0, Heroic = 2.5},
+            ExtraFields = { -- This is where you do all the functionality of the Boon.
+                AddOutgoingDamageMultiplier = { ... }
+            }
+        })
+--]]
+---@class TraitParams
+---@field pluginGUID string
+---@field characterName string
+---@field internalKeepsakeName string
+---@field RarityLevels table
+---@field Keepsake table?
+---@field Icons table?
+---@field ExtraFields table?
+function gods.CreateBoon(params) end
 
-return GodsAPI
+--[[
+    Checks if a God is in LootData, usually for debugging but can be used to do game checks.
+
+    Usage:
+        gods.IsGodRegistered("Ares", true)
+--]]
+---@param godName string (required) The name of the God to check.
+---@param debug boolean? (optional) Enable debug prints, just returns if true or false as a warning.
+---@return boolean # True if the God is in LootData
+function gods.IsGodRegistered(godName, debug) end
+
+--[[
+    Checks if a Keepsake is created in TraitData, usually for debugging but can be used to do game checks.
+
+    Usage:
+        gods.IsKeepsakeRegistered("ForceHephaestusBoonKeepsake")
+--]]
+---@param internalKeepsakeName string (required) The internal name of the Keepsake to check.
+---@param debug boolean? (optional) Enable debug prints, just returns if true or false as a warning.
+---@return boolean # True if the Keepsake is in TraitData
+function gods.IsKeepsakeRegistered(internalKeepsakeName, debug) end
+
+--[[
+    Checks if a Boon is created in TraitData, usually for debugging but can be used to do game checks.
+
+    Usage:
+        gods.IsBoonRegistered("ApolloWeaponBoon")
+--]]
+---@param internalBoonName string (required) The internal name of the Boon to check.
+---@param debug boolean? (optional) Enable debug prints, just returns if true or false as a warning.
+---@return boolean # True if the Boon is in TraitData
+function gods.IsBoonRegistered(internalBoonName, debug) end
+
+return gods

@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+- Add Default Values to Keepsake Description/Display
+- Slight updates to Params/Dev.
+- Added basic dirty work for Traits/Boons.
 
 ## [1.0.4] - 2025-11-11
 
