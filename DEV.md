@@ -232,6 +232,9 @@ gods.CreateKeepsake({
 })
 ```
 
+### Example Boon
+#### WIP
+Although this function exists, a lot of the dirty work will have to be done through external custom functions and or reusing existing functions/wrapping them.
 ```lua
 --[[ 
 uid, internal, charactername ,legendary, rarity, slot, blockstacking,  statlines, extractval, elements, displayName

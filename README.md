@@ -1,5 +1,5 @@
 # GodsAPI, a library to create Gods.
-This is a very early library made to make it easy for developers to add new Gods/NPC Gods & Keepsakes.
+This is a very early library made to make it easy for developers to add new Gods/NPC Gods, Keepsakes & Boons.
 This library does nothing to the game on its own, without outside function calls.
 You should only install it if another mod requires it, or if you will be using this library to create Gods/Keepsakes.
 
@@ -38,10 +38,11 @@ You should only install it if another mod requires it, or if you will be using t
     gods = mods["zannc-GodsAPI"]
     ```
 
-#### For more in-depth examples of how to use these functions, refer to the [DEV.md](https://github.com/excellent-ae/zannc-GodsAPI/blob/main/DEV.md) file.
+#### For more in-depth examples of how to use these functions, refer to the [DEV.md](https://github.com/excellent-ae/zannc-GodsAPI/blob/main/DEV.md) file and the [PARAMS.md](https://github.com/excellent-ae/zannc-GodsAPI/blob/main/PARAMS.md) file.
 
 3. To create a god, you must call `gods.InitializeGod(params)`, and optionally followed by `gods.CreateOlympianSJSONData(params)` and provide the required paramaters / sjson paramaters.<br><br>
-4. To create a Keepsake, you must call `gods.CreateKeepsake(params)`, and pass in the required fields - as well as any custom functions you need to make the keepsake function. <br>
+4. To create a Keepsake, you must call `gods.CreateKeepsake(params)`, and pass in the required fields - as well as any custom functions you need to make the keepsake function.<br><br>
+5. To create a Boon, you must call `gods.CreateBoon(params)`, and pass in the required fields - as well as any custom functions you need to make the boon function. <br>
 
 ## Planned Features
 I am planning to add support for trait creation, and will be released in later versions. <br>

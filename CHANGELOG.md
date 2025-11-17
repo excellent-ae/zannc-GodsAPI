@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Readme update.
 
 ## [1.0.5] - 2025-11-17
 
