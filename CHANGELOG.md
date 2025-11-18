@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [1.0.7] - 2025-11-18
+
 - Added `addToExistingGod` paramater.
 - Moved code around to do traitdict and traitsortorder to work after all mods loaded.
 
@@ -42,7 +45,8 @@
 
 - Initial Release.
 
-[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.6...HEAD
+[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.7...HEAD
+[1.0.7]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.6...1.0.7
 [1.0.6]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.5...1.0.6
 [1.0.5]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.4...1.0.5
 [1.0.4]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.3...1.0.4
