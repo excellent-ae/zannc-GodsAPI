@@ -1,7 +1,7 @@
 # GodsAPI, a library to create Gods.
 This is a very early library made to make it easy for developers to add new Gods/NPC Gods, Keepsakes & Boons.
 This library does nothing to the game on its own, without outside function calls.
-You should only install it if another mod requires it, or if you will be using this library to create Gods/Keepsakes.
+You should only install it if another mod requires it, or if you will be using this library to create Gods/Keepsakes/Boons.
 
 >[!IMPORTANT]
 > *Currently, this library only supports adding in **Olympian** Gods eg. Zeus and **NPC**-type Gods eg. Hermes - as well as custom Keepsakes.* <br>
@@ -45,5 +45,4 @@ You should only install it if another mod requires it, or if you will be using t
 5. To create a Boon, you must call `gods.CreateBoon(params)`, and pass in the required fields - as well as any custom functions you need to make the boon function. <br>
 
 ## Planned Features
-I am planning to add support for trait creation, and will be released in later versions. <br>
-I am also looking into the possibility of Hex Gods like Selene, as well as physical 3D NPCs if possible - however to my knowledge, 3D models have not been created yet.
+I am looking into the possibility of Hex Gods like Selene, as well as physical 3D NPCs if possible - however to my knowledge, 3D models have not been created yet.

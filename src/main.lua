@@ -82,74 +82,6 @@ local function addGodtoRunData(runData, upgrade)
 	end
 end
 
-local function registerEntityData(entityName, entityType, entityData)
-	local upgradeName = entityName .. "Upgrade"
-
-	game.CodexData.OlympianGods.Entries[upgradeName] = {
-		Entries = {
-			{
-				UnlockGameStateRequirements = {
-					{
-						PathTrue = { "GameState", "TextLinesRecord", entityName .. "Gift01" },
-					},
-				},
-				Text = "CodexData_" .. entityName .. "_01",
-			},
-		},
-		Image = "Codex_Portrait_" .. entityName,
-		BoonInfoAllowPinning = true,
-	}
-	if entityType == "npcgod" then
-		game.CodexData.OlympianGods.Entries[upgradeName].NoRequirements = true
-	end
-
-	if not entityData.SpawnLikeHermes then
-		addGodtoRunData(game.RewardStoreData.RunProgress, upgradeName)
-		addGodtoRunData(game.RewardStoreData.TartarusRewards, upgradeName)
-	end
-
-	local traitDictionary = {}
-	game.ScreenData.BoonInfo.TraitDictionary[entityName] = {}
-
-	--* LinkedTraitData is just WeaponUpgrades.
-	if entityData.WeaponUpgrades then
-		game.LinkedTraitData[entityName .. "WeaponTraits"] = game.ConcatTableValuesIPairs(game.ScreenData.BoonInfo.TraitSortOrder[entityName], entityData.WeaponUpgrades)
-		game.LinkedTraitData[entityName .. "CoreTraits"] = game.ConcatTableValuesIPairs(game.ScreenData.BoonInfo.TraitSortOrder[entityName], entityData.WeaponUpgrades)
-	end
-
-	if entityData.WeaponUpgrades ~= nil then
-		for i, traitName in pairs(entityData.WeaponUpgrades) do
-			traitDictionary[traitName] = true
-			game.ScreenData.BoonInfo.TraitDictionary[entityName][traitName] = true
-		end
-	end
-	if entityData.Traits ~= nil then
-		for i, traitName in pairs(entityData.Traits) do
-			traitDictionary[traitName] = true
-			game.ScreenData.BoonInfo.TraitDictionary[entityName][traitName] = true
-		end
-	end
-	if entityData.PermanentTraits ~= nil then
-		for i, traitName in pairs(entityData.PermanentTraits) do
-			traitDictionary[traitName] = true
-			game.ScreenData.BoonInfo.TraitDictionary[entityName][traitName] = true
-		end
-	end
-	if entityData.TemporaryTraits ~= nil then
-		for i, traitName in pairs(entityData.TemporaryTraits) do
-			traitDictionary[traitName] = true
-			game.ScreenData.BoonInfo.TraitDictionary[entityName][traitName] = true
-		end
-	end
-	if entityData.Consumables ~= nil then
-		for i, consumableName in pairs(entityData.Consumables) do
-			game.ScreenData.BoonInfo.TraitDictionary[entityName][consumableName] = true
-		end
-	end
-
-	entityData.TraitIndex = traitDictionary
-end
-
 local function cleanFilePath(pluginGUID, filePath)
 	local parts = {}
 	for part in filePath:gmatch("[^/\\]+") do
@@ -438,7 +370,28 @@ function public.InitializeGod(params)
 		end
 	end
 
-	registerEntityData(params.godName, lowGodType, game.LootData[upgradeName])
+	game.CodexData.OlympianGods.Entries[upgradeName] = {
+		Entries = {
+			{
+				UnlockGameStateRequirements = {
+					{
+						PathTrue = { "GameState", "TextLinesRecord", entityName .. "Gift01" },
+					},
+				},
+				Text = "CodexData_" .. entityName .. "_01",
+			},
+		},
+		Image = "Codex_Portrait_" .. entityName,
+		BoonInfoAllowPinning = true,
+	}
+	if entityType == "npcgod" then
+		game.CodexData.OlympianGods.Entries[upgradeName].NoRequirements = true
+	end
+
+	if not entityData.SpawnLikeHermes then
+		addGodtoRunData(game.RewardStoreData.RunProgress, upgradeName)
+		addGodtoRunData(game.RewardStoreData.TartarusRewards, upgradeName)
+	end
 end
 
 function public.CreateOlympianSJSONData(params)
@@ -1124,7 +1077,7 @@ end
 
 --[[ 
 uid, internal, charactername ,legendary, rarity, slot, blockstacking,  statlines, extractval, elements, displayName
-extrafields, boonIconPath, requirements, flavourtext
+extrafields, boonIconPath, requirements, flavourtext, addToExistingGod
 ]]
 
 --TODO add a way for people to create a new boon, but then just insert into weapon/traits and update dics
@@ -1141,6 +1094,7 @@ function public.CreateBoon(params)
 	local intboonName = params.internalBoonName -- used when passing into traits
 
 	local characterCoreTraits = params.characterName .. "CoreTraits"
+	local characterUpgrade = params.characterName .. "Upgrade"
 
 	-- Creating the boon functions itself
 	game.TraitData[intboonName] = {
@@ -1153,7 +1107,6 @@ function public.CreateBoon(params)
 
 		StatLines = params.StatLines or {},
 		ExtractValues = params.ExtractValues or {},
-		FlavorText = intboonName .. "_FlavourText",
 	}
 
 	if params.ExtraFields then
@@ -1192,6 +1145,7 @@ function public.CreateBoon(params)
 
 	local flavourText
 	if params.flavourText then
+		game.TraitData[intboonName].FlavorText = intboonName .. "_FlavourText"
 		flavourText = sjson.to_object({
 			Id = intboonName .. "_FlavourText",
 			DisplayName = params.flavourText,
@@ -1213,6 +1167,25 @@ function public.CreateBoon(params)
 
 	game.TraitData[params.internalBoonName].TraitOrderingValueCache = GetTraitOrderingValue(game.TraitData[params.internalBoonName])
 
+	if params.addToExistingGod then
+		local characterData = game.LootData[characterUpgrade]
+
+		if characterData then
+			if params.Slot == "Melee" or params.Slot == "Secondary" or params.Slot == "Ranged" or params.Slot == "Rush" or params.Slot == "Mana" then
+				if characterData.WeaponTraits then
+					if type(params.addToExistingGod) == "table" and params.addToExistingGod.boonPosition then
+						table.insert(characterData.WeaponTraits, params.addToExistingGod.boonPosition, intboonName)
+					else
+						table.insert(characterData.WeaponTraits, intboonName)
+					end
+				end
+			else
+				if characterData.Traits then
+					table.insert(characterData.Traits, intboonName) -- Fixed: should be Traits, not WeaponTraits
+				end
+			end
+		end
+	end
 	if params.Slot == "Melee" or params.Slot == "Secondary" or params.Slot == "Ranged" or params.Slot == "Rush" or params.Slot == "Mana" then
 		-- if we want to do linkedtraitdata, but we dont really need to, since its only used to create requirements
 		-- i wrote this comment and had to immediately change my mind!
@@ -1286,36 +1259,72 @@ modutil.once_loaded.game(function()
 	mod = modutil.mod.Mod.Register(_PLUGIN.guid)
 end)
 
-modutil.once_loaded.save(function()
-	for traitName, linkedData in pairs(TraitRequirements) do
-		-- Process type of link
-		ScreenData.BoonInfo.TraitRequirementsDictionary[traitName] = DeepCopyTable(linkedData)
-		if linkedData.OneOf then
-			ScreenData.BoonInfo.TraitRequirementsDictionary[traitName].Type = "OneOf"
-		elseif linkedData.TwoOf then
-			ScreenData.BoonInfo.TraitRequirementsDictionary[traitName].Type = "TwoOf"
-		elseif linkedData.OneFromEachSet then
-			ScreenData.BoonInfo.TraitRequirementsDictionary[traitName].Type = "OneFromEachSet"
-			if TableLength(linkedData.OneFromEachSet) == 3 and #linkedData.OneFromEachSet[1] == #linkedData.OneFromEachSet[2] and #linkedData.OneFromEachSet[2] == #linkedData.OneFromEachSet[3] then
+mods.on_all_mods_loaded(function()
+	modutil.once_loaded.game(function()
+		for traitName, linkedData in pairs(TraitRequirements) do
+			-- Process type of link
+			ScreenData.BoonInfo.TraitRequirementsDictionary[traitName] = DeepCopyTable(linkedData)
+			if linkedData.OneOf then
+				ScreenData.BoonInfo.TraitRequirementsDictionary[traitName].Type = "OneOf"
+			elseif linkedData.TwoOf then
 				ScreenData.BoonInfo.TraitRequirementsDictionary[traitName].Type = "TwoOf"
+			elseif linkedData.OneFromEachSet then
+				ScreenData.BoonInfo.TraitRequirementsDictionary[traitName].Type = "OneFromEachSet"
+				if TableLength(linkedData.OneFromEachSet) == 3 and #linkedData.OneFromEachSet[1] == #linkedData.OneFromEachSet[2] and #linkedData.OneFromEachSet[2] == #linkedData.OneFromEachSet[3] then
+					ScreenData.BoonInfo.TraitRequirementsDictionary[traitName].Type = "TwoOf"
+				end
 			end
 		end
-	end
 
-	for lootName, lootData in pairs(LootData) do
-		lootData.Name = lootName
-		ScreenData.BoonInfo.TraitSortOrder[lootName] = {}
-		if lootData.TraitSortOrder then
-			ScreenData.BoonInfo.TraitSortOrder[lootName] = ShallowCopyTable(lootData.TraitSortOrder)
-		else
-			if lootData.WeaponUpgrades then
-				ScreenData.BoonInfo.TraitSortOrder[lootName] = ConcatTableValuesIPairs(ScreenData.BoonInfo.TraitSortOrder[lootName], lootData.WeaponUpgrades)
+		for lootName, lootData in pairs(LootData) do
+			lootData.Name = lootName
+			local traitDictionary = {}
+			ScreenData.BoonInfo.TraitDictionary[lootName] = {}
+
+			ScreenData.BoonInfo.TraitSortOrder[lootName] = {}
+			if lootData.TraitSortOrder then
+				ScreenData.BoonInfo.TraitSortOrder[lootName] = ShallowCopyTable(lootData.TraitSortOrder)
+			else
+				if lootData.WeaponUpgrades then
+					ScreenData.BoonInfo.TraitSortOrder[lootName] = ConcatTableValuesIPairs(ScreenData.BoonInfo.TraitSortOrder[lootName], lootData.WeaponUpgrades)
+				end
+				if lootData.Traits then
+					ScreenData.BoonInfo.TraitSortOrder[lootName] = ConcatTableValuesIPairs(ScreenData.BoonInfo.TraitSortOrder[lootName], lootData.Traits)
+				end
 			end
-			if lootData.Traits then
-				ScreenData.BoonInfo.TraitSortOrder[lootName] = ConcatTableValuesIPairs(ScreenData.BoonInfo.TraitSortOrder[lootName], lootData.Traits)
+
+			if lootData.WeaponUpgrades ~= nil then
+				for i, traitName in pairs(lootData.WeaponUpgrades) do
+					traitDictionary[traitName] = true
+					ScreenData.BoonInfo.TraitDictionary[lootName][traitName] = true
+				end
 			end
+			if lootData.Traits ~= nil then
+				for i, traitName in pairs(lootData.Traits) do
+					traitDictionary[traitName] = true
+					ScreenData.BoonInfo.TraitDictionary[lootName][traitName] = true
+				end
+			end
+			if lootData.PermanentTraits ~= nil then
+				for i, traitName in pairs(lootData.PermanentTraits) do
+					traitDictionary[traitName] = true
+					ScreenData.BoonInfo.TraitDictionary[lootName][traitName] = true
+				end
+			end
+			if lootData.TemporaryTraits ~= nil then
+				for i, traitName in pairs(lootData.TemporaryTraits) do
+					traitDictionary[traitName] = true
+					ScreenData.BoonInfo.TraitDictionary[lootName][traitName] = true
+				end
+			end
+			if lootData.Consumables ~= nil then
+				for i, consumableName in pairs(lootData.Consumables) do
+					ScreenData.BoonInfo.TraitDictionary[lootName][consumableName] = true
+				end
+			end
+			lootData.TraitIndex = traitDictionary
 		end
-	end
+	end)
 end)
 
 --* property changes - yoinked from aphrodite, files are melinoe_staff_vfx etc

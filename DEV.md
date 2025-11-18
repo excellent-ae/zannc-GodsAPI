@@ -246,6 +246,7 @@ gods.CreateBoon({
 	isLegendary = false,
     Elements = {"Air"},
     characterName = "Tyche",
+	addToExistingGod = { boonPosition = 2 }, -- OR true
     --? Optional
     Slot = "Special",
     BlockStacking = false,
@@ -284,6 +285,93 @@ gods.CreateBoon({
 		},
 	},
 })
+
+--[[
+	AirBoon = 
+	{
+		Elements = { "Air" },
+		DebugOnly = true,
+	},
+	FireBoon = 
+	{
+		Elements = {"Fire"},
+		DebugOnly = true,
+	},
+	EarthBoon = 
+	{
+		Elements = {"Earth"},
+		DebugOnly = true,
+	},
+	WaterBoon = 
+	{
+		Elements = {"Water"},
+		DebugOnly = true,
+	},
+	AetherBoon = 
+	{
+		Elements = {"Aether"},
+		DebugOnly = true,
+	},
+    	SynergyTrait =
+	{
+		InheritFrom = { "AetherBoon", },
+		GameStateRequirements =
+		{
+			{
+				Path = { "CurrentRun", "CurrentRoom", "ChosenRewardType", },
+				IsNone = { "Devotion", },
+			},
+		},
+		IsDuoBoon = true,
+		Frame = "Duo",
+		BlockStacking = true,
+		DebugOnly = true,
+		RarityLevels =
+		{
+			Duo =
+			{
+				MinMultiplier = 1,
+				MaxMultiplier = 1,
+			},
+		},
+	},
+
+	LegacyTrait = 
+	{
+		IsLegacyTrait = true,
+		DebugOnly = true,
+	},
+
+	UnityTrait = 
+	{
+		IsElementalTrait = true,
+		BlockStacking = true,
+		BlockInRunRarify = true,
+		BlockMenuRarify = true,
+		ExcludeFromRarityCount = true,
+		CustomRarityName = "Boon_Infusion",
+		CustomRarityColor = Color.BoonPatchElemental,
+		InfoBackingAnimation = "BoonSlotUnity",
+		UpgradeChoiceBackingAnimation = "BoonSlotUnity",
+		Frame = "Unity",
+		DebugOnly = true,
+		RarityLevels =
+		{
+			Common =
+			{
+				Multiplier = 1,
+			},
+			Rare =
+			{
+				Multiplier = 1,
+			},
+			Epic =
+			{
+				Multiplier = 1,
+			},
+		}
+	},
+]]
 ```
 
 # Checking Implementation

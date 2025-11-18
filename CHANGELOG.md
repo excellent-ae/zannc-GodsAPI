@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+- Added `addToExistingGod` paramater.
+- Moved code around to do traitdict and traitsortorder to work after all mods loaded.
 
 ## [1.0.6] - 2025-11-17
 
