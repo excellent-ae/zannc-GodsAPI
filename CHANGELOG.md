@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [1.0.8] - 2025-11-19
+
 - Added `iconPathOverrides` (table) to `CreateOlympianSJSONData` allow for reuse of any Icons in the game.
 - Added `portraitPathOverrides` (table) to `CreateOlympianSJSONData` allow for reuse of any Portraits in the game.
 - Added `iconPathOverrides` (table) to `CreateKeepsake` allow for reuse of any Icons in the game.
@@ -52,7 +55,8 @@
 
 - Initial Release.
 
-[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.7...HEAD
+[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.8...HEAD
+[1.0.8]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.7...1.0.8
 [1.0.7]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.6...1.0.7
 [1.0.6]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.5...1.0.6
 [1.0.5]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.4...1.0.5
