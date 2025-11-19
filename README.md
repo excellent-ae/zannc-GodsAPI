@@ -20,7 +20,7 @@ You should only install it if another mod requires it, or if you will be using t
 
 2. In `main.lua`, add:
     ```lua
-    --@module 'zannc-GodsAPI'
+    ---@module 'zannc-GodsAPI'
     gods = mods['zannc-GodsAPI']
     ```
     So that it looks like this as an example:
@@ -28,13 +28,13 @@ You should only install it if another mod requires it, or if you will be using t
     _PLUGIN = PLUGIN
     game = rom.game
 
-    --@module 'SGG_Modding-ModUtil'
+    ---@module 'SGG_Modding-ModUtil'
     modutil = mods["SGG_Modding-ModUtil"]
-    --@module 'SGG_Modding-ReLoad'
+    ---@module 'SGG_Modding-ReLoad'
     reload = mods["SGG_Modding-ReLoad"]
-    --@module 'SGG_Modding-SJSON'
+    ---@module 'SGG_Modding-SJSON'
     sjson = mods["SGG_Modding-SJSON"]
-    --@module 'zannc-GodsAPI'
+    ---@module 'zannc-GodsAPI'
     gods = mods["zannc-GodsAPI"]
     ```
 
