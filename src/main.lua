@@ -82,19 +82,20 @@ local function addGodtoRunData(runData, upgrade)
 	end
 end
 
-local function cleanFilePath(pluginGUID, filePath)
+local function cleanFilePath(pluginGUID, filePath, useBasePath)
+	if useBasePath then
+		return filePath
+	end
+
 	local parts = {}
 	for part in filePath:gmatch("[^/\\]+") do
 		table.insert(parts, part)
 	end
-
 	if parts[1] == pluginGUID then
-		table.remove(parts, 1)
-		local result = table.concat(parts, "\\")
-		return result
+		return filePath
 	end
 
-	return filePath
+	return rom.path.combine(pluginGUID, filePath)
 end
 
 local function validateParams(params, requiredFields, context)
@@ -375,20 +376,20 @@ function public.InitializeGod(params)
 			{
 				UnlockGameStateRequirements = {
 					{
-						PathTrue = { "GameState", "TextLinesRecord", entityName .. "Gift01" },
+						PathTrue = { "GameState", "TextLinesRecord", params.godName .. "Gift01" },
 					},
 				},
-				Text = "CodexData_" .. entityName .. "_01",
+				Text = "CodexData_" .. params.godName .. "_01",
 			},
 		},
-		Image = "Codex_Portrait_" .. entityName,
+		Image = "Codex_Portrait_" .. params.godName,
 		BoonInfoAllowPinning = true,
 	}
-	if entityType == "npcgod" then
+	if lowGodType == "npcgod" then
 		game.CodexData.OlympianGods.Entries[upgradeName].NoRequirements = true
 	end
 
-	if not entityData.SpawnLikeHermes then
+	if not params.SpawnLikeHermes then
 		addGodtoRunData(game.RewardStoreData.RunProgress, upgradeName)
 		addGodtoRunData(game.RewardStoreData.TartarusRewards, upgradeName)
 	end
@@ -420,6 +421,10 @@ function public.CreateOlympianSJSONData(params)
 	sjson.hook(GameplayFile, function(data)
 		table.insert(data.Obstacles, godUpgrade)
 	end)
+
+	local useBasePathPreview = params.iconPathOverrides and params.iconPathOverrides.previewPath or false
+	local useBasePathSpin = params.iconPathOverrides and params.iconPathOverrides.iconSpinPath or false
+	local useBasePathSelectSymbol = params.iconPathOverrides and params.iconPathOverrides.boonSelectSymbolPath or false
 
 	--* The Boon Colours/Animations
 	local boonDropConfigs = {
@@ -459,7 +464,7 @@ function public.CreateOlympianSJSONData(params)
 		},
 		["BoonDrop" .. params.godName .. "Preview"] = {
 			InheritFrom = "BoonDropRoomRewardIconPreviewBase",
-			FilePath = rom.path.combine(pluginGUID, cleanFilePath(pluginGUID, params.previewPath)),
+			FilePath = cleanFilePath(pluginGUID, params.previewPath, useBasePathPreview),
 			OffsetZ = params.OffsetZBoonPreview or 0,
 			Scale = params.BoonPreviewScale,
 			ColorFromOwner = "Maintain",
@@ -475,7 +480,7 @@ function public.CreateOlympianSJSONData(params)
 	if not params.boonDropIconCustomFrames then
 		boonDropConfigs["BoonDrop" .. params.godName .. "Icon"] = {
 			InheritFrom = "BoonDropIcon",
-			FilePath = rom.path.combine(pluginGUID, cleanFilePath(pluginGUID, params.iconSpinPath)),
+			FilePath = cleanFilePath(pluginGUID, params.iconSpinPath, useBasePathSpin),
 			OffsetZ = params.OffsetZBoonDrop,
 			Scale = params.BoonDropIconScale,
 			Hue = params.BoonDropIconHue,
@@ -484,7 +489,7 @@ function public.CreateOlympianSJSONData(params)
 		--can do math.max for the frames but meh
 		boonDropConfigs["BoonDrop" .. params.godName .. "Icon"] = {
 			InheritFrom = "BoonDropIcon", -- Still inherit from base BoonDropIcon, otherwise, stackoverflow magically.
-			FilePath = rom.path.combine(pluginGUID, cleanFilePath(pluginGUID, params.iconSpinPath)),
+			FilePath = cleanFilePath(pluginGUID, params.iconSpinPath, useBasePathSpin),
 			OffsetZ = params.OffsetZBoonDrop,
 			Scale = params.BoonDropIconScale,
 			Hue = params.BoonDropIconHue,
@@ -527,13 +532,13 @@ function public.CreateOlympianSJSONData(params)
 	local boonInfoConfigs = {}
 	boonInfoConfigs["BoonInfoSymbol" .. params.godName .. "Icon"] = {
 		InheritFrom = "BoonInfoSymbolBase",
-		FilePath = rom.path.combine(pluginGUID, cleanFilePath(pluginGUID, params.previewPath)),
+		FilePath = cleanFilePath(pluginGUID, params.previewPath, useBasePathPreview),
 	}
 
 	if not params.skipBoonSelectSymbol then
 		boonInfoConfigs["BoonSymbol" .. params.godName] = {
 			InheritFrom = "BoonSymbolBase",
-			FilePath = rom.path.combine(pluginGUID, cleanFilePath(pluginGUID, params.boonSelectSymbolPath)),
+			FilePath = cleanFilePath(pluginGUID, params.boonSelectSymbolPath, useBasePathSelectSymbol),
 			Scale = 1,
 			OffsetY = params.boonSelectSymbolOffsetY or 0,
 		}
@@ -639,7 +644,7 @@ function public.CreateOlympianSJSONData(params)
 		local configs = {
 			[params.godName .. "UpgradePreview"] = {
 				InheritFrom = "BoonSymbolBaseIsometric",
-				FilePath = rom.path.combine(pluginGUID, cleanFilePath(pluginGUID, params.previewPath)),
+				FilePath = cleanFilePath(pluginGUID, params.previewPath, useBasePathPreview),
 			},
 			[params.godName .. "UpgradeShop"] = {
 				InheritFrom = params.godName .. "UpgradePreview",
@@ -685,12 +690,15 @@ function public.CreateOlympianSJSONData(params)
 
 	--! Portraits
 	if params.portraitData then
+		local useBaseNeutral = params.portraitPathOverrides and params.portraitPathOverrides.NeutralPortraitPath or false
+		local useBaseAnnoyed = params.portraitPathOverrides and params.portraitPathOverrides.AnnoyedPortraitPath or false
+		local useBaseSerious = params.portraitPathOverrides and params.portraitPathOverrides.SeriousPortraitPath or false
 		--! I have no idea what some of these do lmao.
 		local portraitConfigs = {}
 		if not params.portraitData.skipNeutralPortrait then
 			portraitConfigs["Portrait_" .. params.godName .. "_Default_01"] = {
 				InheritFrom = "Portrait_God_01",
-				FilePath = rom.path.combine(pluginGUID, cleanFilePath(pluginGUID, params.portraitData.NeutralPortraitFilePath or "")),
+				FilePath = cleanFilePath(pluginGUID, params.portraitData.NeutralPortraitPath or "", useBaseNeutral),
 				ChildAnimation = "PortraitGodRayEmitter_Athena",
 				EndFrame = 1,
 				StartFrame = 1,
@@ -704,7 +712,7 @@ function public.CreateOlympianSJSONData(params)
 
 		portraitConfigs["Portrait_" .. params.godName .. "_Default_01_Exit"] = {
 			InheritFrom = "Portrait_God_01_Exit",
-			FilePath = rom.path.combine(pluginGUID, cleanFilePath(pluginGUID, params.portraitData.NeutralPortraitFilePath or "")),
+			FilePath = cleanFilePath(pluginGUID, params.portraitData.NeutralPortraitPath or "", useBaseNeutral),
 			EndFrame = 1,
 			StartFrame = 1,
 			Sound = "/Leftovers/World Sounds/MapZoomInShortHigh",
@@ -712,24 +720,24 @@ function public.CreateOlympianSJSONData(params)
 
 		portraitConfigs["Portrait_" .. params.godName .. "_Default_01_Wrath"] = {
 			InheritFrom = "Portrait_God_01_Wrath",
-			FilePath = rom.path.combine(pluginGUID, cleanFilePath(pluginGUID, params.portraitData.NeutralPortraitFilePath or "")),
+			FilePath = cleanFilePath(pluginGUID, params.portraitData.NeutralPortraitPath or "", useBaseNeutral),
 			EndFrame = 1,
 			StartFrame = 1,
 		}
 
 		portraitConfigs["Portrait_" .. params.godName .. "_Displeased_01"] = {
 			InheritFrom = "Portrait_" .. params.godName .. "_Default_01",
-			FilePath = rom.path.combine(pluginGUID, cleanFilePath(pluginGUID, params.portraitData.AnnoyedPortraitFilePath or "")),
+			FilePath = cleanFilePath(pluginGUID, params.portraitData.AnnoyedPortraitPath or "", useBaseAnnoyed),
 		}
 
 		portraitConfigs["Portrait_" .. params.godName .. "_Serious_01"] = {
 			InheritFrom = "Portrait_" .. params.godName .. "_Default_01",
-			FilePath = rom.path.combine(pluginGUID, cleanFilePath(pluginGUID, params.portraitData.SeriousPortraitFilePath or "")),
+			FilePath = cleanFilePath(pluginGUID, params.portraitData.SeriousPortraitPath or "", useBaseSerious),
 		}
 
 		portraitConfigs["Portrait_" .. params.godName .. "_Serious_01_Exit"] = {
 			InheritFrom = "Portrait_" .. params.godName .. "_Default_01_Exit",
-			FilePath = rom.path.combine(pluginGUID, cleanFilePath(pluginGUID, params.portraitData.SeriousPortraitFilePath or "")),
+			FilePath = cleanFilePath(pluginGUID, params.portraitData.SeriousPortraitPath or "", useBaseSerious),
 		}
 
 		if params.portraitData.DialogueAnimations then
@@ -1017,22 +1025,25 @@ function public.CreateKeepsake(params)
 	}
 
 	if params.Icons then
+		local useBaseIcon = params.iconPathOverrides and params.iconPathOverrides.iconPath or false
+		local useBaseMaxIcon = params.iconPathOverrides and params.iconPathOverrides.maxIcon or false
+		local useBaseMaxCornerIcon = params.iconPathOverrides and params.iconPathOverrides.maxCornerIcon or false
 		vfxins[params.internalKeepsakeName] = {
 			InheritFrom = "KeepsakeIcon",
-			FilePath = rom.path.combine(pluginGUID, cleanFilePath(pluginGUID, params.Icons.iconPath)),
+			FilePath = cleanFilePath(pluginGUID, params.Icons.iconPath, useBaseIcon),
 		}
 
 		if params.Icons.maxIcon then
 			vfxins["Keepsake_" .. params.characterName] = {
 				InheritFrom = "KeepsakeMax",
-				FilePath = rom.path.combine(pluginGUID, cleanFilePath(pluginGUID, params.Icons.maxIcon)),
+				FilePath = cleanFilePath(pluginGUID, params.Icons.maxIcon, useBaseMaxIcon),
 			}
 		end
 
 		if params.Icons.maxCornerIcon then
 			vfxins["Keepsake_" .. params.characterName .. "_Corner"] = {
 				InheritFrom = "KeepsakeMax_Corner",
-				FilePath = rom.path.combine(pluginGUID, cleanFilePath(pluginGUID, params.Icons.maxCornerIcon)),
+				FilePath = cleanFilePath(pluginGUID, params.Icons.maxCornerIcon, useBaseMaxCornerIcon),
 			}
 		end
 	end
@@ -1076,8 +1087,9 @@ function public.CreateKeepsake(params)
 end
 
 --[[ 
-uid, internal, charactername ,legendary, rarity, slot, blockstacking,  statlines, extractval, elements, displayName
-extrafields, boonIconPath, requirements, flavourtext, addToExistingGod
+Required:   "pluginGUID", "characterName", "internalBoonName", "isLegendary", "Elements"
+Optional:   "RarityLevels", "Slot", "BlockStacking", "StatLines", "ExtractValues", "displayName"
+            "ExtraFields", "boonIconPath", "requirements", "flavourText", "addToExistingGod", "reuseBaseIcons"
 ]]
 
 --TODO add a way for people to create a new boon, but then just insert into weapon/traits and update dics
@@ -1134,11 +1146,13 @@ function public.CreateBoon(params)
 		}
 	end
 
+	local useBasePath = params.reuseBaseIcons or false
 	local traitIcon = sjson.to_object({
 		Name = intboonName,
 		InheritFrom = "BoonIcon",
-		FilePath = rom.path.combine(pluginGUID, cleanFilePath(pluginGUID, params.boonIconPath or nil)),
+		FilePath = cleanFilePath(pluginGUID, params.boonIconPath or nil, useBasePath),
 	}, IconOrder)
+
 	sjson.hook(GUIScreensVFXFile, function(data)
 		table.insert(data.Animations, traitIcon)
 	end)
@@ -1326,1163 +1340,3 @@ mods.on_all_mods_loaded(function()
 		end
 	end)
 end)
-
---* property changes - yoinked from aphrodite, files are melinoe_staff_vfx etc
---[[ Primary
-
-PropertyChanges =
-{
-    -- Staff
-    {
-        WeaponName = "WeaponStaffSwing",
-        WeaponProperty = "FireFx",
-        ChangeValue = "StaffProjectileFireFx1_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponStaffSwing",
-        ProjectileName = "ProjectileStaffSwing1",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "StaffComboAttack1_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponStaffSwing",
-        ProjectileName = "ProjectileStaffSwing1",
-        ProjectileProperty = "DissipateFx",
-        ChangeValue = "StaffComboAttack1Dissipate_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponStaffSwing",
-        ProjectileName = "ProjectileStaffSwing1",
-        ProjectileProperty = "DeathFx",
-        ChangeValue = "StaffComboAttack1Dissipate_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponStaffSwing2",
-        ProjectileName = "ProjectileStaffSwing2",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "StaffComboAttack2_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponStaffSwing2",
-        ProjectileName = "ProjectileStaffSwing2",
-        ProjectileProperty = "DissipateFx",
-        ChangeValue = "StaffComboAttack2Dissipate_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponStaffSwing2",
-        ProjectileName = "ProjectileStaffSwing2",
-        ProjectileProperty = "DeathFx",
-        ChangeValue = "StaffComboAttack2Dissipate_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponStaffSwing3",
-        ProjectileName = "ProjectileStaffSwing3",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "StaffComboAttack3_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponStaffSwing3",
-        ProjectileName = "ProjectileStaffSwing3",
-        ProjectileProperty = "GroupName",
-        ChangeValue = "FX_Standing_Add",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponStaffSwing3",
-        ProjectileName = "ProjectileStaffSwing3",
-        ProjectileProperty = "DissipateFx",
-        ChangeValue = "StaffComboAttack3Dissipate_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponStaffSwing3",
-        ProjectileName = "ProjectileStaffSwing3",
-        ProjectileProperty = "DeathFx",
-        ChangeValue = "StaffComboAttack3Dissipate_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponStaffDash",
-        ProjectileName = "ProjectileStaffDash",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "StaffComboAttack1Dash_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponStaffSwing5",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "StaffChargedAttackFxEmitter_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponStaffSwing5",
-        TraitName = "StaffRaiseDeadAspect",
-        ProjectileName = "ProjectileStaffWall",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "StaffWallIn_Aphrodite",
-        ChangeType = "Absolute",
-    },			
-    {
-        WeaponName = "WeaponStaffSwing5",
-        TraitName = "StaffRaiseDeadAspect",
-        ProjectileName = "ProjectileStaffWall",
-        ProjectileProperty = "ImpactFx",
-        ChangeValue = "AnubisWallImpactFx_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponStaffSwing",
-        TraitName = "StaffRaiseDeadAspect",
-        ProjectileName = "ProjectileStaffSingle",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "AnubisRingFx_Aphrodite",
-        ChangeType = "Absolute",
-    },			
-    {
-        WeaponName = "WeaponStaffSwing",
-        TraitName = "StaffRaiseDeadAspect",
-        WeaponProperty = "FireFx",
-        ChangeValue = "StaffProjectileFireFx3_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    
-    -- Dagger
-    {
-        WeaponName = "WeaponDagger",
-        FalseTraitName = "DaggerTripleAspect",
-        WeaponProperty = "FireFx",
-        ChangeValue = "DaggerSwipeFast_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponDagger2",
-        WeaponProperty = "FireFx",
-        ChangeValue = "DaggerSwipeFastFlip_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponDaggerDash",
-        FalseTraitName = "DaggerTripleAspect",
-        ProjectileName = "ProjectileDaggerDash",
-        WeaponProperty = "FireFx",
-        ChangeValue = "DaggerSwipeFastFlipDash_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponDaggerMultiStab",
-        ProjectileName = "ProjectileDagger",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "DaggerJab_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponDaggerDouble",
-        ProjectileName = "ProjectileDaggerSliceDouble",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "DaggerSwipeDouble_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponDaggerDouble",
-        WeaponProperty = "FireFx",
-        ChangeValue = "null",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponDagger5",
-        WeaponProperty = "FireFx",
-        ChangeValue = "null",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponDagger5",
-        WeaponProperty = "ChargeStartFx",
-        ChangeValue = "DaggerCharge_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponDagger5",
-        ProjectileName = "ProjectileDaggerBackstab",
-        ProjectileProperty = "StartFx",
-        ChangeValue = "DaggerSwipe_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponDagger",
-        TraitName = "DaggerTripleAspect",
-        ProjectileName = "ProjectileDaggerSpinMorrigan",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "DaggerMorriganSpin_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponDaggerDash",
-        TraitName = "DaggerTripleAspect",
-        ProjectileName = "ProjectileDaggerSpinMorrigan",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "DaggerMorriganSpin_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponDagger5",
-        TraitName = "DaggerTripleAspect",
-        ProjectileName = "ProjectileDaggerExecuteMorrigan",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "DaggerSwipeDouble_Morrigan_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-
-    -- Axe
-    {
-        WeaponName = "WeaponAxe",
-        FalseTraitName = "AxeRallyAspect",
-        WeaponProperty = "FireFx",
-        ChangeValue = "AxeSwipe1_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponAxe2",
-        FalseTraitName = "AxeRallyAspect",
-        WeaponProperty = "FireFx",
-        ChangeValue = "AxeSwipe2_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponAxe3",
-        FalseTraitName = "AxeRallyAspect",
-        ProjectileName = "ProjectileAxeOverhead",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "AxeNova_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponAxeDash",
-        FalseTraitName = "AxeRallyAspect",
-        WeaponProperty = "FireFx",
-        ChangeValue = "AxeSwipeUpper_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponAxeSpin",
-        ProjectileName = "ProjectileAxeSpin",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "AxeSwipe2Spin_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponAxe",
-        TraitName = "AxeRallyAspect",
-        ProjectileName = "ProjectileAxeNergalSlow",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "AxeNovaNergal_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponAxe2",
-        TraitName = "AxeRallyAspect",
-        ProjectileName = "ProjectileAxeNergalFast",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "AxeNovaNergal_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponAxe3",
-        TraitName = "AxeRallyAspect",
-        ProjectileName = "ProjectileAxeNergalFast",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "AxeNovaNergal_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponAxe4",
-        TraitName = "AxeRallyAspect",
-        ProjectileName = "ProjectileAxeNergalFast",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "AxeNovaNergal_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponAxe5",
-        TraitName = "AxeRallyAspect",
-        ProjectileName = "ProjectileAxeNergalFast",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "AxeNovaNergal_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponAxeDash",
-        TraitName = "AxeRallyAspect",
-        ProjectileName = "ProjectileAxeNergalFastDash",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "AxeNovaNergal_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-
-    -- Lob
-    {
-        FalseTraitName = "LobCloseAttackAspect",
-        WeaponName = "WeaponLob",
-        ProjectileName = "ProjectileLob",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "LobProjectile_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponLob",
-        ProjectileName = "ProjectileLob",
-        ProjectileProperty = "BounceFx",
-        ChangeValue = "LobProjectileBounceFx_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        TraitName = "LobGunAspect",
-        WeaponName = "WeaponLob",
-        ProjectileName = "ProjectileLobBullet",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "LobProjectileBullet_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        TraitName = "LobGunAspect",
-        WeaponName = "WeaponLob",
-        ProjectileName = "ProjectileLobBullet",
-        ProjectileProperty = "DeathFx",
-        ChangeValue = "LobProjectileBulletFade_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponLob",
-        ProjectileName = "ProjectileLobOverheat",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "LobSpecialFx_Hel_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        FalseTraitName = "LobCloseAttackAspect",
-        WeaponName = "WeaponLob",
-        ProjectileName = "ProjectileLob",
-        ProjectileProperty = "StartFx",
-        ChangeValue = "StaffProjectileFireFx2Close_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        TraitName = "LobCloseAttackAspect",
-        WeaponName = "WeaponLob",
-        ProjectileName = "ProjectileLob",
-        ProjectileProperty = "StartFx",
-        ChangeValue = "MedeaLoadFx_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        TraitName = "LobCloseAttackAspect",
-        WeaponName = "WeaponLob",
-        ProjectileName = "ProjectileLob",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "MedeaFuseFx_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponLob",
-        ProjectileName = "ProjectileLob",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "LobExplosion_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponLob",
-        ProjectileName = "ProjectileLobCharged",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "LobProjectileCharged_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponLob",
-        ProjectileName = "ProjectileLobCharged",
-        ProjectileProperty = "AttachedAnim",
-        ChangeValue = "LobProjectileChargedSecondaryEmitter_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponLob",
-        ProjectileName = "ProjectileLobCharged",
-        ProjectileProperty = "DescentStartFx",
-        ChangeValue = "LobEXDescentStart_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponLob",
-        ProjectileName = "ProjectileLobCharged",
-        ProjectileProperty = "StartFx",
-        ChangeValue = "LobEXFireFx_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponLob",
-        ProjectileName = "ProjectileLobCharged",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "LobExplosionCharged_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-
-    -- Torch
-    {
-        WeaponName = "WeaponTorch",
-        ProjectileName = "ProjectileTorchBall",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "TorchBallIn_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponTorch",
-        ProjectileName = "ProjectileTorchBall",
-        ProjectileProperty = "AttachedAnim",
-        ChangeValue = "TorchBallGroundGlow_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponTorch",
-        ProjectileName = "ProjectileTorchBall",
-        ProjectileProperty = "DissipateFx",
-        ChangeValue = "TorchBallDissipate_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponTorch",
-        ProjectileName = "ProjectileTorchWave",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "ProjectileTorchWave_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponTorch",
-        ProjectileName = "ProjectileTorchWave",
-        ProjectileProperty = "AttachedAnim",
-        ChangeValue = "TorchBallGroundGlowWave_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        TraitName = "TorchEnhancedAttackTrait",
-        WeaponName = "WeaponTorch",
-        ProjectileName = "ProjectileTorchWave",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "ProjectileTorchWaveReturn_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },	
-    {
-        TraitName = "TorchEnhancedAttackTrait",
-        WeaponName = "WeaponTorch",
-        ProjectileName = "ProjectileTorchSupayBallEx",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "ProjectileTorchWaveReturn_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },	
-    {
-        WeaponName = "WeaponTorch",
-        ProjectileName = "ProjectileTorchBall",
-        ProjectileProperty = "ImpactFx",
-        ChangeValue = "TorchImpactFx_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponTorch",
-        ProjectileName = "ProjectileTorchGhost",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "TorchProjectileGhostIn_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponTorch",
-        FalseTraitName = "TorchSprintRecallAspect",
-        ProjectileName = "ProjectileTorchGhostLarge",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "TorchProjectileGhostLargeIn_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponTorch",
-        ProjectileName = "ProjectileTorchGhost",
-        ProjectileProperty = "AttachedAnim",
-        ChangeValue = "TorchProjectileShadow_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponTorch",
-        FalseTraitName = "TorchSprintRecallAspect",
-        ProjectileName = "ProjectileTorchGhostLarge",
-        ProjectileProperty = "AttachedAnim",
-        ChangeValue = "TorchProjectileShadowLarge_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponTorch",
-        ProjectileName = "ProjectileTorchGhost",
-        ProjectileProperty = "DissipateFx",
-        ChangeValue = "TorchProjectileDissipate_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponTorch",
-        ProjectileName = "ProjectileTorchGhostLarge",
-        ProjectileProperty = "DissipateFx",
-        ChangeValue = "TorchProjectileDissipate_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponTorch",
-        ProjectileName = "ProjectileTorchRepeatStrike",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "RadialNovaPentagramCharged_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponTorch",
-        TraitName = "TorchSprintRecallAspect",
-        ProjectileName = "ProjectileTorchBallEos",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "EosProjectile_Aphrodite_In",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponTorch",
-        TraitName = "TorchSprintRecallAspect",
-        ProjectileName = "ProjectileTorchBallEos",
-        ProjectileProperty = "AttachedAnim",
-        ChangeValue = "EosProjectileShadow",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponTorch",
-        ProjectileName = "ProjectileTorchGhostExplosion",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "ProjectileTorchGhostExplosion_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },	
-    {
-        WeaponName = "WeaponTorch",
-        ProjectileName = "ProjectileTorchGhostLargeExplosion",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "ProjectileTorchGhostExplosion_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        FalseTraitName = "TorchEnhancedAttackTrait",
-        TraitName = "TorchAutofireAspect",
-        WeaponName = "WeaponTorch",
-        ProjectileName = "ProjectileTorchSupayBallEx",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "ProjectileTorchWave_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        TraitName = "TorchAutofireAspect",
-        WeaponName = "WeaponTorch",
-        ProjectileName = "ProjectileTorchSupayBallEx",
-        ProjectileProperty = "AttachedAnim",
-        ChangeValue = "TorchBallGroundGlowWave_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-
-    -- Suit
-    {
-        WeaponName = "WeaponSuit",
-        ProjectileName = "ProjectileSuit",
-        ProjectileProperty = "StartFx",
-        ChangeValue = "SuitPunch_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponSuit",
-        ProjectileName = "ProjectileSuit2",
-        ProjectileProperty = "StartFx",
-        ChangeValue = "SuitPunch_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        TraitName = "SuitComboAspect",
-        WeaponName = "WeaponSuitDouble",
-        ProjectileName = "ProjectileSuitDouble",
-        ProjectileProperty = "StartFx",
-        ChangeValue = "SuitPunch_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        TraitName = "SuitComboAspect",
-        WeaponName = "WeaponSuitDouble",
-        WeaponProperty = "FireFx",
-        ChangeValue = "SuitPunchFlare_R_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        TraitName = "SuitComboAspect",
-        WeaponName = "WeaponSuitDouble",
-        WeaponProperty = "FireFx2",
-        ChangeValue = "SuitPunchFlare_L_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        WeaponName = "WeaponSuitCharged",
-        ProjectileProperty = "StartFx",
-        ChangeValue = "SuitPunchLarge_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponSuitDash",
-        ProjectileName = "ProjectileSuitDash",
-        ProjectileProperty = "StartFx",
-        ChangeValue = "SuitNovaBurn_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        TraitName = "SuitDashAttackTrait",
-        WeaponName = "WeaponSuitDash",
-        ProjectileName = "ProjectileSuitDash",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "SuitNovaBurnRapid_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponSuitDash",
-        WeaponProperty = "FireFx",
-        ChangeValue = "SuitExhaustDashTrail_R_Spawner_Aphrodite",
-        ChangeType = "Absolute",
-    },
-},
-]]
-
---[[ Special
-PropertyChanges =
-{
-    -- Staff
-    {
-        WeaponName = "WeaponStaffBall",
-        WeaponProperty = "FireFx",
-        ChangeValue = "StaffProjectileFireFxRing_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponStaffBall",
-        ProjectileName = "ProjectileStaffBall",
-        ProjectileProperty = "StartFx",
-        ChangeValue = "StaffProjectileFireFx2_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponStaffBall",
-        ProjectileName = "ProjectileStaffBall",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "StaffBallProjectileIn_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponStaffBall",
-        ProjectileName = "ProjectileStaffBall",
-        ProjectileProperty = "AttachedAnim",
-        ChangeValue = "AphroditeStaffProjectileShadow",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponStaffBall",
-        ProjectileName = "ProjectileStaffBall",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "RadialNovaPentagram_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponStaffBall",
-        ProjectileName = "ProjectileStaffBallCharged",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "StaffBallProjectileCharged_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponStaffBall",
-        ProjectileName = "ProjectileStaffBallCharged",
-        ProjectileProperty = "AttachedAnim",
-        ChangeValue = "StaffBallProjectileCharged_Aphrodite_Shadow",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponStaffBall",
-        ProjectileName = "ProjectileStaffBallCharged",
-        ProjectileProperty = "StartFx",
-        ChangeValue = "StaffProjectileFireFx3_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponStaffBall",
-        ProjectileName = "ProjectileStaffBallCharged",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "RadialNovaPentagramCharged_Aphrodite",
-        ChangeType = "Absolute",
-    },
-
-    -- Dagger
-    {
-        FalseTraitName = "DaggerTripleAspect",
-        WeaponName = "WeaponDaggerThrow",
-        ProjectileName = "ProjectileDaggerThrow",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "DaggerProjectileCurved_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        TraitName = "DaggerTripleAspect",
-        WeaponName = "WeaponDaggerThrow",
-        ProjectileName = "ProjectileDaggerThrow",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "DaggerThrowMorrigan_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        FalseTraitName = "DaggerTripleAspect",
-        WeaponName = "WeaponDaggerThrow",
-        ProjectileName = "ProjectileDaggerThrowCharged",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "DaggerProjectileFx_Aphrodite", 
-        ChangeType = "Absolute",
-    },
-    {
-        TraitName = "DaggerTripleAspect",
-        WeaponName = "WeaponDaggerThrow",
-        ProjectileName = "ProjectileDaggerThrowCharged",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "DaggerThrowMorrigan_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        TraitName = "DaggerHomingThrowAspect",
-        WeaponName = "WeaponDaggerThrow",
-        ProjectileName = "ProjectileDaggerThrowCharged",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "DaggerProjectileFx_Pan_Aphrodite",
-    },
-    {
-        WeaponName = "WeaponDaggerThrow",
-        ProjectileName = "ProjectileDaggerThrow",
-        ProjectileProperty = "DeathFx",
-        ChangeValue = "DaggerProjectileFxFade_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponDaggerThrow",
-        WeaponProperty = "FireSound",
-        ChangeValue = "/SFX/Player Sounds/AphroditeLoveDaggerThrow",
-        ChangeType = "Absolute",
-    },
-
-    -- Axe
-    {
-        WeaponName = "WeaponAxeBlock2",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "AxeDeflect_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        FalseTraitNames = { "AxeBlockEmpowerTrait", "AxeRallyAspect", },
-        WeaponName = "WeaponAxeSpecial",
-        WeaponProperty = "FireFx",
-        ChangeValue = "AxeSpinDouble_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true
-    },
-    {
-        TraitName = "AxeRallyAspect",
-        FalseTraitName = "AxeBlockEmpowerTrait",
-        WeaponName = "WeaponAxeSpecial",
-        ProjectileProperty = "StartFx",
-        ChangeValue = "null",
-        ChangeType = "Absolute",
-        ExcludeLinked = true
-    },
-    {
-        TraitName = "AxeRallyAspect",
-        FalseTraitName = "AxeBlockEmpowerTrait",
-        WeaponName = "WeaponAxeSpecial",
-        WeaponProperty = "FireFx",
-        ChangeValue = "AxeSwipeUpper_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true
-    },
-    {
-        TraitName = "AxeBlockEmpowerTrait",
-        FalseTraitName = "AxeRallyAspect",
-        WeaponName = "WeaponAxeSpecial",
-        WeaponProperty = "FireFx",
-        ChangeValue = "null",
-        ChangeType = "Absolute",
-        ExcludeLinked = true
-    },
-    {
-        TraitName = "AxeBlockEmpowerTrait",
-        FalseTraitName = "AxeRallyAspect",
-        WeaponName = "WeaponAxeSpecial",
-        ProjectileProperty = "StartFx",
-        ChangeValue = "AxeSpinDouble_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true
-    },
-    {
-        TraitNames = { "AxeBlockEmpowerTrait", "AxeRallyAspect" },
-        WeaponName = "WeaponAxeSpecial",
-        ProjectileProperty = "StartFx",
-        ChangeValue = "AxeSwipeUpper_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true
-    },
-    {
-        WeaponName = "WeaponAxeSpecialSwing",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "AxeNovaEX_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-
-    -- Lob
-    {
-        FalseTraitName = "LobGunAspect",
-        WeaponName = "WeaponLobSpecial",
-        ProjectileName = "ProjectileThrowCharged",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "LobSpecialFx_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        TraitName = "LobGunAspect",
-        WeaponName = "WeaponLobSpecial",
-        ProjectileName = "ProjectileThrowCharged",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "LobSpecialFx_Hel_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponLobSpecial",
-        ProjectileName = "ProjectileThrowBlink",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "DashLobTrailEmitter_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        TraitName = "LobGunAspect",
-        WeaponName = "WeaponLobSpecial",
-        ProjectileName = "ProjectileLobGunRift",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "LobProjectileHel_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        TraitName = "LobGunAspect",
-        WeaponName = "WeaponLobSpecial",
-        ProjectileName = "ProjectileLobSpecialBounce",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "LobProjectileHel_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponSkullImpulse",
-        ProjectileName = "ProjectileSkullImpulse",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "DashLobTrailEmitter_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponLobSpecial",
-        WeaponProperty = "ChargeStartFx",
-        ChangeValue = "LobCharge_Aphrodite",
-        ChangeType = "Absolute",
-    },
-
-    -- Torch
-    {
-        WeaponName = "WeaponTorchSpecial",
-        ProjectileName = "ProjectileTorchOrbit",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "TorchOrbitIn_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponTorchSpecial",
-        ProjectileNames = { "ProjectileTorchOrbit", "ProjectileTorchOrbitEx" },
-        ProjectileProperty = "DissipateFx",
-        ChangeValue = "TorchOrbitOut_Aphrodite",
-        ChangeType = "Absolute",
-    },			
-    {
-        WeaponName = "WeaponTorchSpecial",
-        ProjectileNames = { "ProjectileTorchOrbit", "ProjectileTorchOrbitEx" },
-        ProjectileProperty = "AttachedAnim",
-        ChangeValue = "TorchOrbitShadow_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponTorchSpecial",
-        ProjectileName = "ProjectileTorchOrbitEx",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "TorchOrbitInEX_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponTorchSpecial",
-        WeaponProperty = "FireFx",
-        ChangeValue = "TorchOrbitStartSwirl_Single_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponTorchSpecial",
-        TraitName = "TorchDetonateAspect",
-        ProjectileName = "ProjectileTorchOrbit",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "TorchSpecialProjectileIn_Moros_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponTorchSpecial",
-        TraitName = "TorchDetonateAspect",
-        ProjectileName = "ProjectileTorchOrbit",
-        ProjectileProperty = "AttachedAnim",
-        ChangeValue = "TorchSpecialProjectileGroundGlow_Moros_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponTorchSpecial",
-        TraitName = "TorchDetonateAspect",
-        ProjectileName = "ProjectileTorchOrbit",
-        ProjectileProperty = "DissipateFx",
-        ChangeValue = "TorchSpecialProjectileDissipate_Moros_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponTorchSpecial",
-        TraitName = "TorchDetonateAspect",
-        ProjectileName = "ProjectileTorchOrbitEx",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "TorchSpecialProjectileIn_Moros_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponTorchSpecial",
-        TraitName = "TorchDetonateAspect",
-        ProjectileName = "ProjectileTorchOrbitEx",
-        ProjectileProperty = "AttachedAnim",
-        ChangeValue = "TorchSpecialProjectileGroundGlow_Moros_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponTorchSpecial",
-        TraitName = "TorchDetonateAspect",
-        ProjectileName = "ProjectileTorchOrbitEx",
-        ProjectileProperty = "DissipateFx",
-        ChangeValue = "TorchSpecialProjectileDissipate_Moros_Aphrodite",
-        ChangeType = "Absolute",
-    },
-
-    -- Suit
-    {
-        WeaponName = "WeaponSuitRanged",
-        ProjectileName = "ProjectileSuitRangedChargedUnguided",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "SuitRocketTravel_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponSuitRanged",
-        ProjectileName = "ProjectileSuitRangedCharged",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "SuitRocket_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        WeaponName = "WeaponSuitRanged",
-        ProjectileName = "ProjectileSuitRangedUnguided",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "SuitRocketUnguided_Aphrodite",
-        ChangeType = "Absolute",
-    },			
-    {
-        WeaponName = "WeaponSuitRanged",
-        ProjectileName = "ProjectileSuitRangedGuided",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "SuitRocketTravelUnguided_Aphrodite",
-        ChangeType = "Absolute",
-    },			
-    {
-        WeaponName = "WeaponSuitRanged",
-        ProjectileName = "ProjectileSuitRangedGuided",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "SuitRocketExplosion_Aphrodite",
-        ChangeType = "Absolute",
-    },			
-    {
-        WeaponName = "WeaponSuitRanged",
-        ProjectileName = "ProjectileSuitRangedCharged",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "SuitRocketExplosion_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        TraitName = "SuitComboAspect",
-        WeaponName = "WeaponSuitRanged",
-        ProjectileName = "ProjectileSuitGrenade",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "ShivaGrenade_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        TraitName = "SuitComboAspect",
-        WeaponName = "WeaponSuitRanged",
-        ProjectileName = "ProjectileSuitGrenade",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "GrenadeExplosion_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        TraitName = "SuitComboAspect",
-        WeaponName = "WeaponSuitRanged",
-        ProjectileName = "ProjectileSuitBomb",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "ShivaGrenadeBig_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        TraitName = "SuitComboAspect",
-        WeaponName = "WeaponSuitRanged",
-        ProjectileName = "ProjectileSuitBomb",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "GrenadeExplosion_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        TraitName = "SuitComboAspect",
-        WeaponName = "WeaponSuitRanged",
-        ProjectileName = "ProjectileSuitGrenadeStraight",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "ShivaGrenade_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        TraitName = "SuitComboAspect",
-        WeaponName = "WeaponSuitRanged",
-        ProjectileName = "ProjectileSuitGrenadeStraight",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "GrenadeExplosion_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        TraitName = "SuitComboAspect",
-        WeaponName = "WeaponSuitRanged",
-        ProjectileName = "ProjectileSuitBombStraight",
-        ProjectileProperty = "Graphic",
-        ChangeValue = "ShivaGrenadeBig_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        TraitName = "SuitComboAspect",
-        WeaponName = "WeaponSuitRanged",
-        ProjectileName = "ProjectileSuitBombStraight",
-        ProjectileProperty = "DetonateFx",
-        ChangeValue = "GrenadeExplosion_Aphrodite",
-        ChangeType = "Absolute",
-        ExcludeLinked = true,
-    },
-    {
-        TraitName = "SuitSpecialJumpTrait",
-        WeaponName = "WeaponSuitRanged",
-        ProjectileName = "ProjectileSuitRangedGuided",
-        ProjectileProperty = "BounceFx",
-        ChangeValue = "SuitRocketExplosion_Aphrodite",
-        ChangeType = "Absolute",
-    },
-    {
-        TraitName = "SuitSpecialJumpTrait",
-        WeaponName = "WeaponSuitRanged",
-        ProjectileName = "ProjectileSuitRangedCharged",
-        ProjectileProperty = "BounceFx",
-        ChangeValue = "SuitRocketExplosion_Aphrodite",
-    },
-},
-]]

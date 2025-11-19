@@ -118,8 +118,8 @@ gods.CreateOlympianSJSONData({
     godName = "Artemis",
     godType = "god",
     skipBoonSelectSymbol = true,
-    iconSpinPath = "Items\\Loot\\Boon\\ArtemisIconSpin\\ArtemisIconSpin",
     previewPath = "Items\\Loot\\Boon\\ArtemisIconSpin\\ArtemisPreview",
+    iconSpinPath = "Items\\Loot\\Boon\\ArtemisIconSpin\\ArtemisIconSpin",
     colorA = { Red = 0.42, Green = 0.62, Blue = 0.21 },
     colorB = { Red = 0.35, Green = 0.51, Blue = 0.12 },
     colorC = { Red = 0.23, Green = 0.57, Blue = 0.31 },
@@ -136,16 +136,26 @@ gods.CreateOlympianSJSONData({
     pluginGUID = _PLUGIN.guid
 	godName = "Athena",
 	godType = "npcGOD",
-	skipBoonSelectSymbol = true,
 
-	iconSpinPath = "Items\\Loot\\Boon\\AthenaIconSpin\\AthenaIconSpin",
+    iconPathOverrides = { -- Optional, allows you to reuse icons in base game, you still need to pass in paths
+        previewPath = true,
+        iconSpinPath = true,
+        boonSelectSymbolPath = true,
+    }
+	skipBoonSelectSymbol = true,
 	previewPath = "Items\\Loot\\Boon\\AthenaIconSpin\\AthenaPreview",
+	iconSpinPath = "Items\\Loot\\Boon\\AthenaIconSpin\\AthenaIconSpin",
 	colorA = { Red = 0.76, Green = 0.64, Blue = 0.16 },
 	colorB = { Red = 0.68, Green = 0.57, Blue = 0.12 },
 	colorC = { Red = 0.60, Green = 0.51, Blue = 0.19 },
 	portraitData = {
-		NeutralPortraitFilePath = "Portraits\\Portrait1",
-		AnnoyedPortraitFilePath = "Portraits\\Portrait2",
+        portraitPathOverrides = { -- Optional, allows you to reuse portraits in base game, you still need to pass in paths
+            NeutralPortraitPath = true,
+            AnnoyedPortraitPath = true,
+            SeriousPortraitPath = true,
+        }
+		NeutralPortraitPath = "Portraits\\Portrait1",
+		AnnoyedPortraitPath = "Portraits\\Portrait2",
     
         DialogueAnimations = {
             DialogueEntrance = {
@@ -190,6 +200,7 @@ gods.CreateOlympianSJSONData({
 
 ### Example Keepsake
 #### WIP
+
 ```lua
 gods.CreateKeepsake({
 	pluginGUID = _PLUGIN.guid,
@@ -214,6 +225,11 @@ gods.CreateKeepsake({
 	},
 
 	Icons = {
+        iconPathOverrides = { -- Optional, allows you to reuse icons in base game
+            iconPath = true,
+            maxIcon = true,
+            maxCornerIcon = true,
+        }
 		iconPath = "Keepsakes\\Icons\\Spiegel",
 		--? Optional
 		maxIcon = "Keepsakes\\Icons\\Spiegel_Max",
@@ -237,8 +253,9 @@ gods.CreateKeepsake({
 Although this function exists, a lot of the dirty work will have to be done through external custom functions and or reusing existing functions/wrapping them.
 ```lua
 --[[ 
-uid, internal, charactername ,legendary, rarity, slot, blockstacking,  statlines, extractval, elements, displayName
-extrafields, boonIconPath, requirements, flavourtext
+Required:   "pluginGUID", "characterName", "internalBoonName", "isLegendary", "Elements"
+Optional:   "RarityLevels", "Slot", "BlockStacking", "StatLines", "ExtractValues", "displayName"
+            "ExtraFields", "boonIconPath", "requirements", "flavourText", "addToExistingGod", "reusingBaseIcons"
 ]]
 gods.CreateBoon({
 	pluginGUID = _PLUGIN.guid,
@@ -246,12 +263,14 @@ gods.CreateBoon({
 	isLegendary = false,
     Elements = {"Air"},
     characterName = "Tyche",
-	addToExistingGod = { boonPosition = 2 }, -- OR true
-    --? Optional
-    Slot = "Special",
-    BlockStacking = false,
-    StatLines = { "NearbyDamageStatDisplay1" },
-    ExtractValues = {
+	addToExistingGod = { boonPosition = 2 }, -- OR true // Allows you to insert traits into Olympains (Zeus etc) and Daedalus Hammers (characterName = Weapon) --- Chaos and Selene NOT supported ATM.
+    --? Everything below is an Optional field
+
+    -- "Melee" or "Secondary" or "Ranged" or "Rush" or "Mana", doesn't need to be passed if not a core boon.
+    Slot = "Special", 
+    BlockStacking = false, -- Can't be upgraded with poms
+    StatLines = { "NearbyDamageStatDisplay1" }, -- The display for damage bonus etc etc.
+    ExtractValues = { -- Values to get from ExtraFields eg any damage bonus, which is ued in description and in the stat display.
         {
             Key = "ReportedWeaponMultiplier",
             ExtractAs = "TooltipBonus",
@@ -262,7 +281,8 @@ gods.CreateBoon({
     displayName = "Awesome!",
     description = "Awesome Description!",
     flavourText = "Legendary Flavour Text!",
-	requirements = { OneOf = { "ApolloWeaponBoon" } },
+	requirements = { OneOf = { "ApolloWeaponBoon" } }, -- If this boon needs xyz before it spawns
+    reusingBaseIcons = false, -- Optional, allows you to reuse icons in base game, you still need to pass in paths
     boonIconPath = "path\\to\\boonIcon",
     RarityLevels = {
         Common = { Multiplier = 1.0 },
@@ -286,7 +306,7 @@ gods.CreateBoon({
 	},
 })
 
---[[
+--[[ Elements you can use: 
 	AirBoon = 
 	{
 		Elements = { "Air" },

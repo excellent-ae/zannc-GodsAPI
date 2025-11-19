@@ -1,6 +1,13 @@
 # Changelog
 
 ## [Unreleased]
+- Added `iconPathOverrides` (table) to `CreateOlympianSJSONData` allow for reuse of any Icons in the game.
+- Added `portraitPathOverrides` (table) to `CreateOlympianSJSONData` allow for reuse of any Portraits in the game.
+- Added `iconPathOverrides` (table) to `CreateKeepsake` allow for reuse of any Icons in the game.
+- Added `reuseBaseIcons` (bool) to `CreateBoon` allow for reuse of any Icons in the game.
+- Fix Codex "Entity Name".
+- More info in DEV.
+- DEV: Reworked iconPathing - and cleanIconPath func, no longer combines automatically but does a check and combines if needed
 
 ## [1.0.7] - 2025-11-18
 
