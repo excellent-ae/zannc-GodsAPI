@@ -98,7 +98,6 @@
 - `pluginGUID` string **(required)** 
 - `godName` string **(required)** 
 - `godType` string **(required)** 
-- `skipBoonSelectSymbol` boolean
 - `AmbientSound` string - The ambient sound of the boon drop <br><br>
 - The colours of the physical boon drop - with the inside colour always being white.
 - Supports `RGB 0-255` ({ Red = 255, Green = 0, Blue = 150 }) or `RGB 0-1` { Red = 1.0, Green = 0, Blue = 0.3 }, as well as an Opacity field. **(required)** 
@@ -110,15 +109,18 @@
 - `BoonDropIconHue` float - Negative or Positive. <br><br>
 - `OffsetZBoonPreview` integer - physical boon drop icon offset
 - `BoonPreviewScale` float - physical boon drop icon scale <br><br>
+- `iconPathOverrides` table - Let's you define which icons you want to be using base game icons.
+- `skipBoonSelectSymbol` boolean
 - `iconSpinPath` string **(required)**  - The series of images which create the little animation of the physical boon, must end in 0001, followed by 0010, 0100, 1000, and have a minimum of 2
 - `previewPath` string **(required)**  - Door Icons, Upgrade Icon
 - `boonSelectSymbolPath` string - Upgrade Menu Icon
 - `boonSelectSymbolOffsetY` integer <br><br>
 - `portraitData` table
+    - `portraitPathOverrides` table - Let's you define which portraits you want to be using base game portraits.
     - `skipNeutralPortrait` boolean
-    - `NeutralPortraitFilePath` string
-    - `AnnoyedPortraitFilePath` string
-    - `SeriousPortraitFilePath` string
+    - `NeutralPortraitPath` string
+    - `AnnoyedPortraitPath` string
+    - `SeriousPortraitPath` string
     - `DialogueAnimations` table
         - `DialogueEntrance` table
             * `RedStart` float - The starting colour for the animations. eg. 1.0
@@ -148,8 +150,7 @@
     		* `EndRed` float
     		* `EndGreen` float
     		* `EndBlue` float
-
-
+<!-- 
 ### CreateOlympianSJSONData Paramaters
 If you wish to add SJSON content, such as the boon drop icons, door preview icons or portraits, you must call `gods.CreateOlympianSJSONData(sjsonData)`
 
@@ -187,4 +188,4 @@ If you wish to add SJSON content, such as the boon drop icons, door preview icon
     		* `EndGreen` (float)
     		* `EndBlue` (float)
     </details>
-</details>
+</details> -->
