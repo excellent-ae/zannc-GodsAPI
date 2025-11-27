@@ -707,8 +707,14 @@ function public.CreateOlympianSJSONData(params)
 				Scale = params.portraitData.Scale,
 				CreateAnimation = "OlympianDialogueEntrance_" .. params.godName,
 				CreateAnimations = params.portraitData.NeutralAnimations or {}, -- This is... blinking, and stuff - which you see in a gods Package.
+				-- SortMode = "Id", --! check what this do
 			}
 		end
+		--[[
+        Portraits_Demeter_Pleased_01
+
+        Mel has a lot of differnet portraits, but presumably unused by gods
+        ]]
 
 		portraitConfigs["Portrait_" .. params.godName .. "_Default_01_Exit"] = {
 			InheritFrom = "Portrait_God_01_Exit",
@@ -840,6 +846,7 @@ basically, get a god name for gift data, else, pluginGUID.name = whatever
 then do the entire keepsake, see like wtf is up with all the gaw damn trait texts and stuff, and make sure i can pass in custom stuff
 then sjson
 --]]
+
 function public.CreateKeepsake(params)
 	if not validateParams(params, { "pluginGUID", "characterName", "internalKeepsakeName", "RarityLevels" }, "CreateKeepsake") then
 		return nil
@@ -888,14 +895,6 @@ function public.CreateKeepsake(params)
 			"TraitLevel_Keepsake2",
 			"TraitLevel_Keepsake3",
 			"TraitLevel_Keepsake4",
-		},
-
-		--* Then whatever they wanna add
-		RarityLevels = { -- !req
-			Common = { Multiplier = params.RarityLevels and params.RarityLevels.Common or 1.0 },
-			Rare = { Multiplier = params.RarityLevels and params.RarityLevels.Rare or 1.5 },
-			Epic = { Multiplier = params.RarityLevels and params.RarityLevels.Epic or 2.0 },
-			Heroic = { Multiplier = params.RarityLevels and params.RarityLevels.Heroic or 2.5 },
 		},
 
 		EquipSound = params.EquipSound, --? Opt
@@ -983,6 +982,28 @@ function public.CreateKeepsake(params)
 		end
 	end
 
+	if params.RarityLevels then
+		game.TraitData[params.internalKeepsakeName].RarityLevels = {}
+		local rarity = game.TraitData[params.internalKeepsakeName].RarityLevels
+
+		for rarityName, value in pairs(params.RarityLevels) do
+			if type(value) == "number" then
+				rarity[rarityName] = { Multiplier = value }
+			elseif type(value) == "table" then
+				if value.Multiplier then
+					rarity[rarityName] = value.Multiplier
+				elseif value.MinMultiplier and value.MaxMultiplier then
+					rarity[rarityName] = {
+						MinMultiplier = value.MinMultiplier,
+						MaxMultiplier = value.MaxMultiplier,
+					}
+				else
+					rom.log.error("Unknown rarity format for: " .. rarityName)
+					rarity[rarityName] = value
+				end
+			end
+		end
+	end
 	table.insert(game.ScreenData.KeepsakeRack.ItemOrder, params.internalKeepsakeName)
 
 	-- SJSON stuff now
@@ -1028,10 +1049,14 @@ function public.CreateKeepsake(params)
 		local useBaseIcon = params.iconPathOverrides and params.iconPathOverrides.iconPath or false
 		local useBaseMaxIcon = params.iconPathOverrides and params.iconPathOverrides.maxIcon or false
 		local useBaseMaxCornerIcon = params.iconPathOverrides and params.iconPathOverrides.maxCornerIcon or false
+
 		vfxins[params.internalKeepsakeName] = {
 			InheritFrom = "KeepsakeIcon",
 			FilePath = cleanFilePath(pluginGUID, params.Icons.iconPath, useBaseIcon),
 		}
+		if not params.Icons.iconPath then -- def icon
+			game.LootData[params.characterName .. "Upgrade"].Icon = "Keepsake_34"
+		end
 
 		if params.Icons.maxIcon then
 			vfxins["Keepsake_" .. params.characterName] = {
@@ -1046,6 +1071,19 @@ function public.CreateKeepsake(params)
 				FilePath = cleanFilePath(pluginGUID, params.Icons.maxCornerIcon, useBaseMaxCornerIcon),
 			}
 		end
+	end
+
+	if params.customStatLine then
+		local statline = sjson.to_object({
+			Id = params.customStatLine.ID,
+			InheritFrom = "BaseStatLine",
+			DisplayName = params.customStatLine.displayName or "Lorem Ipsum DisplayName",
+			Description = params.customStatLine.description or "Lorem Ipsum Description",
+		}, TextOrder)
+
+		sjson.hook(TraitTextFile, function(data)
+			table.insert(data.Texts, statline)
+		end)
 	end
 
 	local textObjects = {}
@@ -1086,7 +1124,7 @@ function public.CreateKeepsake(params)
 	end
 end
 
---[[ 
+--[[
 Required:   "pluginGUID", "characterName", "internalBoonName", "isLegendary", "Elements"
 Optional:   "RarityLevels", "Slot", "BlockStacking", "StatLines", "ExtractValues", "displayName"
             "ExtraFields", "boonIconPath", "requirements", "flavourText", "addToExistingGod", "reuseBaseIcons"
@@ -1130,32 +1168,55 @@ function public.CreateBoon(params)
 	if not params.isLegendary then
 		--cost is 30 or 120, no idea what it do
 		game.TraitData[intboonName].Cost = 30
-		game.TraitData[intboonName].RarityLevels = {
-			Common = { Multiplier = params.RarityLevels and params.RarityLevels.Common or 1.0 },
-			Rare = { Multiplier = params.RarityLevels and params.RarityLevels.Rare or 1.5 },
-			Epic = { Multiplier = params.RarityLevels and params.RarityLevels.Epic or 2.0 },
-			Heroic = { Multiplier = params.RarityLevels and params.RarityLevels.Heroic or 2.5 },
-		}
 	else
 		game.TraitData[intboonName].Cost = 120
-		game.TraitData[intboonName].RarityLevels = {
-			Legendary = {
-				MinMultiplier = params.RarityLevels and params.RarityLevels.MinLegendary or 1.0,
-				MaxMultiplier = params.RarityLevels and params.RarityLevels.MaxLegendary or 1.0,
-			},
-		}
 	end
 
-	local useBasePath = params.reuseBaseIcons or false
-	local traitIcon = sjson.to_object({
-		Name = intboonName,
-		InheritFrom = "BoonIcon",
-		FilePath = cleanFilePath(pluginGUID, params.boonIconPath or nil, useBasePath),
-	}, IconOrder)
+	if params.RarityLevels then
+		game.TraitData[intboonName].RarityLevels = {}
+		local rarity = game.TraitData[intboonName].RarityLevels
 
-	sjson.hook(GUIScreensVFXFile, function(data)
+		for rarityName, value in pairs(params.RarityLevels) do
+			if type(value) == "number" then
+				rarity[rarityName] = { Multiplier = value }
+			elseif type(value) == "table" then
+				if value.Multiplier then
+					rarity[rarityName] = value
+				elseif value.MinMultiplier and value.MaxMultiplier then
+					rarity[rarityName] = {
+						MinMultiplier = value.MinMultiplier,
+						MaxMultiplier = value.MaxMultiplier,
+					}
+				else
+					rom.log.warning("Unknown multiplier in " .. intboonName .. ", " .. rarityName .. " falling back to default.")
+					rarity[rarityName] = { Multiplier = 1 }
+				end
+			end
+		end
+	end
+
+	local traitIcon
+	local useBasePath = params.reuseBaseIcons or false
+	if params.Slot == "Melee" or params.Slot == "Secondary" or params.Slot == "Ranged" or params.Slot == "Rush" or params.Slot == "Mana" then
+		traitIcon = sjson.to_object({
+			Name = intboonName,
+			InheritFrom = "BoonTrayIcon",
+			FilePath = cleanFilePath(pluginGUID, params.boonIconPath or nil, useBasePath),
+		}, IconOrder)
+	else
+		traitIcon = sjson.to_object({
+			Name = intboonName,
+			InheritFrom = "BoonIcon",
+			FilePath = cleanFilePath(pluginGUID, params.boonIconPath or nil, useBasePath),
+		}, IconOrder)
+	end
+
+	sjson.hook(GUIBoonsVFXFile, function(data)
 		table.insert(data.Animations, traitIcon)
 	end)
+	if not params.boonIconPath then -- def icon
+		game.TraitData[intboonName].Icon = "Boon_Hera_40"
+	end
 
 	local flavourText
 	if params.flavourText then
@@ -1178,6 +1239,19 @@ function public.CreateBoon(params)
 			table.insert(data.Texts, flavourText)
 		end
 	end)
+
+	if params.customStatLine then
+		local statline = sjson.to_object({
+			Id = params.customStatLine.ID,
+			InheritFrom = "BaseStatLine",
+			DisplayName = params.customStatLine.displayName or "Lorem Ipsum DisplayName",
+			Description = params.customStatLine.description or "Lorem Ipsum Description",
+		}, TextOrder)
+
+		sjson.hook(TraitTextFile, function(data)
+			table.insert(data.Texts, statline)
+		end)
+	end
 
 	game.TraitData[params.internalBoonName].TraitOrderingValueCache = GetTraitOrderingValue(game.TraitData[params.internalBoonName])
 

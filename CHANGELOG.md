@@ -1,6 +1,10 @@
 # Changelog
 
 ## [Unreleased]
+- Changed how `RarityLevels` can be passed in (you can now pass in Multipliers/tables or just a number)
+- Added Default Boon Icon and Keepsake Icon.
+- Fixed Disappearing Icons?
+- Added params to Keepsake and Boons to create CustomStatLines
 
 ## [1.0.8] - 2025-11-19
 

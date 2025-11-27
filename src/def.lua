@@ -13,7 +13,7 @@ function gods.Initialize() end
 
     Basic Usage:
         gods.InitializeGod({
-            
+
         })
 --]]
 ---@class GodParams
@@ -96,7 +96,7 @@ function gods.CreateKeepsake(params) end
 ---@field Keepsake table?
 ---@field Icons table?
 ---@field ExtraFields table?
-function gods.CreateBoon(params) end
+function gods.CreateBoon(TraitParams) end
 
 --[[
     Checks if a God is in LootData, usually for debugging but can be used to do game checks.
