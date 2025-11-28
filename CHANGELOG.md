@@ -5,6 +5,11 @@
 - Added Default Boon Icon and Keepsake Icon.
 - Fixed Disappearing Icons?
 - Added params to Keepsake and Boons to create CustomStatLines
+- Fix Codex Population
+- Fix TraitSortOrder being populated as an empty table
+- Fix Boon Inheritance
+- Fix Portrait Inheritance
+- Fix Slotted Trait inserts
 
 ## [1.0.8] - 2025-11-19
 

@@ -376,7 +376,9 @@ function public.InitializeGod(params)
 			Entries = {
 				{
 					UnlockGameStateRequirements = {
-						-- {
+						{
+							PathTrue = { "GameState", "TextLinesRecord", params.godName .. "Gift01" },
+						},
 					},
 					Text = "CodexData_" .. params.godName .. "_01",
 				},
