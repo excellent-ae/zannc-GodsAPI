@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [1.0.9] - 2025-11-28
+
 - Changed how `RarityLevels` can be passed in (you can now pass in Multipliers/tables or just a number)
 - Added Default Boon Icon and Keepsake Icon.
 - Fixed Disappearing Icons?
@@ -65,7 +68,8 @@
 
 - Initial Release.
 
-[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.8...HEAD
+[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.9...HEAD
+[1.0.9]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.8...1.0.9
 [1.0.8]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.7...1.0.8
 [1.0.7]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.6...1.0.7
 [1.0.6]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.5...1.0.6
