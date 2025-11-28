@@ -170,7 +170,7 @@ function public.InitializeGod(params)
 		PriorityUpgrades = params.WeaponUpgrades or {}, -- Is the same as WeaponUpgrades
 		WeaponUpgrades = params.WeaponUpgrades or {},
 		Traits = params.Traits or {},
-		TraitSortOrder = params.TraitSortOrder or {},
+		-- TraitSortOrder = params.TraitSortOrder or {}, -- Gets populated later.
 		TraitIndex = {}, -- Gets populated later
 
 		FirstSpawnVoiceLines = params.FirstSpawnVoiceLines or {},
@@ -371,22 +371,23 @@ function public.InitializeGod(params)
 		end
 	end
 
-	game.CodexData.OlympianGods.Entries[upgradeName] = {
-		Entries = {
-			{
-				UnlockGameStateRequirements = {
-					{
-						PathTrue = { "GameState", "TextLinesRecord", params.godName .. "Gift01" },
+	if not params.skipCodex then
+		game.CodexData.OlympianGods.Entries[upgradeName] = {
+			Entries = {
+				{
+					UnlockGameStateRequirements = {
+						-- {
 					},
+					Text = "CodexData_" .. params.godName .. "_01",
 				},
-				Text = "CodexData_" .. params.godName .. "_01",
 			},
-		},
-		Image = "Codex_Portrait_" .. params.godName,
-		BoonInfoAllowPinning = true,
-	}
-	if lowGodType == "npcgod" then
-		game.CodexData.OlympianGods.Entries[upgradeName].NoRequirements = true
+			Image = "Codex_Portrait_" .. params.godName,
+			BoonInfoAllowPinning = true,
+		}
+		if lowGodType == "npcgod" then
+			game.CodexData.OlympianGods.Entries[upgradeName].NoRequirements = true
+		end
+		table.insert(game.CodexOrdering.OlympianGods, upgradeName)
 	end
 
 	if not params.SpawnLikeHermes then
@@ -718,9 +719,11 @@ function public.CreateOlympianSJSONData(params)
 		local useBaseAnnoyed = params.portraitPathOverrides and params.portraitPathOverrides.AnnoyedPortraitPath or false
 		local useBaseSerious = params.portraitPathOverrides and params.portraitPathOverrides.SeriousPortraitPath or false
 		--! I have no idea what some of these do lmao.
-		local portraitConfigs = {}
+		local portraitObj = {}
+
 		if not params.portraitData.skipNeutralPortrait then
-			portraitConfigs["Portrait_" .. params.godName .. "_Default_01"] = {
+			local defaultPortrait = sjson.to_object({
+				Name = "Portrait_" .. params.godName .. "_Default_01",
 				InheritFrom = "Portrait_God_01",
 				FilePath = cleanFilePath(pluginGUID, params.portraitData.NeutralPortraitPath or "", useBaseNeutral),
 				ChildAnimation = "PortraitGodRayEmitter_Athena",
@@ -732,46 +735,53 @@ function public.CreateOlympianSJSONData(params)
 				CreateAnimation = "OlympianDialogueEntrance_" .. params.godName,
 				CreateAnimations = params.portraitData.NeutralAnimations or {}, -- This is... blinking, and stuff - which you see in a gods Package.
 				-- SortMode = "Id", --! check what this do
-			}
+			}, PortraitOrder)
+			table.insert(portraitObj, defaultPortrait)
 		end
-		--[[
-        Portraits_Demeter_Pleased_01
 
-        Mel has a lot of differnet portraits, but presumably unused by gods
-        ]]
-
-		portraitConfigs["Portrait_" .. params.godName .. "_Default_01_Exit"] = {
+		local defaultExitPortrait = sjson.to_object({
+			Name = "Portrait_" .. params.godName .. "_Default_01_Exit",
 			InheritFrom = "Portrait_God_01_Exit",
 			FilePath = cleanFilePath(pluginGUID, params.portraitData.NeutralPortraitPath or "", useBaseNeutral),
 			EndFrame = 1,
 			StartFrame = 1,
 			Sound = "/Leftovers/World Sounds/MapZoomInShortHigh",
-		}
+		}, PortraitOrder)
+		table.insert(portraitObj, defaultExitPortrait)
 
-		portraitConfigs["Portrait_" .. params.godName .. "_Default_01_Wrath"] = {
+		local wrathPortrait = sjson.to_object({
+			Name = "Portrait_" .. params.godName .. "_Default_01_Wrath",
 			InheritFrom = "Portrait_God_01_Wrath",
 			FilePath = cleanFilePath(pluginGUID, params.portraitData.NeutralPortraitPath or "", useBaseNeutral),
 			EndFrame = 1,
 			StartFrame = 1,
-		}
+		}, PortraitOrder)
+		table.insert(portraitObj, wrathPortrait)
 
-		portraitConfigs["Portrait_" .. params.godName .. "_Displeased_01"] = {
+		local displeasedPortrait = sjson.to_object({
+			Name = "Portrait_" .. params.godName .. "_Displeased_01",
 			InheritFrom = "Portrait_" .. params.godName .. "_Default_01",
 			FilePath = cleanFilePath(pluginGUID, params.portraitData.AnnoyedPortraitPath or "", useBaseAnnoyed),
-		}
+		}, PortraitOrder)
+		table.insert(portraitObj, displeasedPortrait)
 
-		portraitConfigs["Portrait_" .. params.godName .. "_Serious_01"] = {
+		local seriousPortrait = sjson.to_object({
+			Name = "Portrait_" .. params.godName .. "_Serious_01",
 			InheritFrom = "Portrait_" .. params.godName .. "_Default_01",
 			FilePath = cleanFilePath(pluginGUID, params.portraitData.SeriousPortraitPath or "", useBaseSerious),
-		}
+		}, PortraitOrder)
+		table.insert(portraitObj, seriousPortrait)
 
-		portraitConfigs["Portrait_" .. params.godName .. "_Serious_01_Exit"] = {
+		local seriousExitPortrait = sjson.to_object({
+			Name = "Portrait_" .. params.godName .. "_Serious_01_Exit",
 			InheritFrom = "Portrait_" .. params.godName .. "_Default_01_Exit",
 			FilePath = cleanFilePath(pluginGUID, params.portraitData.SeriousPortraitPath or "", useBaseSerious),
-		}
+		}, PortraitOrder)
+		table.insert(portraitObj, seriousExitPortrait)
 
 		if params.portraitData.DialogueAnimations then
-			portraitConfigs["OlympianDialogueEntrance_" .. params.godName] = {
+			local dialogueEntrance = sjson.to_object({
+				Name = "OlympianDialogueEntrance_" .. params.godName,
 				InheritFrom = "OlympianDialogueEntrance_Base",
 				StartRed = params.portraitData.DialogueAnimations.DialogueEntrance.RedStart,
 				StartGreen = params.portraitData.DialogueAnimations.DialogueEntrance.GreenStart,
@@ -780,20 +790,55 @@ function public.CreateOlympianSJSONData(params)
 				EndGreen = params.portraitData.DialogueAnimations.DialogueEntrance.GreenEnd,
 				EndBlue = params.portraitData.DialogueAnimations.DialogueEntrance.BlueEnd,
 				CreateAnimations = {},
-			}
+			}, PortraitOrder)
 
-			portraitConfigs["OlympianDialogueEntranceStreaks_" .. params.godName] = {
-				InheritFrom = "OlympianDialogueEntranceStreaks_Base",
-				StartRed = params.portraitData.DialogueAnimations.DialogueEntranceStreaks.RedStart,
-				StartGreen = params.portraitData.DialogueAnimations.DialogueEntranceStreaks.GreenStart,
-				StartBlue = params.portraitData.DialogueAnimations.DialogueEntranceStreaks.BlueStart,
-				EndRed = params.portraitData.DialogueAnimations.DialogueEntranceStreaks.RedEnd,
-				EndGreen = params.portraitData.DialogueAnimations.DialogueEntranceStreaks.GreenEnd,
-				EndBlue = params.portraitData.DialogueAnimations.DialogueEntranceStreaks.BlueEnd,
-				VisualFx = "OlympianDialogueEntranceParticle_" .. params.godName,
-			}
+			if params.portraitData.DialogueAnimations.DialogueEntranceStreaks then
+				local dialogueStreaks = sjson.to_object({
+					Name = "OlympianDialogueEntranceStreaks_" .. params.godName,
+					InheritFrom = "OlympianDialogueEntranceStreaks_Base",
+					StartRed = params.portraitData.DialogueAnimations.DialogueEntranceStreaks.RedStart,
+					StartGreen = params.portraitData.DialogueAnimations.DialogueEntranceStreaks.GreenStart,
+					StartBlue = params.portraitData.DialogueAnimations.DialogueEntranceStreaks.BlueStart,
+					EndRed = params.portraitData.DialogueAnimations.DialogueEntranceStreaks.RedEnd,
+					EndGreen = params.portraitData.DialogueAnimations.DialogueEntranceStreaks.GreenEnd,
+					EndBlue = params.portraitData.DialogueAnimations.DialogueEntranceStreaks.BlueEnd,
+					VisualFx = "OlympianDialogueEntranceParticle_" .. params.godName,
+				}, PortraitOrder)
+				table.insert(portraitObj, dialogueStreaks)
+				table.insert(dialogueEntrance.CreateAnimations, { Name = "OlympianDialogueEntranceStreaks_" .. params.godName })
+			elseif params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst then
+				local particleBurst = sjson.to_object({
+					Name = "OlympianDialogueEntranceParticleBurst_" .. params.godName,
+					InheritFrom = "OlympianDialogueEntranceParticleBurst_Base",
+					StartRed = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.RedStart,
+					StartGreen = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.GreenStart,
+					StartBlue = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.BlueStart,
+					EndRed = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.RedEnd,
+					EndGreen = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.GreenEnd,
+					EndBlue = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.BlueEnd,
+				}, PortraitOrder)
+				table.insert(portraitObj, particleBurst)
 
-			portraitConfigs["OlympianDialogueEntranceParticle_" .. params.godName] = {
+				local particleBurstFlip = sjson.to_object({
+					Name = "OlympianDialogueEntranceParticleBurst_" .. params.godName .. "_Flip",
+					InheritFrom = "OlympianDialogueEntranceParticleBurst_Base_Flip",
+					StartRed = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.RedStart,
+					StartGreen = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.GreenStart,
+					StartBlue = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.BlueStart,
+					EndRed = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.RedEnd,
+					EndGreen = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.GreenEnd,
+					EndBlue = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.BlueEnd,
+				}, PortraitOrder)
+				table.insert(portraitObj, particleBurstFlip)
+
+				table.insert(dialogueEntrance.CreateAnimations, { Name = "OlympianDialogueEntranceParticleBurst_" .. params.godName })
+				table.insert(dialogueEntrance.CreateAnimations, { Name = "OlympianDialogueEntranceParticleBurst_" .. params.godName .. "_Flip" })
+			end
+
+			table.insert(portraitObj, dialogueEntrance)
+
+			local dialogueParticle = sjson.to_object({
+				Name = "OlympianDialogueEntranceParticle_" .. params.godName,
 				InheritFrom = "OlympianDialogueEntranceParticles_Base",
 				StartRed = params.portraitData.DialogueAnimations.DialogueEntranceParticles.RedStart,
 				StartGreen = params.portraitData.DialogueAnimations.DialogueEntranceParticles.GreenStart,
@@ -801,34 +846,8 @@ function public.CreateOlympianSJSONData(params)
 				EndRed = params.portraitData.DialogueAnimations.DialogueEntranceParticles.RedEnd,
 				EndGreen = params.portraitData.DialogueAnimations.DialogueEntranceParticles.GreenEnd,
 				EndBlue = params.portraitData.DialogueAnimations.DialogueEntranceParticles.BlueEnd,
-			}
-
-			portraitConfigs["OlympianDialogueEntranceParticleBurst_" .. params.godName] = {
-				InheritFrom = "OlympianDialogueEntranceParticleBurst_Base",
-				StartRed = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.RedStart,
-				StartGreen = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.GreenStart,
-				StartBlue = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.BlueStart,
-				EndRed = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.RedEnd,
-				EndGreen = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.GreenEnd,
-				EndBlue = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.BlueEnd,
-			}
-
-			portraitConfigs["OlympianDialogueEntranceParticleBurst_" .. params.godName .. "_Flip"] = {
-				InheritFrom = "OlympianDialogueEntranceParticleBurst_Base_Flip",
-				StartRed = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.RedStart,
-				StartGreen = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.GreenStart,
-				StartBlue = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.BlueStart,
-				EndRed = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.RedEnd,
-				EndGreen = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.GreenEnd,
-				EndBlue = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.BlueEnd,
-			}
-
-			if params.portraitData.DialogueAnimations.DialogueEntranceStreaks then
-				table.insert(portraitConfigs["OlympianDialogueEntrance_" .. params.godName].CreateAnimations, { Name = "OlympianDialogueEntranceStreaks_" .. params.godName })
-			elseif params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst then
-				table.insert(portraitConfigs["OlympianDialogueEntrance_" .. params.godName].CreateAnimations, { Name = "OlympianDialogueEntranceParticleBurst_" .. params.godName })
-				table.insert(portraitConfigs["OlympianDialogueEntrance_" .. params.godName].CreateAnimations, { Name = "OlympianDialogueEntranceParticleBurst_" .. params.godName .. "_Flip" })
-			end
+			}, PortraitOrder)
+			table.insert(portraitObj, dialogueParticle)
 		end
 
 		sjson.hook(PortraitFile, function(data)
@@ -837,29 +856,8 @@ function public.CreateOlympianSJSONData(params)
 				existingPortraits[animation.Name] = true
 			end
 
-			for name, config in pairs(portraitConfigs) do
-				if not existingPortraits[name] then
-					local object = sjson.to_object({
-						Name = name,
-						InheritFrom = config.InheritFrom,
-						FilePath = config.FilePath,
-						ChildAnimation = config.ChildAnimation,
-						EndFrame = config.EndFrame,
-						StartFrame = config.StartFrame,
-						OffsetX = config.OffsetX,
-						OffsetY = config.OffsetY,
-						Scale = config.Scale,
-						CreateAnimation = config.CreateAnimation,
-						CreateAnimations = config.CreateAnimations,
-						Sound = config.Sound,
-						StartRed = config.StartRed,
-						StartGreen = config.StartGreen,
-						StartBlue = config.StartBlue,
-						EndRed = config.EndRed,
-						EndGreen = config.EndGreen,
-						EndBlue = config.EndBlue,
-						VisualFx = config.VisualFx,
-					}, PortraitOrder)
+			for _, object in ipairs(portraitObj) do
+				if not existingPortraits[object.Name] then
 					table.insert(data.Animations, object)
 				end
 			end
@@ -1180,6 +1178,9 @@ function public.CreateBoon(params)
 		Icon = intboonName,
 		Slot = params.Slot,
 		BlockStacking = params.BlockStacking or false,
+		isDuoBoon = params.Duo or false,
+		IsElementalTrait = params.IsElementalTrait or false,
+		Legendary = params.isLegendary or false,
 
 		StatLines = params.StatLines or {},
 		ExtractValues = params.ExtractValues or {},
@@ -1286,16 +1287,16 @@ function public.CreateBoon(params)
 
 		if characterData then
 			if params.Slot == "Melee" or params.Slot == "Secondary" or params.Slot == "Ranged" or params.Slot == "Rush" or params.Slot == "Mana" then
-				if characterData.WeaponTraits then
+				if characterData.WeaponUpgrades then
 					if type(params.addToExistingGod) == "table" and params.addToExistingGod.boonPosition then
-						table.insert(characterData.WeaponTraits, params.addToExistingGod.boonPosition, intboonName)
+						table.insert(characterData.WeaponUpgrades, params.addToExistingGod.boonPosition, intboonName)
 					else
-						table.insert(characterData.WeaponTraits, intboonName)
+						table.insert(characterData.WeaponUpgrades, intboonName)
 					end
 				end
 			else
 				if characterData.Traits then
-					table.insert(characterData.Traits, intboonName) -- Fixed: should be Traits, not WeaponTraits
+					table.insert(characterData.Traits, intboonName)
 				end
 			end
 		end
@@ -1390,7 +1391,7 @@ mods.on_all_mods_loaded(function()
 			end
 		end
 
-		for lootName, lootData in pairs(LootData) do
+		for lootName, lootData in pairs(game.LootData) do
 			lootData.Name = lootName
 			local traitDictionary = {}
 			ScreenData.BoonInfo.TraitDictionary[lootName] = {}
