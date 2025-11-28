@@ -500,7 +500,31 @@ function public.CreateOlympianSJSONData(params)
 		}
 	end
 
+	local dependencyOrder = {
+		"BoonDrop" .. params.godName .. "Preview",
+		"BoonDrop" .. params.godName .. "UpgradedPreview",
+	}
+
 	local boonVFXobj = {}
+	for _, name in ipairs(dependencyOrder) do
+		local config = boonDropConfigs[name]
+		if config then
+			local object = sjson.to_object({
+				Name = name,
+				InheritFrom = config.InheritFrom,
+				ChildAnimation = config.ChildAnimation,
+				FilePath = config.FilePath,
+				OffsetZ = config.OffsetZ,
+				Scale = config.Scale,
+				ColorFromOwner = config.ColorFromOwner,
+				AngleFromOwner = config.AngleFromOwner,
+				Sound = config.Sound,
+			}, VFXMainOrder)
+			table.insert(boonVFXobj, object)
+			boonDropConfigs[name] = nil
+		end
+	end
+
 	for name, config in pairs(boonDropConfigs) do
 		local object = sjson.to_object({
 			Name = name,
@@ -807,35 +831,37 @@ function public.CreateOlympianSJSONData(params)
 			end
 		end
 
-		local portraitObj = {}
-		for name, config in pairs(portraitConfigs) do
-			local object = sjson.to_object({
-				Name = name,
-				InheritFrom = config.InheritFrom,
-				FilePath = config.FilePath,
-				ChildAnimation = config.ChildAnimation,
-				EndFrame = config.EndFrame,
-				StartFrame = config.StartFrame,
-				OffsetX = config.OffsetX,
-				OffsetY = config.OffsetY,
-				Scale = config.Scale,
-				CreateAnimation = config.CreateAnimation,
-				CreateAnimations = config.CreateAnimations,
-				Sound = config.Sound,
-				StartRed = config.StartRed,
-				StartGreen = config.StartGreen,
-				StartBlue = config.StartBlue,
-				EndRed = config.EndRed,
-				EndGreen = config.EndGreen,
-				EndBlue = config.EndBlue,
-				VisualFx = config.VisualFx,
-			}, PortraitOrder)
-			table.insert(portraitObj, object)
-		end
-
 		sjson.hook(PortraitFile, function(data)
-			for _, object in ipairs(portraitObj) do
-				table.insert(data.Animations, object)
+			local existingPortraits = {}
+			for _, animation in ipairs(data.Animations) do
+				existingPortraits[animation.Name] = true
+			end
+
+			for name, config in pairs(portraitConfigs) do
+				if not existingPortraits[name] then
+					local object = sjson.to_object({
+						Name = name,
+						InheritFrom = config.InheritFrom,
+						FilePath = config.FilePath,
+						ChildAnimation = config.ChildAnimation,
+						EndFrame = config.EndFrame,
+						StartFrame = config.StartFrame,
+						OffsetX = config.OffsetX,
+						OffsetY = config.OffsetY,
+						Scale = config.Scale,
+						CreateAnimation = config.CreateAnimation,
+						CreateAnimations = config.CreateAnimations,
+						Sound = config.Sound,
+						StartRed = config.StartRed,
+						StartGreen = config.StartGreen,
+						StartBlue = config.StartBlue,
+						EndRed = config.EndRed,
+						EndGreen = config.EndGreen,
+						EndBlue = config.EndBlue,
+						VisualFx = config.VisualFx,
+					}, PortraitOrder)
+					table.insert(data.Animations, object)
+				end
 			end
 		end)
 	end
