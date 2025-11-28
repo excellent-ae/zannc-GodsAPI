@@ -10,6 +10,7 @@
 - Fix Boon Inheritance
 - Fix Portrait Inheritance
 - Fix Slotted Trait inserts
+- Added ability to create custom text for codex & images.
 
 ## [1.0.8] - 2025-11-19
 
