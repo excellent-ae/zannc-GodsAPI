@@ -22,36 +22,32 @@ local TraitTextFile = rom.path.combine(rom.paths.Content, "Game/Text/en/TraitTex
 local PortraitFile = rom.path.combine(rom.paths.Content, "Game/Animations/GUI_Portraits_VFX.sjson")
 local GUIBoonsVFXFile = rom.path.combine(rom.paths.Content, "Game/Animations/GUI_Boons_VFX.sjson")
 local HelpTextFile = rom.path.combine(rom.paths.Content, "Game/Text/en/HelpText.en.sjson")
+local CodexTextFile = rom.path.combine(rom.paths.Content, "Game/Text/en/CodexText.en.sjson")
 
-local TextOrder = { "Id", "InheritFrom", "DisplayName", "Description" }
-local IconOrder = { "Name", "InheritFrom", "FilePath", "OffsetY", "OffsetZ", "Scale", "Hue" }
-local GameplayOrder = { "Name", "InheritFrom", "DisplayInEditor", "Thing" }
-local VFXMainOrder = {
+local Order = {
+	"Id",
 	"Name",
 	"InheritFrom",
+	"DisplayName",
+	"Description",
+	"DisplayInEditor",
+	"Thing",
 	"ChildAnimation",
+	"CreateAnimation",
 	"CreateAnimations",
 	"Color",
 	"FilePath",
+	"OffsetX",
+	"OffsetY",
 	"OffsetZ",
 	"Scale",
 	"Hue",
+	"StartFrame",
 	"EndFrame",
 	"NumFrames",
 	"PlaySpeed",
 	"ColorFromOwner",
 	"AngleFromOwner",
-	"Sound",
-}
-local PortraitOrder = {
-	"Name",
-	"InheritFrom",
-	"ChildAnimation",
-	"CreateAnimation",
-	"CreateAnimations",
-	"EndFrame",
-	"StartFrame",
-	"FilePath",
 	"Sound",
 	"StartRed",
 	"StartGreen",
@@ -60,6 +56,13 @@ local PortraitOrder = {
 	"EndGreen",
 	"EndBlue",
 	"VisualFx",
+	"Duration",
+	"StartOffsetZ",
+	"EndOffsetZ",
+	"PingPongShiftOverDuration",
+	"AmbientSound",
+	"Graphic",
+	"EditorOutlineDrawBounds",
 }
 --#endregion
 
@@ -112,6 +115,87 @@ local function validateParams(params, requiredFields, context)
 	end
 
 	return true
+end
+
+local function codexReg(params, upgradeName, lowGodType)
+	if params.skipCodex then
+		return
+	end
+
+	game.CodexData.OlympianGods.Entries[upgradeName] = {
+		Entries = {
+			{
+				UnlockGameStateRequirements = {
+					-- {
+					-- 	PathTrue = { "GameState", "TextLinesRecord", params.godName .. "Gift01" },
+					-- },
+				},
+				Text = "CodexData_" .. params.godName .. "_01",
+			},
+		},
+		Image = "Codex_Portrait_" .. params.godName,
+		BoonInfoAllowPinning = true,
+		NoRequirements = lowGodType == "npcgod",
+	}
+
+	if params.extraCodexEntry then
+		local entry = {
+			UnlockGameStateRequirements = {
+				params.extraCodexEntry.UnlockGameStateRequirements,
+			},
+			Text = "CodexData_" .. params.godName .. "_02",
+		}
+		table.insert(game.CodexData.OlympianGods.Entries[upgradeName].Entries, entry)
+	end
+
+	if params.codexData then
+		local cData = {}
+
+		if params.codexData.baseDescription then
+			local codexText1 = sjson.to_object({
+				Id = "CodexData_" .. params.godName .. "_01",
+				InheritFrom = "BaseCodexEntry",
+				DisplayName = params.codexData.baseDescription,
+			}, Order)
+			table.insert(cData, codexText1)
+		end
+
+		if params.codexData.secondDescription then
+			local codexText2 = sjson.to_object({
+				Id = "CodexData_" .. params.godName .. "_02",
+				InheritFrom = "BaseCodexEntry",
+				DisplayName = params.codexData.secondDescription,
+			}, Order)
+			table.insert(cData, codexText2)
+		end
+
+		if #cData > 0 then
+			sjson.hook(CodexTextFile, function(data)
+				for _, object in ipairs(cData) do
+					table.insert(data.Texts, object)
+				end
+			end)
+		end
+
+		if params.codexData.imageData then
+			local imageins = sjson.to_object({
+				Name = "Codex_Portrait_" .. params.godName,
+				InheritFrom = "Codex_Portrait_Base_01",
+				FilePath = cleanFilePath(pluginGUID, params.codexData.imageData.imagePath),
+				OffsetY = params.codexData.imageData.OffsetY,
+				OffsetZ = params.codexData.imageData.OffsetZ,
+				Scale = params.codexData.imageData.Scale,
+				EndFrame = 1,
+				StartFrame = 1,
+			}, Order)
+
+			sjson.hook(GUIScreensVFXFile, function(data)
+				table.insert(data.Animations, imageins)
+			end)
+		end
+	end
+
+	table.insert(game.CodexOrdering.OlympianGods, upgradeName)
 end
 
 function public.Initialize()
@@ -371,26 +455,7 @@ function public.InitializeGod(params)
 		end
 	end
 
-	if not params.skipCodex then
-		game.CodexData.OlympianGods.Entries[upgradeName] = {
-			Entries = {
-				{
-					UnlockGameStateRequirements = {
-						{
-							PathTrue = { "GameState", "TextLinesRecord", params.godName .. "Gift01" },
-						},
-					},
-					Text = "CodexData_" .. params.godName .. "_01",
-				},
-			},
-			Image = "Codex_Portrait_" .. params.godName,
-			BoonInfoAllowPinning = true,
-		}
-		if lowGodType == "npcgod" then
-			game.CodexData.OlympianGods.Entries[upgradeName].NoRequirements = true
-		end
-		table.insert(game.CodexOrdering.OlympianGods, upgradeName)
-	end
+	codexReg(params, upgradeName, lowGodType)
 
 	if not params.SpawnLikeHermes then
 		addGodtoRunData(game.RewardStoreData.RunProgress, upgradeName)
@@ -419,7 +484,7 @@ function public.CreateOlympianSJSONData(params)
 			Graphic = "BoonDrop" .. params.godName,
 			AmbientSound = params.AmbientSound,
 		},
-	}, GameplayOrder)
+	}, Order)
 
 	sjson.hook(GameplayFile, function(data)
 		table.insert(data.Obstacles, godUpgrade)
@@ -522,7 +587,7 @@ function public.CreateOlympianSJSONData(params)
 				ColorFromOwner = config.ColorFromOwner,
 				AngleFromOwner = config.AngleFromOwner,
 				Sound = config.Sound,
-			}, VFXMainOrder)
+			}, Order)
 			table.insert(boonVFXobj, object)
 			boonDropConfigs[name] = nil
 		end
@@ -545,7 +610,7 @@ function public.CreateOlympianSJSONData(params)
 			ColorFromOwner = config.ColorFromOwner,
 			AngleFromOwner = config.AngleFromOwner,
 			Sound = config.Sound,
-		}, VFXMainOrder)
+		}, Order)
 		table.insert(boonVFXobj, object)
 	end
 
@@ -579,7 +644,7 @@ function public.CreateOlympianSJSONData(params)
 			FilePath = config.FilePath,
 			Scale = config.Scale,
 			OffsetY = config.OffsetY,
-		}, IconOrder)
+		}, Order)
 		table.insert(boonInfoObjects, object)
 	end
 
@@ -612,7 +677,7 @@ function public.CreateOlympianSJSONData(params)
 			Id = id,
 			DisplayName = config.DisplayName,
 			InheritFrom = config.InheritFrom,
-		}, TextOrder)
+		}, Order)
 		table.insert(macrosTextobj, object)
 	end
 
@@ -647,7 +712,7 @@ function public.CreateOlympianSJSONData(params)
 			Id = id,
 			DisplayName = config.DisplayName,
 			Description = config.Description,
-		}, TextOrder)
+		}, Order)
 		table.insert(screenTextsobj, object)
 	end
 
@@ -661,7 +726,7 @@ function public.CreateOlympianSJSONData(params)
 		Id = "NPC_" .. params.godName .. "_01",
 		DisplayName = params.godName,
 		Description = params.godDescriptionText,
-	}, TextOrder)
+	}, Order)
 
 	sjson.hook(HelpTextFile, function(data)
 		table.insert(data.Texts, testing)
@@ -694,7 +759,7 @@ function public.CreateOlympianSJSONData(params)
 				EndOffsetZ = config.EndOffsetZ,
 				PingPongShiftOverDuration = config.PingPongShiftOverDuration,
 				Sound = config.Sound,
-			}, VFXMainOrder)
+			}, Order)
 			table.insert(vfxObjects, object)
 		end
 
@@ -708,7 +773,7 @@ function public.CreateOlympianSJSONData(params)
 			Id = params.godName .. "Upgrade_Store",
 			DisplayName = "Boon of " .. params.godName,
 			Description = "Receive your choice of {#BoldFormat}1 {#Prev}out of {$ScreenData.UpgradeChoice.MaxChoices} {$Keywords.GodBoonPlural} from {#BoldFormat}" .. params.godName .. "{#Prev}.",
-		}, TextOrder)
+		}, Order)
 
 		sjson.hook(TraitTextFile, function(data)
 			table.insert(data.Texts, upgradeStore)
@@ -737,7 +802,7 @@ function public.CreateOlympianSJSONData(params)
 				CreateAnimation = "OlympianDialogueEntrance_" .. params.godName,
 				CreateAnimations = params.portraitData.NeutralAnimations or {}, -- This is... blinking, and stuff - which you see in a gods Package.
 				-- SortMode = "Id", --! check what this do
-			}, PortraitOrder)
+			}, Order)
 			table.insert(portraitObj, defaultPortrait)
 		end
 
@@ -748,7 +813,7 @@ function public.CreateOlympianSJSONData(params)
 			EndFrame = 1,
 			StartFrame = 1,
 			Sound = "/Leftovers/World Sounds/MapZoomInShortHigh",
-		}, PortraitOrder)
+		}, Order)
 		table.insert(portraitObj, defaultExitPortrait)
 
 		local wrathPortrait = sjson.to_object({
@@ -757,28 +822,28 @@ function public.CreateOlympianSJSONData(params)
 			FilePath = cleanFilePath(pluginGUID, params.portraitData.NeutralPortraitPath or "", useBaseNeutral),
 			EndFrame = 1,
 			StartFrame = 1,
-		}, PortraitOrder)
+		}, Order)
 		table.insert(portraitObj, wrathPortrait)
 
 		local displeasedPortrait = sjson.to_object({
 			Name = "Portrait_" .. params.godName .. "_Displeased_01",
 			InheritFrom = "Portrait_" .. params.godName .. "_Default_01",
 			FilePath = cleanFilePath(pluginGUID, params.portraitData.AnnoyedPortraitPath or "", useBaseAnnoyed),
-		}, PortraitOrder)
+		}, Order)
 		table.insert(portraitObj, displeasedPortrait)
 
 		local seriousPortrait = sjson.to_object({
 			Name = "Portrait_" .. params.godName .. "_Serious_01",
 			InheritFrom = "Portrait_" .. params.godName .. "_Default_01",
 			FilePath = cleanFilePath(pluginGUID, params.portraitData.SeriousPortraitPath or "", useBaseSerious),
-		}, PortraitOrder)
+		}, Order)
 		table.insert(portraitObj, seriousPortrait)
 
 		local seriousExitPortrait = sjson.to_object({
 			Name = "Portrait_" .. params.godName .. "_Serious_01_Exit",
 			InheritFrom = "Portrait_" .. params.godName .. "_Default_01_Exit",
 			FilePath = cleanFilePath(pluginGUID, params.portraitData.SeriousPortraitPath or "", useBaseSerious),
-		}, PortraitOrder)
+		}, Order)
 		table.insert(portraitObj, seriousExitPortrait)
 
 		if params.portraitData.DialogueAnimations then
@@ -792,7 +857,7 @@ function public.CreateOlympianSJSONData(params)
 				EndGreen = params.portraitData.DialogueAnimations.DialogueEntrance.GreenEnd,
 				EndBlue = params.portraitData.DialogueAnimations.DialogueEntrance.BlueEnd,
 				CreateAnimations = {},
-			}, PortraitOrder)
+			}, Order)
 
 			if params.portraitData.DialogueAnimations.DialogueEntranceStreaks then
 				local dialogueStreaks = sjson.to_object({
@@ -805,7 +870,7 @@ function public.CreateOlympianSJSONData(params)
 					EndGreen = params.portraitData.DialogueAnimations.DialogueEntranceStreaks.GreenEnd,
 					EndBlue = params.portraitData.DialogueAnimations.DialogueEntranceStreaks.BlueEnd,
 					VisualFx = "OlympianDialogueEntranceParticle_" .. params.godName,
-				}, PortraitOrder)
+				}, Order)
 				table.insert(portraitObj, dialogueStreaks)
 				table.insert(dialogueEntrance.CreateAnimations, { Name = "OlympianDialogueEntranceStreaks_" .. params.godName })
 			elseif params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst then
@@ -818,7 +883,7 @@ function public.CreateOlympianSJSONData(params)
 					EndRed = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.RedEnd,
 					EndGreen = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.GreenEnd,
 					EndBlue = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.BlueEnd,
-				}, PortraitOrder)
+				}, Order)
 				table.insert(portraitObj, particleBurst)
 
 				local particleBurstFlip = sjson.to_object({
@@ -830,7 +895,7 @@ function public.CreateOlympianSJSONData(params)
 					EndRed = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.RedEnd,
 					EndGreen = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.GreenEnd,
 					EndBlue = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.BlueEnd,
-				}, PortraitOrder)
+				}, Order)
 				table.insert(portraitObj, particleBurstFlip)
 
 				table.insert(dialogueEntrance.CreateAnimations, { Name = "OlympianDialogueEntranceParticleBurst_" .. params.godName })
@@ -848,7 +913,7 @@ function public.CreateOlympianSJSONData(params)
 				EndRed = params.portraitData.DialogueAnimations.DialogueEntranceParticles.RedEnd,
 				EndGreen = params.portraitData.DialogueAnimations.DialogueEntranceParticles.GreenEnd,
 				EndBlue = params.portraitData.DialogueAnimations.DialogueEntranceParticles.BlueEnd,
-			}, PortraitOrder)
+			}, Order)
 			table.insert(portraitObj, dialogueParticle)
 		end
 
@@ -1105,7 +1170,7 @@ function public.CreateKeepsake(params)
 			InheritFrom = "BaseStatLine",
 			DisplayName = params.customStatLine.displayName or "Lorem Ipsum DisplayName",
 			Description = params.customStatLine.description or "Lorem Ipsum Description",
-		}, TextOrder)
+		}, Order)
 
 		sjson.hook(TraitTextFile, function(data)
 			table.insert(data.Texts, statline)
@@ -1119,7 +1184,7 @@ function public.CreateKeepsake(params)
 			InheritFrom = config.InheritFrom,
 			DisplayName = config.DisplayName,
 			Description = config.Description,
-		}, TextOrder)
+		}, Order)
 		table.insert(textObjects, object)
 	end
 
@@ -1129,7 +1194,7 @@ function public.CreateKeepsake(params)
 			Name = name,
 			InheritFrom = config.InheritFrom,
 			FilePath = config.FilePath,
-		}, IconOrder)
+		}, Order)
 		table.insert(vfxObjects, object)
 	end
 
@@ -1231,13 +1296,13 @@ function public.CreateBoon(params)
 			Name = intboonName,
 			InheritFrom = "BoonTrayIcon",
 			FilePath = cleanFilePath(pluginGUID, params.boonIconPath or nil, useBasePath),
-		}, IconOrder)
+		}, Order)
 	else
 		traitIcon = sjson.to_object({
 			Name = intboonName,
 			InheritFrom = "BoonIcon",
 			FilePath = cleanFilePath(pluginGUID, params.boonIconPath or nil, useBasePath),
-		}, IconOrder)
+		}, Order)
 	end
 
 	sjson.hook(GUIBoonsVFXFile, function(data)
@@ -1253,7 +1318,7 @@ function public.CreateBoon(params)
 		flavourText = sjson.to_object({
 			Id = intboonName .. "_FlavourText",
 			DisplayName = params.flavourText,
-		}, TextOrder)
+		}, Order)
 	end
 
 	local traitDisplay = sjson.to_object({
@@ -1261,7 +1326,7 @@ function public.CreateBoon(params)
 		InheritFrom = "BaseBoonMultiline",
 		DisplayName = params.displayName or "Lorem Ipsum DisplayName",
 		Description = params.description or "Lorem Ipsum Description",
-	}, TextOrder)
+	}, Order)
 	sjson.hook(TraitTextFile, function(data)
 		table.insert(data.Texts, traitDisplay)
 		if params.flavourText then
@@ -1275,7 +1340,7 @@ function public.CreateBoon(params)
 			InheritFrom = "BaseStatLine",
 			DisplayName = params.customStatLine.displayName or "Lorem Ipsum DisplayName",
 			Description = params.customStatLine.description or "Lorem Ipsum Description",
-		}, TextOrder)
+		}, Order)
 
 		sjson.hook(TraitTextFile, function(data)
 			table.insert(data.Texts, statline)
