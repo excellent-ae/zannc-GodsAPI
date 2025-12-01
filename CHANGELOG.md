@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Add missing GodLoot, usefule for other mods to check if GodLoot or not.
 
 ## [2.0.0] - 2025-12-01
 
