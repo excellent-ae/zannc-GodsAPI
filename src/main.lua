@@ -1306,7 +1306,14 @@ function definitions.CreateBoon(env, params)
 	game.TraitData[intboonName].TraitOrderingValueCache = GetTraitOrderingValue(game.TraitData[intboonName])
 
 	if params.addToExistingGod then
-		local characterData = game.LootData[characterUpgrade]
+		local characterData = nil
+		if game.LootData[params.characterName] then
+			characterData = game.LootData[params.characterName]
+		elseif game.LootData[characterUpgrade] then
+			characterData = game.LootData[characterUpgrade]
+		else
+			rom.log.warning("addToExistingGod: LootData for character" .. params.characterName .. " does not exist, cannot add trait.")
+		end
 
 		if characterData then
 			if params.Slot == "Melee" or params.Slot == "Secondary" or params.Slot == "Ranged" or params.Slot == "Rush" or params.Slot == "Mana" then
@@ -1326,6 +1333,8 @@ function definitions.CreateBoon(env, params)
 							table.insert(characterData.WeaponUpgrades, intboonName)
 						end
 					end
+				else
+					rom.log.warning("addToExistingGod: Trying to add to WeaponUpgrades but table doesn't exist for " .. params.characterName)
 				end
 			else
 				if characterData.Traits then
@@ -1340,6 +1349,8 @@ function definitions.CreateBoon(env, params)
 					if not alreadyExists then
 						table.insert(characterData.Traits, intboonName)
 					end
+				else
+					rom.log.warning("addToExistingGod: Trying to add to Traits but table doesn't exist for " .. params.characterName)
 				end
 			end
 		end

@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Fix addToExistingGod.
 
 ## [2.0.1] - 2025-12-01
 

@@ -222,7 +222,7 @@ gods.CreateOlympianSJSONData({
 
 ```lua
 gods.CreateKeepsake({
-	pluginGUID = _PLUGIN.guid,
+	
 	characterName = "Spike",
 	internalKeepsakeName = "CarryingWeightKeepsake",
 
@@ -277,7 +277,6 @@ Optional:   "RarityLevels", "Slot", "BlockStacking", "StatLines", "ExtractValues
             "ExtraFields", "boonIconPath", "requirements", "flavourText", "addToExistingGod", "reuseBaseIcons"
 ]]
 gods.CreateBoon({
-	pluginGUID = _PLUGIN.guid,
 	internalBoonName = "AwesomeWeaponBoon",  -- eg TycheWeaponBoon
 	isLegendary = false,
     Elements = {"Air"},
