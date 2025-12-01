@@ -225,6 +225,7 @@ function definitions.InitializeGod(env, params)
 		Speaker = "NPC_" .. godName .. "_01",
 		SpeakerName = godName,
 		Gender = params.Gender or "X",
+		GodLoot = true,
 
 		TreatAsGodLootByShops = nil,
 		GameStateRequirements = params.GameStateRequirements or {},
