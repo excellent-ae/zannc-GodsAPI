@@ -234,7 +234,7 @@ function definitions.InitializeGod(env, params)
 		DoorIcon = "BoonDrop" .. godName .. "Preview",
 		DoorUpgradedIcon = "BoonDrop" .. godName .. "UpgradedPreview",
 		Icon = "BoonSymbol" .. godName,
-		MenuTitle = "UpgradeChoiceMenu_Title_" .. godName .. "Upgrade",
+		MenuTitle = "UpgradeChoiceMenu_Title_" .. upgradeName,
 
 		--! Portraits
 		Portrait = "Portrait_" .. godName .. "_Default_01", -- Default Portrait
@@ -1308,7 +1308,7 @@ function definitions.CreateBoon(env, params)
 	if params.addToExistingGod then
 		local characterData = nil
 		if game.LootData[params.characterName .. "Upgrade"] then
-			characterData = game.LootData[params.characterName]
+			characterData = game.LootData[params.characterName .. "Upgrade"]
 		elseif game.LootData[characterUpgrade] then
 			characterData = game.LootData[characterUpgrade]
 		else
