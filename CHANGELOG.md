@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [2.0.0] - 2025-12-01
+
 - Add Data Inheritence to functions // cuts down on params (though can still be changed)
 - Use `InheritFrom` in creation of Boons instead of `isLegendary` // `Elements`
 - No longer need to pass in `_PLUGIN.guid`.
@@ -73,7 +76,8 @@
 
 - Initial Release.
 
-[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.9...HEAD
+[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.0...HEAD
+[2.0.0]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.9...2.0.0
 [1.0.9]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.8...1.0.9
 [1.0.8]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.7...1.0.8
 [1.0.7]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.6...1.0.7
