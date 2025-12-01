@@ -1,8 +1,10 @@
+--TODO - Documentation on things you NEED to append your plugin_guid to, in order to work correctly.
+
 ---@diagnostic disable: undefined-global
 ---@meta _
 
 local mods = rom.mods
-mods["LuaENVY-ENVY"].auto()
+envy = mods["SGG_Modding-ENVY"].auto()
 rom = rom
 ---@diagnostic disable-next-line: undefined-global
 _PLUGIN = PLUGIN
@@ -11,6 +13,9 @@ modutil = mods["SGG_Modding-ModUtil"]
 sjson = mods["SGG_Modding-SJSON"]
 
 import_as_fallback(rom.game)
+
+local plugin_data_by_guid = {}
+local definitions = {}
 
 --region SJSON defs
 local GameplayFile = rom.path.combine(rom.paths.Content, "Game/Obstacles/Gameplay.sjson")
@@ -117,23 +122,24 @@ local function validateParams(params, requiredFields, context)
 	return true
 end
 
-local function codexReg(params, upgradeName, lowGodType)
+local function codexReg(env, params, upgradeName, lowGodType)
 	if params.skipCodex then
 		return
 	end
+	local godName = env._PLUGIN.guid .. "-" .. params.godName
 
 	game.CodexData.OlympianGods.Entries[upgradeName] = {
 		Entries = {
 			{
 				UnlockGameStateRequirements = {
-					-- {
-					-- 	PathTrue = { "GameState", "TextLinesRecord", params.godName .. "Gift01" },
-					-- },
+					{
+						PathTrue = { "GameState", "TextLinesRecord", godName .. "Gift01" },
+					},
 				},
-				Text = "CodexData_" .. params.godName .. "_01",
+				Text = "CodexData_" .. godName .. "_01",
 			},
 		},
-		Image = "Codex_Portrait_" .. params.godName,
+		Image = "Codex_Portrait_" .. godName,
 		BoonInfoAllowPinning = true,
 		NoRequirements = lowGodType == "npcgod",
 	}
@@ -143,7 +149,7 @@ local function codexReg(params, upgradeName, lowGodType)
 			UnlockGameStateRequirements = {
 				params.extraCodexEntry.UnlockGameStateRequirements,
 			},
-			Text = "CodexData_" .. params.godName .. "_02",
+			Text = "CodexData_" .. godName .. "_02",
 		}
 		table.insert(game.CodexData.OlympianGods.Entries[upgradeName].Entries, entry)
 	end
@@ -153,7 +159,7 @@ local function codexReg(params, upgradeName, lowGodType)
 
 		if params.codexData.baseDescription then
 			local codexText1 = sjson.to_object({
-				Id = "CodexData_" .. params.godName .. "_01",
+				Id = "CodexData_" .. godName .. "_01",
 				InheritFrom = "BaseCodexEntry",
 				DisplayName = params.codexData.baseDescription,
 			}, Order)
@@ -162,7 +168,7 @@ local function codexReg(params, upgradeName, lowGodType)
 
 		if params.codexData.secondDescription then
 			local codexText2 = sjson.to_object({
-				Id = "CodexData_" .. params.godName .. "_02",
+				Id = "CodexData_" .. godName .. "_02",
 				InheritFrom = "BaseCodexEntry",
 				DisplayName = params.codexData.secondDescription,
 			}, Order)
@@ -179,9 +185,9 @@ local function codexReg(params, upgradeName, lowGodType)
 
 		if params.codexData.imageData then
 			local imageins = sjson.to_object({
-				Name = "Codex_Portrait_" .. params.godName,
+				Name = "Codex_Portrait_" .. godName,
 				InheritFrom = "Codex_Portrait_Base_01",
-				FilePath = cleanFilePath(pluginGUID, params.codexData.imageData.imagePath),
+				FilePath = cleanFilePath(env._PLUGIN.guid, params.codexData.imageData.imagePath),
 				OffsetY = params.codexData.imageData.OffsetY,
 				OffsetZ = params.codexData.imageData.OffsetZ,
 				Scale = params.codexData.imageData.Scale,
@@ -198,17 +204,14 @@ local function codexReg(params, upgradeName, lowGodType)
 	table.insert(game.CodexOrdering.OlympianGods, upgradeName)
 end
 
-function public.Initialize()
-	rom.log.warning("Initialize is now a `DEFUNCT` function, it no longer does anything, you now pass in your _PLUGIN.guid into any function that requires it.")
-end
-
 -- Gods like Zeus/Ares/etc or NPC Gods like Hermes.
-function public.InitializeGod(params)
+function definitions.InitializeGod(env, params)
 	if not validateParams(params, { "godName", "godType" }, "InitializeGod") then
 		return nil
 	end
 
-	local upgradeName = params.godName .. "Upgrade"
+	local upgradeName = env._PLUGIN.guid .. "-" .. params.godName .. "Upgrade"
+	local godName = env._PLUGIN.guid .. "-" .. params.godName
 	local lowGodType = string.lower(params.godType)
 
 	if game.LootData[upgradeName] then
@@ -217,25 +220,25 @@ function public.InitializeGod(params)
 	end
 
 	game.LootData[upgradeName] = {
+		InheritFrom = { "BaseLoot", "BaseSoundPackage" },
 		Name = upgradeName,
-		Speaker = "NPC_" .. params.godName .. "_01",
-		SpeakerName = params.godName,
+		Speaker = "NPC_" .. godName .. "_01",
+		SpeakerName = godName,
 		Gender = params.Gender or "X",
 
-		GodLoot = true,
 		TreatAsGodLootByShops = nil,
 		GameStateRequirements = params.GameStateRequirements or {},
 
-		BoonInfoIcon = "BoonInfoSymbol" .. params.godName .. "Icon",
-		DoorIcon = "BoonDrop" .. params.godName .. "Preview",
-		DoorUpgradedIcon = "BoonDrop" .. params.godName .. "UpgradedPreview",
-		Icon = "BoonSymbol" .. params.godName,
-		MenuTitle = "UpgradeChoiceMenu_Title_" .. params.godName .. "Upgrade",
+		BoonInfoIcon = "BoonInfoSymbol" .. godName .. "Icon",
+		DoorIcon = "BoonDrop" .. godName .. "Preview",
+		DoorUpgradedIcon = "BoonDrop" .. godName .. "UpgradedPreview",
+		Icon = "BoonSymbol" .. godName,
+		MenuTitle = "UpgradeChoiceMenu_Title_" .. godName .. "Upgrade",
 
 		--! Portraits
-		Portrait = "Portrait_" .. params.godName .. "_Default_01", -- Default Portrait
-		WrathPortrait = "Portrait_" .. params.godName .. "_Default_01_Wrath", -- Wrath Portrait
-		OverlayAnim = params.godName .. "Overlay", -- Serious Portrait, but its defined later anyway?
+		Portrait = "Portrait_" .. godName .. "_Default_01", -- Default Portrait
+		WrathPortrait = "Portrait_" .. godName .. "_Default_01_Wrath", -- Wrath Portrait
+		OverlayAnim = godName .. "Overlay", -- Serious Portrait, but its defined later anyway?
 
 		--! Likely to change
 		Color = params.Color or { 250, 250, 215, 255 },
@@ -247,7 +250,7 @@ function public.InitializeGod(params)
 		SubtitleColor = params.SubtitleColor or { 255, 255, 205, 255 },
 
 		LoadPackages = params.LoadPackages or {}, -- Need it for the animations for in person, maybe, idk.
-		FlavorTextIds = params.FlavorTextIds or {},
+		FlavorTextIds = params.FlavourTextIds or {},
 		SpawnSound = params.SFX_Portrait,
 		PortraitEnterSound = params.SFX_Portrait,
 		UpgradeSelectedSound = params.UpgradeSelectedSound, -- These are different.
@@ -262,14 +265,13 @@ function public.InitializeGod(params)
 		UpgradeMenuOpenVoiceLines = params.UpgradeMenuOpenVoiceLines or { [1] = { GlobalVoiceLines = "HeraclesBoonReactionVoiceLines" } },
 		DuoPickupTextLines = params.DuoPickupTextLines or {},
 		InteractTextLineSets = params.InteractTextLineSets or {
-			[params.godName .. "Chat01"] = {
-				Name = params.godName .. "Chat01",
+			[godName .. "Chat01"] = {
+				Name = godName .. "Chat01",
 				UseableOffSource = true,
 				{ Cue = "", UseEventEndSound = true, Text = "Dialogue has not been implemented, using default!" },
 			},
 		},
 		BoughtTextLines = params.BoughtTextLines or {},
-		BoughtTextLinesRequirements = params.BoughtTextLinesRequirements or {},
 		RejectionTextLines = params.RejectionTextLines or {},
 		RejectionVoiceLines = params.RejectionVoiceLines or { [1] = { GlobalVoiceLines = "GodRejectedVoiceLines" } },
 		SwapUpgradePickedVoiceLines = {
@@ -296,37 +298,11 @@ function public.InitializeGod(params)
 		LootRejectedText = "Player_GodDispleased_" .. upgradeName,
 		SuperSacrificeCombatText = "SuperSacrifice_CombatText_" .. upgradeName,
 		EchoLastRewardId = "EchoLastRewardBoon_" .. upgradeName,
-		BackgroundAnimation = params.BackgroundAnimation or "DialogueBackground_Olympus_BoonScreen",
-		GoldifyValue = params.GoldifyValue or 400,
-		GoldConversionEligible = params.GoldConversionEligible or true,
-		ReplaceSpecialForGoldify = params.ReplaceSpecialForGoldify or true,
 		Weight = params.Weight or 10,
-		NarrativeContextArtFlippable = params.NarrativeContextArtFlippable or false,
 		CanReceiveGift = params.CanReceiveGift or true,
-		TextLinesIgnoreQuests = params.TextLinesIgnoreQuests or true,
-		UsePromptOffsetX = params.UsePromptOffsetX or 80,
 		AlwaysShowDefaultUseText = params.AlwaysShowDefaultUseText or true,
-		DestroyOnPickup = params.DestroyOnPickup or true,
-		SelectionSound = params.SelectionSound or "/SFX/Menu Sounds/GeneralWhooshMENU",
-		ConfirmSound = params.ConfirmSound or "/SFX/Menu Sounds/GodBoonChoiceConfirm",
-		OnUsedFunctionArgs = params.OnUsedFunctionArgs or { PreserveContextArt = true },
-		BanUnpickedBoonsEligible = params.BanUnpickedBoonsEligible or true,
-		LastRewardEligible = params.LastRewardEligible or true,
-		AnimOffsetZ = params.AnimOffsetZ or 80,
 		LootRejectionAnimation = params.LootRejectionAnimation or "BoonDissipateA_Zeus",
-		NarrativeContextArt = params.NarrativeContextArt or "DialogueBackground_Olympus",
-		BoxAnimation = params.BoxAnimation or "DialogueSpeechBubbleLight",
-		BoxExitAnimation = params.BoxExitAnimation or "DialogueSpeechBubbleLightOut",
-		RequireUseToGift = params.RequireUseToGift or true,
-		ManualRecordUse = params.ManualRecordUse or true,
-		UsePromptOffsetY = params.UsePromptOffsetY or 48,
 		ColorGrade = params.ColorGrade or "ZeusLightning",
-		UseText = params.UseText or "UseLoot",
-		OnUsedFunctionName = params.OnUsedFunctionName or "UseLoot",
-		UseTextTalkAndGift = params.UseTextTalkAndGift or "UseLootAndGift",
-		UseTextTalkAndSpecial = params.UseTextTalkAndSpecial or "UseLootAndSpecial",
-		BlockedLootInteractionText = params.BlockedLootInteractionText or "UseLootLocked",
-		UseTextTalkGiftAndSpecial = params.UseTextTalkGiftAndSpecial or "UseLootGiftAndSpecial",
 		Consumables = params.Consumables or {},
 		EmoteOffsetX = params.EmoteOffsetX or 30,
 		EmoteOffsetY = params.EmoteOffsetY or -320,
@@ -343,8 +319,8 @@ function public.InitializeGod(params)
 		game.LootData[upgradeName].SpecialInteractCooldown = 60
 		game.LootData[upgradeName].GodLoot = false
 		game.LootData[upgradeName].TreatAsGodLootByShops = true
-		game.LootData[upgradeName].BoonInfoTitleText = "UpgradeChoiceMenu_" .. params.godName
-		game.LootData[upgradeName].SurfaceShopIcon = "BoonInfoSymbol" .. params.godName .. "Icon"
+		game.LootData[upgradeName].BoonInfoTitleText = "UpgradeChoiceMenu_" .. godName
+		game.LootData[upgradeName].SurfaceShopIcon = "BoonInfoSymbol" .. godName .. "Icon"
 		game.LootData[upgradeName].SurfaceShopText = upgradeName .. "_Store"
 
 		if params.SpawnLikeHermes then
@@ -352,7 +328,7 @@ function public.InitializeGod(params)
 				-- unlock requirements
 				{
 					Path = { "GameState", "TextLinesRecord" },
-					HasAll = { params.godName .. "FirstPickUp" },
+					HasAll = { godName .. "FirstPickUp" },
 				},
 				{
 					FunctionName = "RequiredNotInStore",
@@ -388,7 +364,7 @@ function public.InitializeGod(params)
 					Money = 150,
 				},
 				UseText = "UsePurchaseLoot",
-				UseFunctionName = "rom.mods." .. _PLUGIN.guid .. ".Create" .. params.godName .. "Loot",
+				UseFunctionName = "rom.mods." .. env._PLUGIN.guid .. "-Create" .. params.godName .. "Loot",
 				SurfaceShopText = upgradeName .. "_Store",
 				SurfaceShopIcon = upgradeName .. "Shop",
 				GameStateRequirements = {
@@ -409,7 +385,7 @@ function public.InitializeGod(params)
 			table.insert(game.StoreData.I_WorldShop.GroupsOf[4].OptionsData, { Name = "Shop" .. upgradeName, Cost = 500, UpgradeChance = 1.0, UpgradedCost = 500, ReplaceRequirements = nil })
 			table.insert(game.StoreData.Q_WorldShop.GroupsOf[3].OptionsData, { Name = "Shop" .. upgradeName, Cost = 500, UpgradeChance = 1.0, UpgradedCost = 500, ReplaceRequirements = nil })
 
-			mod["Create" .. params.godName .. "Loot"] = function(args)
+			plugin_data_by_guid[env._PLUGIN.guid][env._PLUGIN.guid .. "-Create" .. params.godName .. "Loot"] = function(args)
 				args = args or {}
 				return CreateLoot(MergeTables(args, { Name = upgradeName, AutoLoadPackages = true }))
 			end
@@ -424,17 +400,20 @@ function public.InitializeGod(params)
 					if not boonRarities and itemData.Args then
 						boonRarities = itemData.Args.BoonRaritiesOverride
 					end
-					spawnedItem = mod["Create" .. params.godName .. "Loot"]({
-						SpawnPoint = kitId,
-						ResourceCosts = itemData.ResourceCosts or GetProcessedValue(ConsumableData[itemData.Name].ResourceCosts),
-						DoesNotBlockExit = true,
-						SuppressSpawnSounds = true,
-						BoughtFromShop = true,
-						AddBoostedAnimation = itemData.AddBoostedAnimation,
-						BoonRaritiesOverride = itemData.BoonRaritiesOverride,
-					})
-					spawnedItem.CanReceiveGift = false
-					SetThingProperty({ Property = "SortBoundsScale", Value = 1.0, DestinationId = kitId })
+
+					if plugin_data_by_guid[env._PLUGIN.guid] and plugin_data_by_guid[env._PLUGIN.guid][env._PLUGIN.guid .. "-Create" .. params.godName .. "Loot"] then
+						spawnedItem = plugin_data_by_guid[env._PLUGIN.guid][env._PLUGIN.guid .. "-Create" .. params.godName .. "Loot"]({
+							SpawnPoint = kitId,
+							ResourceCosts = itemData.ResourceCosts or GetProcessedValue(ConsumableData[itemData.Name].ResourceCosts),
+							DoesNotBlockExit = true,
+							SuppressSpawnSounds = true,
+							BoughtFromShop = true,
+							AddBoostedAnimation = itemData.AddBoostedAnimation,
+							BoonRaritiesOverride = itemData.BoonRaritiesOverride,
+						})
+						spawnedItem.CanReceiveGift = false
+						SetThingProperty({ Property = "SortBoundsScale", Value = 1.0, DestinationId = kitId })
+					end
 				end
 				if spawnedItem ~= nil then
 					MapState.RewardPointsUsed[kitId] = spawnedItem.ObjectId
@@ -455,7 +434,7 @@ function public.InitializeGod(params)
 		end
 	end
 
-	codexReg(params, upgradeName, lowGodType)
+	codexReg(env, params, upgradeName, lowGodType)
 
 	if not params.SpawnLikeHermes then
 		addGodtoRunData(game.RewardStoreData.RunProgress, upgradeName)
@@ -463,25 +442,28 @@ function public.InitializeGod(params)
 	end
 end
 
-function public.CreateOlympianSJSONData(params)
-	local requiredFields = { "pluginGUID", "godName", "godType", "iconSpinPath", "previewPath", "colorA", "colorB", "colorC" }
+function definitions.CreateOlympianSJSONData(env, params)
+	local requiredFields = { "godName", "godType", "iconSpinPath", "previewPath", "colorA", "colorB", "colorC" }
 	if params and not params.skipBoonSelectSymbol then
 		table.insert(requiredFields, "boonSelectSymbolPath")
-	end -- doesnt really matter if i do it like this
+	end
 
 	if not validateParams(params, requiredFields, "CreateOlympianSJSONData") then
 		return nil
 	end
-	local pluginGUID = params.pluginGUID
+
+	local pluginGUID = env._PLUGIN.guid
+	local godName = env._PLUGIN.guid .. "-" .. params.godName
+	local upgradeName = env._PLUGIN.guid .. "-" .. params.godName .. "Upgrade"
 
 	--* The actual boon drop
 	local godUpgrade = sjson.to_object({
-		Name = params.godName .. "Upgrade",
+		Name = upgradeName,
 		InheritFrom = "BaseBoon",
 		DisplayInEditor = true,
 		Thing = {
 			EditorOutlineDrawBounds = false,
-			Graphic = "BoonDrop" .. params.godName,
+			Graphic = "BoonDrop" .. godName,
 			AmbientSound = params.AmbientSound,
 		},
 	}, Order)
@@ -496,13 +478,13 @@ function public.CreateOlympianSJSONData(params)
 
 	--* The Boon Colours/Animations
 	local boonDropConfigs = {
-		["BoonDrop" .. params.godName] = {
+		["BoonDrop" .. godName] = {
 			InheritFrom = "BoonDropGold",
-			ChildAnimation = "BoonDropA-" .. params.godName,
+			ChildAnimation = "BoonDropA-" .. godName,
 		},
-		["BoonDropA-" .. params.godName] = { -- This one is outer field, IDK why they did it this way, but I will assign colourB to it instead.
+		["BoonDropA-" .. godName] = { -- This one is outer field, IDK why they did it this way, but I will assign colourB to it instead.
 			InheritFrom = "BoonDropA",
-			ChildAnimation = "BoonDropB-" .. params.godName,
+			ChildAnimation = "BoonDropB-" .. godName,
 			Color = params.colorB,
 			CreateAnimations = { {
 				Name = "BoonDropBackGlow",
@@ -510,9 +492,9 @@ function public.CreateOlympianSJSONData(params)
 				Name = "BoonDropFrontFlare",
 			} },
 		},
-		["BoonDropB-" .. params.godName] = {
+		["BoonDropB-" .. godName] = {
 			InheritFrom = "BoonDropB",
-			ChildAnimation = "BoonDropC-" .. params.godName,
+			ChildAnimation = "BoonDropC-" .. godName,
 			Color = params.colorA,
 			CreateAnimations = { {
 				Name = "BoonDropBackGlow",
@@ -520,9 +502,9 @@ function public.CreateOlympianSJSONData(params)
 				Name = "BoonDropFrontFlare",
 			} },
 		},
-		["BoonDropC-" .. params.godName] = {
+		["BoonDropC-" .. godName] = {
 			InheritFrom = "BoonDropC",
-			ChildAnimation = "BoonDrop" .. params.godName .. "Icon",
+			ChildAnimation = "BoonDrop" .. godName .. "Icon",
 			Color = params.colorC,
 			CreateAnimations = { {
 				Name = "BoonDropBackGlow",
@@ -530,7 +512,7 @@ function public.CreateOlympianSJSONData(params)
 				Name = "BoonDropFrontFlare",
 			} },
 		},
-		["BoonDrop" .. params.godName .. "Preview"] = {
+		["BoonDrop" .. godName .. "Preview"] = {
 			InheritFrom = "BoonDropRoomRewardIconPreviewBase",
 			FilePath = cleanFilePath(pluginGUID, params.previewPath, useBasePathPreview),
 			OffsetZ = params.OffsetZBoonPreview or 0,
@@ -539,14 +521,14 @@ function public.CreateOlympianSJSONData(params)
 			AngleFromOwner = "Ignore",
 			Sound = params.AmbientSound,
 		},
-		["BoonDrop" .. params.godName .. "UpgradedPreview"] = {
-			InheritFrom = "BoonDrop" .. params.godName .. "Preview",
+		["BoonDrop" .. godName .. "UpgradedPreview"] = {
+			InheritFrom = "BoonDrop" .. godName .. "Preview",
 			ChildAnimation = "BoonUpgradedPreviewSparkles",
 		},
 	}
 
 	if not params.boonDropIconCustomFrames then
-		boonDropConfigs["BoonDrop" .. params.godName .. "Icon"] = {
+		boonDropConfigs["BoonDrop" .. godName .. "Icon"] = {
 			InheritFrom = "BoonDropIcon",
 			FilePath = cleanFilePath(pluginGUID, params.iconSpinPath, useBasePathSpin),
 			OffsetZ = params.OffsetZBoonDrop,
@@ -555,7 +537,7 @@ function public.CreateOlympianSJSONData(params)
 		}
 	else
 		--can do math.max for the frames but meh
-		boonDropConfigs["BoonDrop" .. params.godName .. "Icon"] = {
+		boonDropConfigs["BoonDrop" .. godName .. "Icon"] = {
 			InheritFrom = "BoonDropIcon", -- Still inherit from base BoonDropIcon, otherwise, stackoverflow magically.
 			FilePath = cleanFilePath(pluginGUID, params.iconSpinPath, useBasePathSpin),
 			OffsetZ = params.OffsetZBoonDrop,
@@ -569,8 +551,8 @@ function public.CreateOlympianSJSONData(params)
 	end
 
 	local dependencyOrder = {
-		"BoonDrop" .. params.godName .. "Preview",
-		"BoonDrop" .. params.godName .. "UpgradedPreview",
+		"BoonDrop" .. godName .. "Preview",
+		"BoonDrop" .. godName .. "UpgradedPreview",
 	}
 
 	local boonVFXobj = {}
@@ -622,13 +604,13 @@ function public.CreateOlympianSJSONData(params)
 
 	--* Visuals on doors/boon select
 	local boonInfoConfigs = {}
-	boonInfoConfigs["BoonInfoSymbol" .. params.godName .. "Icon"] = {
+	boonInfoConfigs["BoonInfoSymbol" .. godName .. "Icon"] = {
 		InheritFrom = "BoonInfoSymbolBase",
 		FilePath = cleanFilePath(pluginGUID, params.previewPath, useBasePathPreview),
 	}
 
 	if not params.skipBoonSelectSymbol then
-		boonInfoConfigs["BoonSymbol" .. params.godName] = {
+		boonInfoConfigs["BoonSymbol" .. godName] = {
 			InheritFrom = "BoonSymbolBase",
 			FilePath = cleanFilePath(pluginGUID, params.boonSelectSymbolPath, useBasePathSelectSymbol),
 			Scale = 1,
@@ -656,17 +638,17 @@ function public.CreateOlympianSJSONData(params)
 
 	--* Macro texts
 	local macrosText = {
-		["Player_GodDispleased_" .. params.godName .. "Upgrade"] = {
+		["Player_GodDispleased_" .. upgradeName] = {
 			DisplayName = params.godName .. " Grew Displeased!",
 		},
-		["SuperSacrifice_CombatText_" .. params.godName .. "Upgrade"] = {
+		["SuperSacrifice_CombatText_" .. upgradeName] = {
 			DisplayName = "{#CombatTextHighlightFormat}Boons of " .. params.godName .. " {#Prev}{#UpgradeFormat}+{$TempTextData.Amount}{#Prev}{!Icons.PomLevel}!",
 		},
-		["EchoLastRewardBoon_" .. params.godName .. "Upgrade"] = {
+		["EchoLastRewardBoon_" .. upgradeName] = {
 			InheritFrom = "BaseBoon",
 			DisplayName = "Manifest a copy of your most recently claimed {#ItalicFormat}Reward: {#Prev}{#BoldFormat}{$Keywords.GodBoon} of " .. params.godName,
 		},
-		["UpgradeChoiceMenu_Title_" .. params.godName .. "Upgrade"] = {
+		["UpgradeChoiceMenu_Title_" .. upgradeName] = {
 			DisplayName = "Boons of " .. params.godName,
 		},
 	}
@@ -691,17 +673,17 @@ function public.CreateOlympianSJSONData(params)
 		["UpgradeChoiceMenu_" .. params.godName] = {
 			DisplayName = "Boons of " .. params.godName,
 		},
-		[params.godName .. "Upgrade"] = {
+		[upgradeName] = {
 			DisplayName = params.godName,
 			Description = params.godDescriptionText,
 		},
-		[params.godName .. "Upgrade_FlavorText01"] = {
+		[upgradeName .. "_FlavorText01"] = {
 			DisplayName = params.godDescriptionTextFlavour01,
 		},
-		[params.godName .. "Upgrade_FlavorText02"] = {
+		[upgradeName .. "FlavorText02"] = {
 			DisplayName = params.godDescriptionTextFlavour02,
 		},
-		[params.godName .. "Upgrade_FlavorText03"] = {
+		[upgradeName .. "_FlavorText03"] = {
 			DisplayName = params.godDescriptionTextFlavour03,
 		},
 	}
@@ -723,7 +705,7 @@ function public.CreateOlympianSJSONData(params)
 	end)
 
 	local testing = sjson.to_object({
-		Id = "NPC_" .. params.godName .. "_01",
+		Id = "NPC_" .. godName .. "_01",
 		DisplayName = params.godName,
 		Description = params.godDescriptionText,
 	}, Order)
@@ -732,14 +714,28 @@ function public.CreateOlympianSJSONData(params)
 		table.insert(data.Texts, testing)
 	end)
 
+	if params.godDescriptionTextFlavour01 then
+		if game.LootData[upgradeName] then
+			table.insert(game.LootData[upgradeName].FlavorTextIds, upgradeName .. "_FlavorText01")
+		end
+	elseif params.godDescriptionTextFlavour02 then
+		if game.LootData[upgradeName] then
+			table.insert(game.LootData[upgradeName].FlavorTextIds, upgradeName .. "_FlavorText02")
+		end
+	elseif params.godDescriptionTextFlavour03 then
+		if game.LootData[upgradeName] then
+			table.insert(game.LootData[upgradeName].FlavorTextIds, upgradeName .. "_FlavorText03")
+		end
+	end
+
 	if string.lower(params.godType) == "npcgod" then
 		local configs = {
-			[params.godName .. "UpgradePreview"] = {
+			[godName .. "UpgradePreview"] = {
 				InheritFrom = "BoonSymbolBaseIsometric",
 				FilePath = cleanFilePath(pluginGUID, params.previewPath, useBasePathPreview),
 			},
-			[params.godName .. "UpgradeShop"] = {
-				InheritFrom = params.godName .. "UpgradePreview",
+			[godName .. "UpgradeShop"] = {
+				InheritFrom = godName .. "UpgradePreview",
 				Duration = 0,
 				StartOffsetZ = 0,
 				EndOffsetZ = 0,
@@ -770,7 +766,7 @@ function public.CreateOlympianSJSONData(params)
 		end)
 
 		local upgradeStore = sjson.to_object({
-			Id = params.godName .. "Upgrade_Store",
+			Id = godName .. "Upgrade_Store",
 			DisplayName = "Boon of " .. params.godName,
 			Description = "Receive your choice of {#BoldFormat}1 {#Prev}out of {$ScreenData.UpgradeChoice.MaxChoices} {$Keywords.GodBoonPlural} from {#BoldFormat}" .. params.godName .. "{#Prev}.",
 		}, Order)
@@ -788,26 +784,24 @@ function public.CreateOlympianSJSONData(params)
 		--! I have no idea what some of these do lmao.
 		local portraitObj = {}
 
-		if not params.portraitData.skipNeutralPortrait then
-			local defaultPortrait = sjson.to_object({
-				Name = "Portrait_" .. params.godName .. "_Default_01",
-				InheritFrom = "Portrait_God_01",
-				FilePath = cleanFilePath(pluginGUID, params.portraitData.NeutralPortraitPath or "", useBaseNeutral),
-				ChildAnimation = "PortraitGodRayEmitter_Athena",
-				EndFrame = 1,
-				StartFrame = 1,
-				OffsetX = params.portraitData.OffsetX,
-				OffsetY = params.portraitData.OffsetY,
-				Scale = params.portraitData.Scale,
-				CreateAnimation = "OlympianDialogueEntrance_" .. params.godName,
-				CreateAnimations = params.portraitData.NeutralAnimations or {}, -- This is... blinking, and stuff - which you see in a gods Package.
-				-- SortMode = "Id", --! check what this do
-			}, Order)
-			table.insert(portraitObj, defaultPortrait)
-		end
+		local defaultPortrait = sjson.to_object({
+			Name = "Portrait_" .. godName .. "_Default_01",
+			InheritFrom = "Portrait_God_01",
+			FilePath = cleanFilePath(pluginGUID, params.portraitData.NeutralPortraitPath or "", useBaseNeutral),
+			ChildAnimation = "PortraitGodRayEmitter_Athena",
+			EndFrame = 1,
+			StartFrame = 1,
+			OffsetX = params.portraitData.OffsetX,
+			OffsetY = params.portraitData.OffsetY,
+			Scale = params.portraitData.Scale,
+			CreateAnimation = "OlympianDialogueEntrance_" .. godName,
+			CreateAnimations = params.portraitData.NeutralAnimations or {}, -- This is... blinking, and stuff - which you see in a gods Package.
+			-- SortMode = "Id", --! check what this do
+		}, Order)
+		table.insert(portraitObj, defaultPortrait)
 
 		local defaultExitPortrait = sjson.to_object({
-			Name = "Portrait_" .. params.godName .. "_Default_01_Exit",
+			Name = "Portrait_" .. godName .. "_Default_01_Exit",
 			InheritFrom = "Portrait_God_01_Exit",
 			FilePath = cleanFilePath(pluginGUID, params.portraitData.NeutralPortraitPath or "", useBaseNeutral),
 			EndFrame = 1,
@@ -817,7 +811,7 @@ function public.CreateOlympianSJSONData(params)
 		table.insert(portraitObj, defaultExitPortrait)
 
 		local wrathPortrait = sjson.to_object({
-			Name = "Portrait_" .. params.godName .. "_Default_01_Wrath",
+			Name = "Portrait_" .. godName .. "_Default_01_Wrath",
 			InheritFrom = "Portrait_God_01_Wrath",
 			FilePath = cleanFilePath(pluginGUID, params.portraitData.NeutralPortraitPath or "", useBaseNeutral),
 			EndFrame = 1,
@@ -826,29 +820,29 @@ function public.CreateOlympianSJSONData(params)
 		table.insert(portraitObj, wrathPortrait)
 
 		local displeasedPortrait = sjson.to_object({
-			Name = "Portrait_" .. params.godName .. "_Displeased_01",
-			InheritFrom = "Portrait_" .. params.godName .. "_Default_01",
+			Name = "Portrait_" .. godName .. "_Displeased_01",
+			InheritFrom = "Portrait_" .. godName .. "_Default_01",
 			FilePath = cleanFilePath(pluginGUID, params.portraitData.AnnoyedPortraitPath or "", useBaseAnnoyed),
 		}, Order)
 		table.insert(portraitObj, displeasedPortrait)
 
 		local seriousPortrait = sjson.to_object({
-			Name = "Portrait_" .. params.godName .. "_Serious_01",
-			InheritFrom = "Portrait_" .. params.godName .. "_Default_01",
+			Name = "Portrait_" .. godName .. "_Serious_01",
+			InheritFrom = "Portrait_" .. godName .. "_Default_01",
 			FilePath = cleanFilePath(pluginGUID, params.portraitData.SeriousPortraitPath or "", useBaseSerious),
 		}, Order)
 		table.insert(portraitObj, seriousPortrait)
 
 		local seriousExitPortrait = sjson.to_object({
-			Name = "Portrait_" .. params.godName .. "_Serious_01_Exit",
-			InheritFrom = "Portrait_" .. params.godName .. "_Default_01_Exit",
+			Name = "Portrait_" .. godName .. "_Serious_01_Exit",
+			InheritFrom = "Portrait_" .. godName .. "_Default_01_Exit",
 			FilePath = cleanFilePath(pluginGUID, params.portraitData.SeriousPortraitPath or "", useBaseSerious),
 		}, Order)
 		table.insert(portraitObj, seriousExitPortrait)
 
 		if params.portraitData.DialogueAnimations then
 			local dialogueEntrance = sjson.to_object({
-				Name = "OlympianDialogueEntrance_" .. params.godName,
+				Name = "OlympianDialogueEntrance_" .. godName,
 				InheritFrom = "OlympianDialogueEntrance_Base",
 				StartRed = params.portraitData.DialogueAnimations.DialogueEntrance.RedStart,
 				StartGreen = params.portraitData.DialogueAnimations.DialogueEntrance.GreenStart,
@@ -861,7 +855,7 @@ function public.CreateOlympianSJSONData(params)
 
 			if params.portraitData.DialogueAnimations.DialogueEntranceStreaks then
 				local dialogueStreaks = sjson.to_object({
-					Name = "OlympianDialogueEntranceStreaks_" .. params.godName,
+					Name = "OlympianDialogueEntranceStreaks_" .. godName,
 					InheritFrom = "OlympianDialogueEntranceStreaks_Base",
 					StartRed = params.portraitData.DialogueAnimations.DialogueEntranceStreaks.RedStart,
 					StartGreen = params.portraitData.DialogueAnimations.DialogueEntranceStreaks.GreenStart,
@@ -869,13 +863,13 @@ function public.CreateOlympianSJSONData(params)
 					EndRed = params.portraitData.DialogueAnimations.DialogueEntranceStreaks.RedEnd,
 					EndGreen = params.portraitData.DialogueAnimations.DialogueEntranceStreaks.GreenEnd,
 					EndBlue = params.portraitData.DialogueAnimations.DialogueEntranceStreaks.BlueEnd,
-					VisualFx = "OlympianDialogueEntranceParticle_" .. params.godName,
+					VisualFx = "OlympianDialogueEntranceParticle_" .. godName,
 				}, Order)
 				table.insert(portraitObj, dialogueStreaks)
-				table.insert(dialogueEntrance.CreateAnimations, { Name = "OlympianDialogueEntranceStreaks_" .. params.godName })
+				table.insert(dialogueEntrance.CreateAnimations, { Name = "OlympianDialogueEntranceStreaks_" .. godName })
 			elseif params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst then
 				local particleBurst = sjson.to_object({
-					Name = "OlympianDialogueEntranceParticleBurst_" .. params.godName,
+					Name = "OlympianDialogueEntranceParticleBurst_" .. godName,
 					InheritFrom = "OlympianDialogueEntranceParticleBurst_Base",
 					StartRed = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.RedStart,
 					StartGreen = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.GreenStart,
@@ -887,7 +881,7 @@ function public.CreateOlympianSJSONData(params)
 				table.insert(portraitObj, particleBurst)
 
 				local particleBurstFlip = sjson.to_object({
-					Name = "OlympianDialogueEntranceParticleBurst_" .. params.godName .. "_Flip",
+					Name = "OlympianDialogueEntranceParticleBurst_" .. godName .. "_Flip",
 					InheritFrom = "OlympianDialogueEntranceParticleBurst_Base_Flip",
 					StartRed = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.RedStart,
 					StartGreen = params.portraitData.DialogueAnimations.DialogueEntranceParticleBurst.GreenStart,
@@ -898,14 +892,14 @@ function public.CreateOlympianSJSONData(params)
 				}, Order)
 				table.insert(portraitObj, particleBurstFlip)
 
-				table.insert(dialogueEntrance.CreateAnimations, { Name = "OlympianDialogueEntranceParticleBurst_" .. params.godName })
-				table.insert(dialogueEntrance.CreateAnimations, { Name = "OlympianDialogueEntranceParticleBurst_" .. params.godName .. "_Flip" })
+				table.insert(dialogueEntrance.CreateAnimations, { Name = "OlympianDialogueEntranceParticleBurst_" .. godName })
+				table.insert(dialogueEntrance.CreateAnimations, { Name = "OlympianDialogueEntranceParticleBurst_" .. godName .. "_Flip" })
 			end
 
 			table.insert(portraitObj, dialogueEntrance)
 
 			local dialogueParticle = sjson.to_object({
-				Name = "OlympianDialogueEntranceParticle_" .. params.godName,
+				Name = "OlympianDialogueEntranceParticle_" .. godName,
 				InheritFrom = "OlympianDialogueEntranceParticles_Base",
 				StartRed = params.portraitData.DialogueAnimations.DialogueEntranceParticles.RedStart,
 				StartGreen = params.portraitData.DialogueAnimations.DialogueEntranceParticles.GreenStart,
@@ -937,9 +931,8 @@ basically, get a god name for gift data, else, pluginGUID.name = whatever
 then do the entire keepsake, see like wtf is up with all the gaw damn trait texts and stuff, and make sure i can pass in custom stuff
 then sjson
 --]]
-
-function public.CreateKeepsake(params)
-	if not validateParams(params, { "pluginGUID", "characterName", "internalKeepsakeName", "RarityLevels" }, "CreateKeepsake") then
+function definitions.CreateKeepsake(env, params)
+	if not validateParams(params, { "characterName", "internalKeepsakeName", "RarityLevels" }, "CreateKeepsake") then
 		return nil
 	end
 
@@ -947,135 +940,97 @@ function public.CreateKeepsake(params)
 		rom.log.warning("No Common/Rare/Epic/Heroic rarity multiplier passed in, falling back to default.")
 	end
 
-	local pluginGUID = params.pluginGUID
+	local pluginGUID = env._PLUGIN.guid
+	local internalKeepsakeName = pluginGUID .. "-" .. params.internalBoonName -- used when passing into traits
+	local characterName = pluginGUID .. "-" .. params.characterName -- used when passing into traits
 
-	game.TraitData[params.internalKeepsakeName] = {
-		Icon = params.internalKeepsakeName, --! req
-		Name = params.internalKeepsakeName,
-
-		ShowInHUD = true,
+	game.TraitData[internalKeepsakeName] = {
+		InheritFrom = { "GiftTrait" }, -- don't need "BaseBoonUpgradeKeepsake", handled by DoesNotAutomaticallyExpire
+		Icon = internalKeepsakeName, --! req
+		Name = internalKeepsakeName,
 		Ordered = true,
-		HUDScale = params.HUDScale or 0.435, --? Opt
 		PriorityDisplay = true,
-		ChamberThresholds = { 25, 50 },
-		HideInRunHistory = true,
-		Slot = "Keepsake",
-		InfoBackingAnimation = "KeepsakeSlotBase",
-		RecordCacheOnEquip = true,
 		TraitOrderingValueCache = -1,
-		ActiveSlotOffsetIndex = 0,
-
-		TrayTextBackingAnimation = "TraitTray_LevelBacking_Alt",
-		TrayTextBackingOffsetY = 9,
-		TrayTextOffsetY = -10,
-		NewTraitHighlightAnimation = "NewTraitHighlightKeepsake",
-		PinAnimationIn = "TraitPinIn_Keepsake",
-		PinAnimationOut = "TraitPinOut_Keepsake",
-		TrayHighlightAnimScale = 1.2,
-		PreCreateActiveOverlay = true,
-
-		FrameRarities = {
-			Common = "Frame_Keepsake_Rank1",
-			Rare = "Frame_Keepsake_Rank2",
-			Epic = "Frame_Keepsake_Rank3",
-			Heroic = "Frame_Keepsake_Rank4",
-		},
-
-		CustomRarityLevels = {
-			"TraitLevel_Keepsake1",
-			"TraitLevel_Keepsake2",
-			"TraitLevel_Keepsake3",
-			"TraitLevel_Keepsake4",
-		},
+		DoesNotAutomaticallyExpire = params.DoesNotAutomaticallyExpire,
 
 		EquipSound = params.EquipSound, --? Opt
 		EquipVoiceLines = params.EquipVoiceLines, -- table --? Opt
 
-		--* like, just say they can pass wahtever, or else ill be here foreve
-		-- SpeakerNames = params.SpeakerNames, -- table --? Opt
-		-- BlockedByEnding = params.BlockedByEnding, -- this is like... if the god would be fighting typhon? or what.  --? Opt
-
-		-- find out
-		CustomTrayText = "SisyphusVanillaKeepsake_Tray", -- When you equip it
-		ZeroBonusTrayText = params.internalKeepsakeName .. "_Expired",
-		--???
-		-- InRackTitle = params.internalKeepsakeName .. "_Rack", -- Literally! Unused! Why!
-		-- UnequippedKeepsakeTitle = params.internalKeepsakeName .. "_Rack", -- ? Also no reason.
-		-- CustomTrayNameWhileDead = params.internalKeepsakeName, --? There is literally no reason to do this though.
+		CustomTrayText = internalKeepsakeName .. "_Tray", -- When you equip it
+		ZeroBonusTrayText = internalKeepsakeName .. "_Expired",
 	}
 
-	--? IDK!!!!
-	-- * document the if GodLoot, else do params (basically, if god exists, dev do nothing, otherwise, smile.)
-	-- if params.createGiftData then
-	--     if params.characterName then
+	--? I wrote this code and then forgot what it does
+	--really ugly code, but if god exists, do gift text lines for max gift, otherwise, user args for what is max and min req.
+	if game.LootData[characterName .. "Upgrade"] then
+		local giftTextLines = game.LootData[characterName .. "Upgrade"].GiftTextLineSets
+		local lastGiftLineKey = nil
 
-	--[[
-    really ugly code, but if god exists, do gift text lines for max gift, otherwise, user args for what is max and min req.
-    ]]
-	if game.LootData[params.characterName .. "Upgrade"] then
-		local lootGiftPath = game.LootData[params.characterName .. "Upgrade"].GiftTextLineSets
-		game.GiftData[params.characterName .. "Upgrade"] = {
+		for key, value in pairs(giftTextLines) do
+			lastGiftLineKey = key
+		end
+		game.GiftData[characterName .. "Upgrade"] = {
 			InheritFrom = { "DefaultGiftData" },
 			MaxedRequirement = {
 				{
-					PathTrue = { "GameState", "TextLinesRecord", lootGiftPath[#lootGiftPath] },
+					PathTrue = { "GameState", "TextLinesRecord", game.LootData[characterName .. "Upgrade"][lastGiftLineKey] },
 				},
 			},
-			MaxedIcon = "Keepsake_" .. params.characterName .. "_Corner",
-			MaxedSticker = "Keepsake_" .. params.characterName,
+			MaxedIcon = "Keepsake_" .. characterName .. "_Corner",
+			MaxedSticker = "Keepsake_" .. characterName,
 			[1] = {
 				GameStateRequirements = {
 					{
-						PathTrue = { "GameState", "TextLinesRecord", game.LootData[params.characterName .. "Upgrade"][1] },
+						PathTrue = { "GameState", "TextLinesRecord", game.LootData[characterName .. "Upgrade"][1] },
 					},
 				},
-				Gift = params.internalKeepsakeName,
+				Gift = internalKeepsakeName,
 			},
 		}
-		game.TraitData[params.internalKeepsakeName].SignOffData = {
+		game.TraitData[internalKeepsakeName].SignOffData = {
 			{
 				GameStateRequirements = {
 					{
-						PathTrue = { "GameState", "TextLinesRecord", lootGiftPath[#lootGiftPath] },
+						PathTrue = { "GameState", "TextLinesRecord", game.LootData[characterName .. "Upgrade"][lastGiftLineKey] },
 					},
 				},
-				Text = "Signoff" .. params.characterName .. "_Max",
+				Text = "Signoff" .. characterName .. "_Max",
 			},
 			{
-				Text = "Signoff" .. params.characterName,
+				Text = "Signoff" .. characterName,
 			},
 		}
 	else
-		game.GiftData[params.characterName .. "Upgrade"] = {
+		game.GiftData[characterName .. "Upgrade"] = {
 			InheritFrom = { "DefaultGiftData" },
 			MaxedRequirement = params.maxRequirement,
-			MaxedIcon = "Keepsake_" .. params.characterName .. "_Corner",
-			MaxedSticker = "Keepsake_" .. params.characterName,
+			MaxedIcon = "Keepsake_" .. characterName .. "_Corner",
+			MaxedSticker = "Keepsake_" .. characterName,
 			[1] = {
 				GameStateRequirements = params.minRequirement,
-				Gift = params.internalKeepsakeName,
+				Gift = internalKeepsakeName,
 			},
 		}
-		game.TraitData[params.internalKeepsakeName].SignOffData = {
+		game.TraitData[internalKeepsakeName].SignOffData = {
 			{
 				GameStateRequirements = params.maxRequirement,
-				Text = "Signoff" .. params.characterName .. "_Max",
+				Text = "Signoff" .. characterName .. "_Max",
 			},
 			{
-				Text = "Signoff" .. params.characterName,
+				Text = "Signoff" .. characterName,
 			},
 		}
 	end
 
 	if params.ExtraFields then
 		for k, v in pairs(params.ExtraFields) do
-			game.TraitData[params.internalKeepsakeName][k] = v
+			game.TraitData[internalKeepsakeName][k] = v
 		end
 	end
 
 	if params.RarityLevels then
-		game.TraitData[params.internalKeepsakeName].RarityLevels = {}
-		local rarity = game.TraitData[params.internalKeepsakeName].RarityLevels
+		game.TraitData[internalKeepsakeName].RarityLevels = {}
+		local rarity = game.TraitData[internalKeepsakeName].RarityLevels
 
 		for rarityName, value in pairs(params.RarityLevels) do
 			if type(value) == "number" then
@@ -1095,44 +1050,44 @@ function public.CreateKeepsake(params)
 			end
 		end
 	end
-	table.insert(game.ScreenData.KeepsakeRack.ItemOrder, params.internalKeepsakeName)
+	table.insert(game.ScreenData.KeepsakeRack.ItemOrder, internalKeepsakeName)
 
 	-- SJSON stuff now
 	local textsins = {}
 	local vfxins = {}
 
 	if params.Keepsake then
-		textsins[params.internalKeepsakeName] = {
+		textsins[internalKeepsakeName] = {
 			InheritFrom = "BaseBoonMultiline",
 			DisplayName = params.Keepsake.displayName or "Lorem Ipsum Display Name",
 			Description = params.Keepsake.description or "Lorem Ipsum Description",
 		}
 
 		if params.Keepsake.trayDescription then
-			textsins[params.internalKeepsakeName .. "_Tray"] = {
-				InheritFrom = params.internalKeepsakeName,
+			textsins[internalKeepsakeName .. "_Tray"] = {
+				InheritFrom = internalKeepsakeName,
 				Description = params.Keepsake.trayDescription,
 			}
 		else
-			textsins[params.internalKeepsakeName .. "_Tray"] = {
-				InheritFrom = params.internalKeepsakeName,
+			textsins[internalKeepsakeName .. "_Tray"] = {
+				InheritFrom = internalKeepsakeName,
 				Description = params.Keepsake.description or "Lorem Ipsum Tray Description", -- fall to default
 			}
 		end
 
 		if params.Keepsake.trayExpired then
-			textsins[params.internalKeepsakeName .. "_Expired"] = {
-				InheritFrom = params.internalKeepsakeName,
+			textsins[internalKeepsakeName .. "_Expired"] = {
+				InheritFrom = internalKeepsakeName,
 				Description = params.Keepsake.trayExpired,
 			}
 		end
 	end
 
-	textsins["Signoff" .. params.characterName] = {
+	textsins["Signoff" .. characterName] = {
 		DisplayName = "From " .. params.characterName,
 	}
 
-	textsins["Signoff" .. params.characterName .. "_Max"] = {
+	textsins["Signoff" .. characterName .. "_Max"] = {
 		DisplayName = params.Keepsake.signoffMax or ("Max Friendship Signoff not implemented for " .. params.characterName),
 	}
 
@@ -1141,40 +1096,27 @@ function public.CreateKeepsake(params)
 		local useBaseMaxIcon = params.iconPathOverrides and params.iconPathOverrides.maxIcon or false
 		local useBaseMaxCornerIcon = params.iconPathOverrides and params.iconPathOverrides.maxCornerIcon or false
 
-		vfxins[params.internalKeepsakeName] = {
+		vfxins[internalKeepsakeName] = {
 			InheritFrom = "KeepsakeIcon",
 			FilePath = cleanFilePath(pluginGUID, params.Icons.iconPath, useBaseIcon),
 		}
 		if not params.Icons.iconPath then -- def icon
-			game.LootData[params.characterName .. "Upgrade"].Icon = "Keepsake_34"
+			game.TraitData[internalKeepsakeName].Icon = "Keepsake_34"
 		end
 
 		if params.Icons.maxIcon then
-			vfxins["Keepsake_" .. params.characterName] = {
+			vfxins["Keepsake_" .. characterName] = {
 				InheritFrom = "KeepsakeMax",
 				FilePath = cleanFilePath(pluginGUID, params.Icons.maxIcon, useBaseMaxIcon),
 			}
 		end
 
 		if params.Icons.maxCornerIcon then
-			vfxins["Keepsake_" .. params.characterName .. "_Corner"] = {
+			vfxins["Keepsake_" .. characterName .. "_Corner"] = {
 				InheritFrom = "KeepsakeMax_Corner",
 				FilePath = cleanFilePath(pluginGUID, params.Icons.maxCornerIcon, useBaseMaxCornerIcon),
 			}
 		end
-	end
-
-	if params.customStatLine then
-		local statline = sjson.to_object({
-			Id = params.customStatLine.ID,
-			InheritFrom = "BaseStatLine",
-			DisplayName = params.customStatLine.displayName or "Lorem Ipsum DisplayName",
-			Description = params.customStatLine.description or "Lorem Ipsum Description",
-		}, Order)
-
-		sjson.hook(TraitTextFile, function(data)
-			table.insert(data.Texts, statline)
-		end)
 	end
 
 	local textObjects = {}
@@ -1216,14 +1158,12 @@ function public.CreateKeepsake(params)
 end
 
 --[[
-Required:   "pluginGUID", "characterName", "internalBoonName", "isLegendary", "Elements"
+Required:   "characterName", "internalBoonName"
 Optional:   "RarityLevels", "Slot", "BlockStacking", "StatLines", "ExtractValues", "displayName"
             "ExtraFields", "boonIconPath", "requirements", "flavourText", "addToExistingGod", "reuseBaseIcons"
 ]]
-
---TODO add a way for people to create a new boon, but then just insert into weapon/traits and update dics
-function public.CreateBoon(params)
-	if not validateParams(params, { "pluginGUID", "characterName", "internalBoonName", "isLegendary", "Elements" }, "CreateBoon") then
+function definitions.CreateBoon(env, params)
+	if not validateParams(params, { "characterName", "internalBoonName" }, "CreateBoon") then
 		return nil
 	end
 
@@ -1231,39 +1171,49 @@ function public.CreateBoon(params)
 		rom.log.warning("No rarity multiplier passed in, falling back to default.")
 	end
 
-	local pluginGUID = params.pluginGUID
-	local intboonName = params.internalBoonName -- used when passing into traits
+	local pluginGUID = env._PLUGIN.guid
+	local intboonName = pluginGUID .. "-" .. params.internalBoonName -- used when passing into traits
 
-	local characterCoreTraits = params.characterName .. "CoreTraits"
-	local characterUpgrade = params.characterName .. "Upgrade"
+	local characterCoreTraits = pluginGUID .. "-" .. params.characterName .. "CoreTraits"
+	local characterUpgrade = pluginGUID .. "-" .. params.characterName .. "Upgrade"
 
 	-- Creating the boon functions itself
 	game.TraitData[intboonName] = {
-		Elements = params.Elements or {},
+		InheritFrom = {}, -- this is where the type of boon really happens
 		Name = intboonName, -- eg TycheWeaponBoon
 		BoonInfoTitle = intboonName,
 		Icon = intboonName,
 		Slot = params.Slot,
-		BlockStacking = params.BlockStacking or false,
-		isDuoBoon = params.Duo or false,
-		IsElementalTrait = params.IsElementalTrait or false,
-		Legendary = params.isLegendary or false,
+		BlockStacking = params.BlockStacking, -- specfic override
 
 		StatLines = params.StatLines or {},
 		ExtractValues = params.ExtractValues or {},
 	}
 
+	if params.Elements then
+		rom.log.warning("Usage of `Elements` is no longer needed, pass an element into `InheritFrom` e.g: 'AirBoon'.")
+
+		if params.Elements == "Air" then
+			table.insert(game.TraitData[intboonName].InheritFrom, "AirBoon")
+		elseif params.Elements == "Fire" then
+			table.insert(game.TraitData[intboonName].InheritFrom, "FireBoon")
+		elseif params.Elements == "Earth" then
+			table.insert(game.TraitData[intboonName].InheritFrom, "EarthBoon")
+		elseif params.Elements == "Water" then
+			table.insert(game.TraitData[intboonName].InheritFrom, "WaterBoon")
+		elseif params.Elements == "Aether" then
+			table.insert(game.TraitData[intboonName].InheritFrom, "AetherBoon")
+		end
+	end
+	if params.isLegendary then
+		rom.log.warning('Usage of `isLegendary` is no longer needed, pass "LegendaryTrait" into `InheritFrom`.')
+		table.insert(game.TraitData[intboonName].InheritFrom, "LegendaryTrait")
+	end
+
 	if params.ExtraFields then
 		for k, v in pairs(params.ExtraFields) do
 			game.TraitData[intboonName][k] = v
 		end
-	end
-
-	if not params.isLegendary then
-		--cost is 30 or 120, no idea what it do
-		game.TraitData[intboonName].Cost = 30
-	else
-		game.TraitData[intboonName].Cost = 120
 	end
 
 	if params.RarityLevels then
@@ -1287,6 +1237,11 @@ function public.CreateBoon(params)
 				end
 			end
 		end
+	end
+
+	-- just do a check incase nothing is in inheritfrom, fall back to basetrait
+	if game.TraitData[intboonName].InheritFrom == nil then
+		game.TraitData[intboonName].InheritFrom = { "BaseTrait", "FireBoon" }
 	end
 
 	local traitIcon
@@ -1347,7 +1302,7 @@ function public.CreateBoon(params)
 		end)
 	end
 
-	game.TraitData[params.internalBoonName].TraitOrderingValueCache = GetTraitOrderingValue(game.TraitData[params.internalBoonName])
+	game.TraitData[intboonName].TraitOrderingValueCache = GetTraitOrderingValue(game.TraitData[intboonName])
 
 	if params.addToExistingGod then
 		local characterData = game.LootData[characterUpgrade]
@@ -1355,15 +1310,35 @@ function public.CreateBoon(params)
 		if characterData then
 			if params.Slot == "Melee" or params.Slot == "Secondary" or params.Slot == "Ranged" or params.Slot == "Rush" or params.Slot == "Mana" then
 				if characterData.WeaponUpgrades then
-					if type(params.addToExistingGod) == "table" and params.addToExistingGod.boonPosition then
-						table.insert(characterData.WeaponUpgrades, params.addToExistingGod.boonPosition, intboonName)
-					else
-						table.insert(characterData.WeaponUpgrades, intboonName)
+					local alreadyExists = false
+					for _, existingBoon in ipairs(characterData.WeaponUpgrades) do
+						if existingBoon == intboonName then
+							alreadyExists = true
+							break
+						end
+					end
+
+					if not alreadyExists then
+						if type(params.addToExistingGod) == "table" and params.addToExistingGod.boonPosition then
+							table.insert(characterData.WeaponUpgrades, params.addToExistingGod.boonPosition, intboonName)
+						else
+							table.insert(characterData.WeaponUpgrades, intboonName)
+						end
 					end
 				end
 			else
 				if characterData.Traits then
-					table.insert(characterData.Traits, intboonName)
+					local alreadyExists = false
+					for _, existingTrait in ipairs(characterData.Traits) do
+						if existingTrait == intboonName then
+							alreadyExists = true
+							break
+						end
+					end
+
+					if not alreadyExists then
+						table.insert(characterData.Traits, intboonName)
+					end
 				end
 			end
 		end
@@ -1406,35 +1381,95 @@ function public.CreateBoon(params)
 	end
 end
 
--- Extra func for testing or function checsk
-function public.IsGodRegistered(godName, debug)
+--#region Extra func for testing or function checsk
+function definitions.IsGodRegistered(env, godName, debug)
 	if debug then
-		local isRegistered = game.LootData[godName .. "Upgrade"] ~= nil
+		local isRegistered = game.LootData[env._PLUGIN.guid .. "-" .. godName .. "Upgrade"] ~= nil
 		rom.log.warning("IsGodRegistered: " .. godName .. " = " .. tostring(isRegistered))
 		return isRegistered
 	end
 
-	return game.LootData[godName .. "Upgrade"] ~= nil
+	return game.LootData[env._PLUGIN.guid .. "-" .. godName .. "Upgrade"] ~= nil
 end
 
-function public.IsKeepsakeRegistered(internalKeepsakeName, debug)
+function definitions.GetInternalGodName(env, godName)
+	if not godName or type(godName) ~= "string" then
+		return nil
+	end
+	return env._PLUGIN.guid .. "-" .. godName .. "Upgrade"
+end
+
+function definitions.GetGodData(env, godName)
+	if not godName or type(godName) ~= "string" then
+		return nil
+	end
+	local fullGodName = env._PLUGIN.guid .. "-" .. godName
+	return game.LootData[fullGodName]
+end
+
+function definitions.IsKeepsakeRegistered(env, internalKeepsakeName, debug)
 	if debug then
-		local isRegistered = game.TraitData[internalKeepsakeName] ~= nil
+		local isRegistered = game.TraitData[env._PLUGIN.guid .. "-" .. internalKeepsakeName] ~= nil
 		rom.log.warning("IsKeepsakeRegistered: " .. internalKeepsakeName .. " = " .. tostring(isRegistered))
 		return isRegistered
 	end
 
-	return game.TraitData[internalKeepsakeName] ~= nil
+	return game.TraitData[env._PLUGIN.guid .. "-" .. internalKeepsakeName]
 end
 
-function public.IsBoonRegistered(internalBoonName, debug)
+function definitions.GetInternalKeepsakeName(env, internalKeepsakeName)
+	if not internalKeepsakeName or type(internalKeepsakeName) ~= "string" then
+		return nil
+	end
+	return env._PLUGIN.guid .. "-" .. internalKeepsakeName
+end
+
+function definitions.GetKeepsakeData(env, internalKeepsakeName)
+	if not internalKeepsakeName or type(internalKeepsakeName) ~= "string" then
+		return nil
+	end
+	local fullKeepsakeName = env._PLUGIN.guid .. "-" .. internalKeepsakeName
+	return game.TraitData[fullKeepsakeName]
+end
+
+function definitions.IsBoonRegistered(env, internalBoonName, debug)
 	if debug then
-		local isRegistered = game.TraitData[internalBoonName] ~= nil
+		local isRegistered = game.TraitData[env._PLUGIN.guid .. "-" .. internalBoonName] ~= nil
 		rom.log.warning("IsBoonRegistered: " .. internalBoonName .. " = " .. tostring(isRegistered))
 		return isRegistered
 	end
 
-	return game.TraitData[internalBoonName] ~= nil
+	return game.TraitData[env._PLUGIN.guid .. "-" .. internalBoonName] ~= nil
+end
+
+function definitions.GetInternalBoonName(env, internalBoonName)
+	if not internalBoonName or type(internalBoonName) ~= "string" then
+		return nil
+	end
+	return env._PLUGIN.guid .. "-" .. internalBoonName
+end
+
+function definitions.GetBoonData(env, internalBoonName)
+	if not internalBoonName or type(internalBoonName) ~= "string" then
+		return nil
+	end
+	local fullBoonName = env._PLUGIN.guid .. "-" .. internalBoonName
+	return game.TraitData[fullBoonName]
+end
+--#endregion
+
+function public.setup(env)
+	local binds = {}
+	for k, v in pairs(definitions) do
+		binds[k] = function(...)
+			return v(env, ...)
+		end
+	end
+	return binds
+end
+
+function public.auto()
+	return public.setup(envy.getfenv(2))
 end
 
 modutil.once_loaded.game(function()
@@ -1443,23 +1478,340 @@ end)
 
 mods.on_all_mods_loaded(function()
 	modutil.once_loaded.game(function()
-		for traitName, linkedData in pairs(TraitRequirements) do
-			-- Process type of link
-			ScreenData.BoonInfo.TraitRequirementsDictionary[traitName] = DeepCopyTable(linkedData)
-			if linkedData.OneOf then
-				ScreenData.BoonInfo.TraitRequirementsDictionary[traitName].Type = "OneOf"
-			elseif linkedData.TwoOf then
-				ScreenData.BoonInfo.TraitRequirementsDictionary[traitName].Type = "TwoOf"
-			elseif linkedData.OneFromEachSet then
-				ScreenData.BoonInfo.TraitRequirementsDictionary[traitName].Type = "OneFromEachSet"
-				if TableLength(linkedData.OneFromEachSet) == 3 and #linkedData.OneFromEachSet[1] == #linkedData.OneFromEachSet[2] and #linkedData.OneFromEachSet[2] == #linkedData.OneFromEachSet[3] then
-					ScreenData.BoonInfo.TraitRequirementsDictionary[traitName].Type = "TwoOf"
+		for traitName, traitData in pairs(TraitData) do
+			traitData.Name = traitName
+			ProcessDataInheritance(traitData, TraitData)
+			local autoExpandProperties = {
+				WeaponProperties = "WeaponProperty",
+				ProjectileProperties = "ProjectileProperty",
+				EffectProperties = "EffectProperty",
+			}
+
+			if traitData.PropertyChanges ~= nil and not traitData.ExpandedProperties then
+				local addlPropertyChanges = {}
+				for k, propertyChange in pairs(traitData.PropertyChanges) do
+					for expandFromName, expandToName in pairs(autoExpandProperties) do
+						if propertyChange[expandFromName] then
+							for property, changeValue in pairs(propertyChange[expandFromName]) do
+								if property ~= "ReportValues" then
+									local newPropertyChange = ShallowCopyTable(propertyChange)
+									for autoExpandPropertyName in pairs(autoExpandProperties) do
+										newPropertyChange[autoExpandPropertyName] = nil
+									end
+									newPropertyChange[expandToName] = property
+									newPropertyChange.ChangeValue = changeValue
+									newPropertyChange.ChangeType = "Absolute"
+									if propertyChange[expandFromName].ReportValues then
+										for reportKey, reportSourceName in pairs(propertyChange[expandFromName].ReportValues) do
+											if reportSourceName == property then
+												newPropertyChange.ReportValues = {}
+												newPropertyChange.ReportValues[reportKey] = "ChangeValue"
+											end
+										end
+									end
+									table.insert(addlPropertyChanges, newPropertyChange)
+								end
+							end
+						end
+					end
+					if propertyChange.SpeedPropertyChanges then
+						local weaponNames = ShallowCopyTable(propertyChange.WeaponNames)
+						if weaponNames == nil then
+							weaponNames = { propertyChange.WeaponName }
+						end
+						for q, weaponName in pairs(weaponNames) do
+							local newPropertyChanges = DeepCopyTable(WeaponData.DefaultWeaponValues.DefaultSpeedPropertyChanges)
+							if WeaponData[weaponName] and WeaponData[weaponName].SpeedPropertyChanges then
+								newPropertyChanges = DeepCopyTable(WeaponData[weaponName].SpeedPropertyChanges)
+							end
+							for s, newPropertyChange in pairs(newPropertyChanges) do
+								newPropertyChange = MergeTables(newPropertyChange, propertyChange)
+								newPropertyChange.WeaponNames = nil
+								newPropertyChange.WeaponName = weaponName
+								newPropertyChange.ChangeType = "Multiply"
+								if newPropertyChange.InvertSource then
+									if newPropertyChange.ChangeValue then
+										newPropertyChange.ChangeValue = 1 / newPropertyChange.ChangeValue
+									end
+									if newPropertyChange.BaseValue then
+										newPropertyChange.BaseValue = 1 / newPropertyChange.BaseValue
+									end
+								end
+								newPropertyChange.SpeedPropertyChanges = nil
+								table.insert(addlPropertyChanges, newPropertyChange)
+							end
+						end
+					end
+				end
+				if not IsEmpty(addlPropertyChanges) then
+					ConcatTableValues(traitData.PropertyChanges, addlPropertyChanges)
+					traitData.ExpandedProperties = true
 				end
 			end
+			if not traitData.ExcludeLinked then
+				if traitData.DamageOnFireWeapons and not traitData.DamageOnFireWeapons.ExcludeLinked then
+					traitData.DamageOnFireWeapons.WeaponNames = AddLinkedWeapons(traitData.DamageOnFireWeapons.WeaponNames)
+				end
+				if traitData.AddOutgoingLifestealModifiers then
+					if traitData.AddOutgoingLifestealModifiers.ValidWeapons then
+						if not traitData.AddOutgoingLifestealModifiers.ExcludeLinked then
+							traitData.AddOutgoingLifestealModifiers.ValidWeapons = AddLinkedWeapons(traitData.AddOutgoingLifestealModifiers.ValidWeapons)
+						end
+						traitData.AddOutgoingLifestealModifiers.ValidWeaponsLookup = ToLookup(traitData.AddOutgoingLifestealModifiers.ValidWeapons)
+					end
+				end
+				if traitData.DamageClamps and traitData.DamageClamps.ValidProjectiles then
+					traitData.DamageClamps.ValidProjectilesLookup = ToLookup(traitData.DamageClamps.ValidProjectiles)
+				end
+				if traitData.AddOutgoingDamageModifiers then
+					if traitData.AddOutgoingDamageModifiers.ValidWeapons then
+						if not traitData.AddOutgoingDamageModifiers.ExcludeLinked then
+							traitData.AddOutgoingDamageModifiers.ValidWeapons = AddLinkedWeapons(traitData.AddOutgoingDamageModifiers.ValidWeapons)
+						end
+						traitData.AddOutgoingDamageModifiers.ValidWeaponsLookup = ToLookup(traitData.AddOutgoingDamageModifiers.ValidWeapons)
+					end
+					if traitData.AddOutgoingDamageModifiers.ValidProjectiles then
+						traitData.AddOutgoingDamageModifiers.ValidProjectilesLookup = ToLookup(traitData.AddOutgoingDamageModifiers.ValidProjectiles)
+					end
+					if traitData.AddOutgoingDamageModifiers.ValidEnchantments and not traitData.AddOutgoingDamageModifiers.ExcludeLinked then
+						for key, weaponNames in pairs(traitData.AddOutgoingDamageModifiers.ValidEnchantments.TraitDependentWeapons) do
+							traitData.AddOutgoingDamageModifiers.ValidEnchantments.TraitDependentWeapons[key] = AddLinkedWeapons(weaponNames)
+						end
+
+						if traitData.AddOutgoingDamageModifiers.ValidEnchantments.ValidWeapons then
+							traitData.AddOutgoingDamageModifiers.ValidEnchantments.ValidWeapons = AddLinkedWeapons(traitData.AddOutgoingDamageModifiers.ValidEnchantments.ValidWeapons)
+						end
+					end
+					if traitData.AddOutgoingDamageModifiers.EmptySlotValidData then
+						for key, weaponNames in pairs(traitData.AddOutgoingDamageModifiers.EmptySlotValidData) do
+							traitData.AddOutgoingDamageModifiers.EmptySlotValidData[key] = AddLinkedWeapons(weaponNames)
+						end
+					end
+				end
+
+				if traitData.AddOutgoingDamageModifiersArray then
+					for i, data in pairs(traitData.AddOutgoingDamageModifiersArray) do
+						if data.ValidWeapons then
+							if not data.ExcludeLinked then
+								data.ValidWeapons = AddLinkedWeapons(data.ValidWeapons)
+							end
+							data.ValidWeaponsLookup = ToLookup(data.ValidWeapons)
+						end
+						if data.ValidProjectiles then
+							data.ValidProjectilesLookup = ToLookup(data.ValidProjectiles)
+						end
+						if data.ValidEnchantments and not data.ExcludeLinked then
+							for key, weaponNames in pairs(data.ValidEnchantments.TraitDependentWeapons) do
+								data.ValidEnchantments.TraitDependentWeapons[key] = AddLinkedWeapons(weaponNames)
+							end
+
+							if data.ValidEnchantments.ValidWeapons then
+								data.ValidEnchantments.ValidWeapons = AddLinkedWeapons(data.ValidEnchantments.ValidWeapons)
+							end
+						end
+						if data.EmptySlotValidData then
+							for key, weaponNames in pairs(data.EmptySlotValidData) do
+								data.EmptySlotValidData[key] = AddLinkedWeapons(weaponNames)
+							end
+						end
+					end
+				end
+
+				if traitData.AddOutgoingCritModifiers then
+					if traitData.AddOutgoingCritModifiers.ValidWeapons then
+						if not traitData.AddOutgoingCritModifiers.ExcludeLinked then
+							traitData.AddOutgoingCritModifiers.ValidWeapons = AddLinkedWeapons(traitData.AddOutgoingCritModifiers.ValidWeapons)
+						end
+						traitData.AddOutgoingCritModifiers.ValidWeaponsLookup = ToLookup(traitData.AddOutgoingCritModifiers.ValidWeapons)
+					end
+					if traitData.AddOutgoingCritModifiers.ValidProjectiles then
+						traitData.AddOutgoingCritModifiers.ValidProjectilesLookup = ToLookup(traitData.AddOutgoingCritModifiers.ValidProjectiles)
+					end
+				end
+				if traitData.AddOutgoingDoubleDamageModifiers then
+					if traitData.AddOutgoingDoubleDamageModifiers.ValidWeapons then
+						if not traitData.AddOutgoingDoubleDamageModifiers.ExcludeLinked then
+							traitData.AddOutgoingDoubleDamageModifiers.ValidWeapons = AddLinkedWeapons(traitData.AddOutgoingDoubleDamageModifiers.ValidWeapons)
+						end
+						traitData.AddOutgoingDoubleDamageModifiers.ValidWeaponsLookup = ToLookup(traitData.AddOutgoingDoubleDamageModifiers.ValidWeapons)
+					end
+				end
+
+				if traitData.ChargeStageModifiers then
+					if traitData.ChargeStageModifiers.ValidWeapons then
+						if not traitData.ChargeStageModifiers.ExcludeLinked then
+							traitData.ChargeStageModifiers.ValidWeapons = AddLinkedWeapons(traitData.ChargeStageModifiers.ValidWeapons)
+						end
+						traitData.ChargeStageModifiers.ValidWeaponsLookup = ToLookup(traitData.ChargeStageModifiers.ValidWeapons)
+					end
+				end
+
+				if traitData.ChargeStageModifiersArray then
+					for i, data in pairs(traitData.ChargeStageModifiersArray) do
+						if data.ValidWeapons then
+							if not data.ExcludeLinked then
+								data.ValidWeapons = AddLinkedWeapons(data.ValidWeapons)
+							end
+							data.ValidWeaponsLookup = ToLookup(data.ValidWeapons)
+						end
+					end
+				end
+
+				if traitData.OnWeaponChargeFunctions then
+					if traitData.OnWeaponChargeFunctions.ValidWeapons then
+						if not traitData.OnWeaponChargeFunctions.ExcludeLinked then
+							traitData.OnWeaponChargeFunctions.ValidWeapons = AddLinkedWeapons(traitData.OnWeaponChargeFunctions.ValidWeapons)
+						end
+					end
+				end
+				if traitData.OnWeaponFiredFunctions then
+					if traitData.OnWeaponFiredFunctions.ValidWeapons then
+						if not traitData.OnWeaponFiredFunctions.ExcludeLinked then
+							traitData.OnWeaponFiredFunctions.ValidWeapons = AddLinkedWeapons(traitData.OnWeaponFiredFunctions.ValidWeapons)
+						end
+						traitData.OnWeaponFiredFunctions.ValidWeaponsLookup = ToLookup(traitData.OnWeaponFiredFunctions.ValidWeapons)
+					end
+				end
+				if traitData.OnWeaponChargeCanceledFunctions then
+					if traitData.OnWeaponChargeCanceledFunctions.ValidWeapons then
+						if not traitData.OnWeaponChargeCanceledFunctions.ExcludeLinked then
+							traitData.OnWeaponChargeCanceledFunctions.ValidWeapons = AddLinkedWeapons(traitData.OnWeaponChargeCanceledFunctions.ValidWeapons)
+						end
+					end
+				end
+				if traitData.OnProjectileDeathFunction then
+					if traitData.OnProjectileDeathFunction.ValidWeapons then
+						if not traitData.OnProjectileDeathFunction.ExcludeLinked then
+							traitData.OnProjectileDeathFunction.ValidWeapons = AddLinkedWeapons(traitData.OnProjectileDeathFunction.ValidWeapons)
+						end
+						traitData.OnProjectileDeathFunction.ValidWeaponsLookup = ToLookup(traitData.OnProjectileDeathFunction.ValidWeapons)
+					end
+					if traitData.OnProjectileDeathFunction.ValidProjectiles then
+						traitData.OnProjectileDeathFunction.ValidProjectilesLookup = ToLookup(traitData.OnProjectileDeathFunction.ValidProjectiles)
+					end
+				end
+				if traitData.OnProjectileCreationFunction then
+					if traitData.OnProjectileCreationFunction.ValidProjectiles then
+						traitData.OnProjectileCreationFunction.ValidProjectilesLookup = ToLookup(traitData.OnProjectileCreationFunction.ValidProjectiles)
+					end
+				end
+				if traitData.OnEnemyDamagedAction then
+					if traitData.OnEnemyDamagedAction.ValidWeapons then
+						if not traitData.OnEnemyDamagedAction.ExcludeLinked then
+							traitData.OnEnemyDamagedAction.ValidWeapons = AddLinkedWeapons(traitData.OnEnemyDamagedAction.ValidWeapons)
+						end
+						traitData.OnEnemyDamagedAction.ValidWeaponsLookup = ToLookup(traitData.OnEnemyDamagedAction.ValidWeapons)
+					end
+					if traitData.OnEnemyDamagedAction.ValidProjectiles then
+						traitData.OnEnemyDamagedAction.ValidProjectilesLookup = ToLookup(traitData.OnEnemyDamagedAction.ValidProjectiles)
+					end
+					if traitData.OnEnemyDamagedAction.ExcludeProjectiles then
+						traitData.OnEnemyDamagedAction.ExcludeProjectilesLookup = ToLookup(traitData.OnEnemyDamagedAction.ExcludeProjectiles)
+					end
+					if traitData.OnEnemyDamagedAction.Args then
+						if traitData.OnEnemyDamagedAction.Args.TraitWeaponMappings then
+							for traitName, weaponList in pairs(traitData.OnEnemyDamagedAction.Args.TraitWeaponMappings) do
+								traitData.OnEnemyDamagedAction.Args.TraitWeaponMappings[traitName] = AddLinkedWeapons(weaponList)
+							end
+							traitData.OnEnemyDamagedAction.Args.TraitWeaponMappingsLookup = {}
+							for traitName, weaponList in pairs(traitData.OnEnemyDamagedAction.Args.TraitWeaponMappings) do
+								for i, weaponName in pairs(weaponList) do
+									traitData.OnEnemyDamagedAction.Args.TraitWeaponMappingsLookup[weaponName] = traitName
+								end
+							end
+						end
+						if traitData.OnEnemyDamagedAction.Args.MultihitWeaponWhitelist then
+							if not traitData.OnEnemyDamagedAction.Args.ExcludeLinked then
+								traitData.OnEnemyDamagedAction.Args.MultihitWeaponWhitelist = AddLinkedWeapons(traitData.OnEnemyDamagedAction.Args.MultihitWeaponWhitelist)
+							end
+							traitData.OnEnemyDamagedAction.Args.MultihitWeaponWhitelistLookup = ToLookup(traitData.OnEnemyDamagedAction.Args.MultihitWeaponWhitelist)
+						end
+						if traitData.OnEnemyDamagedAction.Args.MultihitProjectileWhitelist then
+							traitData.OnEnemyDamagedAction.Args.MultihitProjectileWhitelistLookup = ToLookup(traitData.OnEnemyDamagedAction.Args.MultihitProjectileWhitelist)
+						end
+						if traitData.OnEnemyDamagedAction.Args.ValidProjectiles then
+							traitData.OnEnemyDamagedAction.Args.ValidProjectilesLookup = ToLookup(traitData.OnEnemyDamagedAction.Args.ValidProjectiles)
+						end
+						if traitData.OnEnemyDamagedAction.Args.ValidEffectNames then
+							traitData.OnEnemyDamagedAction.Args.ValidEffectNamesLookup = ToLookup(traitData.OnEnemyDamagedAction.Args.ValidEffectNames)
+						end
+					end
+				end
+			end
+			if traitData.AddWeaponsToTraits and traitData.AddWeaponsToTraits.WeaponNames then
+				if not traitData.AddWeaponsToTraits.ExcludeLinked then
+					traitData.AddWeaponsToTraits.WeaponNames = AddLinkedWeapons(traitData.AddWeaponsToTraits.WeaponNames)
+				end
+
+				traitData.AddWeaponsToTraits.WeaponNamesLookup = ToLookup(traitData.AddWeaponsToTraits.WeaponNames)
+			end
+			if traitData.ManaCostModifiers and traitData.ManaCostModifiers.WeaponNames then
+				if not traitData.ManaCostModifiers.ExcludeLinked then
+					traitData.ManaCostModifiers.WeaponNames = AddLinkedWeapons(traitData.ManaCostModifiers.WeaponNames)
+				end
+
+				traitData.ManaCostModifiers.WeaponNamesLookup = ToLookup(traitData.ManaCostModifiers.WeaponNames)
+			end
+			if traitData.WeaponSpeedMultiplier and traitData.WeaponSpeedMultiplier.WeaponNames then
+				if not traitData.WeaponSpeedMultiplier.ExcludeLinked then
+					traitData.WeaponSpeedMultiplier.WeaponNames = AddLinkedWeapons(traitData.WeaponSpeedMultiplier.WeaponNames)
+				end
+
+				traitData.WeaponSpeedMultiplier.WeaponNamesLookup = ToLookup(traitData.WeaponSpeedMultiplier.WeaponNames)
+			end
+			if traitData.OnResourceMaxHealth then
+				traitData.OnResourceMaxHealth.ResourceNamesLookup = ToLookup(traitData.OnResourceMaxHealth.ResourceNames)
+			end
+			if traitData.OnResourceMaxMana then
+				traitData.OnResourceMaxMana.ResourceNamesLookup = ToLookup(traitData.OnResourceMaxMana.ResourceNames)
+			end
+			if traitData.WeaponDataOverride then
+				for weaponName, weaponData in pairs(traitData.WeaponDataOverride) do
+					if weaponData.Sounds ~= nil then
+						for _, key in pairs({ "ChargeSounds", "ChargeStageSounds" }) do
+							if weaponData.Sounds[key] then
+								for k, soundElement in pairs(weaponData.Sounds[key]) do
+									if soundElement.StoppedBy ~= nil then
+										soundElement.StoppedByLookup = soundElement.StoppedByLookup or {}
+										for k, eventName in pairs(soundElement.StoppedBy) do
+											soundElement.StoppedByLookup[eventName] = true
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+			local roomExitTraitKeys = {
+				DoorHeal = "CheckDoorHealTrait",
+				DoorHealFixed = "CheckDoorHealTrait",
+				DoorHealIgnorePenaltyFixed = "CheckDoorHealTrait",
+				DoorFullHealThreshold = "CheckDoorHealTrait",
+				DoorHealThreshold = "CheckDoorHealTrait",
+				DoorHealReserve = "CheckDoorHealTrait",
+				DoorArmor = "CheckDoorArmorTrait",
+				DoorCash = "CheckDoorGoldTrait",
+			}
+
+			for key, functionName in pairs(roomExitTraitKeys) do
+				if traitData[key] then
+					traitData.LeaveRoomFunctionName = functionName
+				end
+			end
+
+			traitData.TraitOrderingValueCache = GetTraitOrderingValue(traitData)
 		end
 
-		for lootName, lootData in pairs(game.LootData) do
+		for lootName, lootData in pairs(LootData) do
 			lootData.Name = lootName
+			ProcessDataInheritance(lootData, LootData)
+			if lootData.PropertyChanges ~= nil then
+				for k, propertyChange in pairs(lootData.PropertyChanges) do
+					AddFormattedPercentageChangeValues(propertyChange)
+				end
+			end
+
 			local traitDictionary = {}
 			ScreenData.BoonInfo.TraitDictionary[lootName] = {}
 
@@ -1505,6 +1857,27 @@ mods.on_all_mods_loaded(function()
 				end
 			end
 			lootData.TraitIndex = traitDictionary
+			ProcessTextLines(lootData, lootData.InteractTextLineSets, "InteractTextLinePriorities", args)
+			ProcessTextLines(lootData, lootData.RejectionTextLines, nil, args)
+			ProcessTextLines(lootData, lootData.MakeUpTextLines, nil, args)
+			ProcessTextLines(lootData, lootData.BoughtTextLines, nil, args)
+			ProcessTextLines(lootData, lootData.DuoPickupTextLines, nil, args)
+			ProcessTextLines(lootData, lootData.GiftTextLineSets, "GiftTextLinePriorities", args)
+		end
+
+		for traitName, linkedData in pairs(TraitRequirements) do
+			-- Process type of link
+			ScreenData.BoonInfo.TraitRequirementsDictionary[traitName] = DeepCopyTable(linkedData)
+			if linkedData.OneOf then
+				ScreenData.BoonInfo.TraitRequirementsDictionary[traitName].Type = "OneOf"
+			elseif linkedData.TwoOf then
+				ScreenData.BoonInfo.TraitRequirementsDictionary[traitName].Type = "TwoOf"
+			elseif linkedData.OneFromEachSet then
+				ScreenData.BoonInfo.TraitRequirementsDictionary[traitName].Type = "OneFromEachSet"
+				if TableLength(linkedData.OneFromEachSet) == 3 and #linkedData.OneFromEachSet[1] == #linkedData.OneFromEachSet[2] and #linkedData.OneFromEachSet[2] == #linkedData.OneFromEachSet[3] then
+					ScreenData.BoonInfo.TraitRequirementsDictionary[traitName].Type = "TwoOf"
+				end
+			end
 		end
 	end)
 end)

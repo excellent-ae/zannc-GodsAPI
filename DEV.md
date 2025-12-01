@@ -6,19 +6,38 @@ A lot of values have default values to remove errors if not manually filled, the
 <br>
 
 >[!IMPORTANT]
-> This is still a work in progress, and needs to be cleaned up/ written with better examples for SJSON/Keepsake & Traits.
+> This is still a work in progress, if you have any questions, please join the [Hades Modding Discord](https://discord.gg/AHk3D48WYD), [post an issue](https://github.com/excellent-ae/zannc-GodsAPI/issues/new) or message me on discord: **dwbl.**
+
+### Checking Implementation
+There are a series of functions you can use to retrieve internal names for Gods/Boons/Keepsakes, retrieve their data or to simply check if they are registered.
+
+**Gods**<br>
+`gods.IsGodRegistered("godName", debug)`<br>
+`gods.GetInternalGodName("godName")`<br>
+`gods.GetGodData("godName")`
+
+**Keepsakes**<br>
+`gods.IsKeepsakeRegistered("internalKeepsakeName", debug)`<br>
+`gods.GetInternalKeepsakeName("internalKeepsakeName")`<br>
+`gods.GetKeepsakeData("internalKeepsakeName")`
+
+**Boons**<br>
+`gods.IsBoonRegistered("internalBoonName", debug)`<br>
+`gods.GetInternalBoonName("internalBoonName")`<br>
+`gods.GetBoonData("internalBoonName")`
+
+If you pass in debug (`true`), it will return a warning print for confirmation of creation and that it is in the correct table (`LootData` or `TraitData`)
 
 ### InitializeGod Examples
 ```lua
 --[[
-This will add a new God: `Artemis` with the **internal** name `ArtemisUpgrade`.
+This will add a new God: `Artemis` with the **internal** name `<_PLUGIN.guid>-ArtemisUpgrade`.
 ]]
 gods.InitializeGod({
     godName = "Artemis",
     godType = "GOD",
     Gender = "F",
     LoadPackages = { "Artemis" },
-    FlavorTextIds = { "ArtemisUpgrade_FlavorText01", "ArtemisUpgrade_FlavorText02", "ArtemisUpgrade_FlavorText03" }, -- Defined later in SJSON
 
     SFX_Portrait = "/SFX/ArtemisBoonArrow",
     UpgradeSelectedSound = "/SFX/ArtemisBoonArrow",
@@ -252,10 +271,10 @@ gods.CreateKeepsake({
 #### WIP
 Although this function exists, a lot of the dirty work will have to be done through external custom functions and or reusing existing functions/wrapping them.
 ```lua
---[[ 
-Required:   "pluginGUID", "characterName", "internalBoonName", "isLegendary", "Elements"
+--[[
+Required:   "characterName", "internalBoonName"
 Optional:   "RarityLevels", "Slot", "BlockStacking", "StatLines", "ExtractValues", "displayName"
-            "ExtraFields", "boonIconPath", "requirements", "flavourText", "addToExistingGod", "reusingBaseIcons"
+            "ExtraFields", "boonIconPath", "requirements", "flavourText", "addToExistingGod", "reuseBaseIcons"
 ]]
 gods.CreateBoon({
 	pluginGUID = _PLUGIN.guid,
@@ -393,6 +412,3 @@ gods.CreateBoon({
 	},
 ]]
 ```
-
-# Checking Implementation
-If you need to check if the God you created is currently registered, or need to use an `if statement` to check if a god is enabled/disabled per config, you can use `gods.IsGodRegistered("GODNAME", debug)` - returning **true or false**. If you pass in debug (true), it will return a warning print for confirmation of creation.<br>
