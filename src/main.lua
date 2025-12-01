@@ -1,5 +1,3 @@
---TODO - Append _PLUGIN.guid to Gods/Keepsakes/Boons to allow for multiple people to create Gods/Keepsakes/Boons of same name.
---TODO - No longer need to define FlavourText if you have created Descriptions for them, though it still remains a param.
 --TODO - Documentation on things you NEED to append your plugin_guid to, in order to work correctly.
 
 ---@diagnostic disable: undefined-global
@@ -445,11 +443,6 @@ function definitions.InitializeGod(env, params)
 end
 
 function definitions.CreateOlympianSJSONData(env, params)
-	rom.log.warning("`CreateOlympianSJSONData` is now a defunct function, use SJSONData from now on.")
-	definitions.SJSONData(env, params)
-end
-
-function definitions.SJSONData(env, params)
 	local requiredFields = { "godName", "godType", "iconSpinPath", "previewPath", "colorA", "colorB", "colorC" }
 	if params and not params.skipBoonSelectSymbol then
 		table.insert(requiredFields, "boonSelectSymbolPath")
@@ -988,7 +981,7 @@ function definitions.CreateKeepsake(env, params)
 			[1] = {
 				GameStateRequirements = {
 					{
-						PathTrue = { "GameState", "TextLinesRecord", game.LootData[characterName .. "Upgrade"][lastGiftLineKey] },
+						PathTrue = { "GameState", "TextLinesRecord", game.LootData[characterName .. "Upgrade"][1] },
 					},
 				},
 				Gift = internalKeepsakeName,

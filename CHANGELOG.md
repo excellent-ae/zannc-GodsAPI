@@ -3,7 +3,9 @@
 ## [Unreleased]
 - Add Data Inheritence to functions // cuts down on params (though can still be changed)
 - Use `InheritFrom` in creation of Boons instead of `isLegendary` // `Elements`
-- No longer need to pass in `_PLUGIN.guid`
+- No longer need to pass in `_PLUGIN.guid`.
+- Append `_PLUGIN.guid` to Gods/Keepsakes/Boons to allow for multiple people to create Gods/Keepsakes/Boons of same name.
+- No longer need to define `FlavourText` if you have created Descriptions for them, though it still remains a param if you want to reuse any.
 
 ## [1.0.9] - 2025-11-28
 

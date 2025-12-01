@@ -50,6 +50,19 @@
     * `RarityUpgradeVoiceLines` (table)
     * `BlindBoxOpenedVoiceLines` (table)
 
+    #### Codex Data
+    * `skipCodex` (boolean) - Skip creating codex entries, only really useful if the codex entry already exists for character.
+    * `extraCodexEntry` (table) - Additional codex entry text (like Cerberus has)
+        * `UnlockGameStateRequirements` (table)
+    * `codexData` (table)
+        * `baseDescription` (string) - First codex description
+        * `secondDescription` (string) - Second codex description
+        * `imageData` (table) - Codex portrait image
+            * `imagePath` (string)
+            * `OffsetY` (integer)
+            * `OffsetZ` (integer)
+            * `Scale` (float)
+
     #### Other values
     * `Weight` (integer) - The chance of it spawning in the shop.
     * `CanReceiveGift` (boolean)
@@ -62,21 +75,21 @@
     </details>
 </details>
 
-## SJSONData parameters
+## CreateOlympianSJSONData parameters
 <details>
 <summary><strong>Parameters</strong></summary><br>
 
 * `params` (table) - A set of options to create the visual elements, colours, portraits, and codex entries.
-    * `godName` (string) **(required)** - The name of the God | eg "Ares", "Zeus" etc.
-    * `godType` (string) **(required)** - The type of God | eg "god" or "npcgod".
+    * `godName` (string) - The name of the God | eg "Ares", "Zeus" etc.
+    * `godType` (string) - The type of God | eg "god" or "npcgod".
     * `boonSelectSymbolPath` (string) **( OPTIONAL requirement)** - Upgrade Menu Icon path, can be skipped by using: `skipBoonSelectSymbol`
     * `skipBoonSelectSymbol` (boolean) **(Optional)** - Skip creating the boon select symbol for upgrade menu.
-    * `iconSpinPath` (string) **(required)** - The series of images which create the little animation of the physical boon, must end in 0001, followed by 0010, 0100, 1000, and have a minimum of 2
-    * `previewPath` (string) **(required)** - Door Icons, Upgrade Icon path.<br><br>
+    * `iconSpinPath` (string) - The series of images which create the little animation of the physical boon, must end in 0001, followed by 0010, 0100, 1000, and have a minimum of 2
+    * `previewPath` (string) - Door Icons, Upgrade Icon path.<br><br>
     *Colours support `RGB 0-255` ({ 255, 0, 150, 255 }) or `RGB 0-1` ({ 1.0, 0, 0.3, 1.0 }), with an opacity field.*
-    * `colorA` (table) **(required)** - Inner Ring color - supports RGB 0-255 or 0-1.
-    * `colorB` (table) **(required)** - Outer Ring color.
-    * `colorC` (table) **(required)** - Flare Shootoffs color. <br><br> <img width="322" height="232" alt="Hades2_SNP4G6SaZi" src="https://github.com/user-attachments/assets/2df94b31-27f1-4fac-ac4a-45175a426499" />
+    * `colorA` (table) - Inner Ring color - supports RGB 0-255 or 0-1.
+    * `colorB` (table) - Outer Ring color.
+    * `colorC` (table) - Flare Shootoffs color. <br><br> <img width="322" height="232" alt="Hades2_SNP4G6SaZi" src="https://github.com/user-attachments/assets/2df94b31-27f1-4fac-ac4a-45175a426499" />
 
     <details>
     <summary><strong>Optional Parameters</strong></summary><br>
@@ -140,19 +153,6 @@
                 * `EndGreen` (float)
                 * `EndBlue` (float)
 
-    #### Codex Data
-    * `skipCodex` (boolean) - Skip creating codex entries, only really useful if the codex entry already exists for character.
-    * `extraCodexEntry` (table) - Additional codex entry text (like Cerberus has)
-        * `UnlockGameStateRequirements` (table)
-    * `codexData` (table)
-        * `baseDescription` (string) - First codex description
-        * `secondDescription` (string) - Second codex description
-        * `imageData` (table) - Codex portrait image
-            * `imagePath` (string)
-            * `OffsetY` (integer)
-            * `OffsetZ` (integer)
-            * `Scale` (float)
-
     #### Text Content
     * `godDescriptionText` (string) - Subtitle under the GodName during dialogue
     * `godDescriptionTextFlavour01` (string) - Flavour Text, shown at the top of the screen when selecting boons
@@ -215,17 +215,16 @@ If you wish to add SJSON content, such as the boon drop icons, door preview icon
     <summary><strong>Optional Parameters</strong></summary><br>
 
     * `DoesNotAutomaticallyExpire` (boolean)
-    * `EquipSound` (string) - Sound when equipping keepsake.
-    * `EquipVoiceLines` (table) - Voice lines when equipping.
+    * `EquipSound` (string)
+    * `EquipVoiceLines` (table)
     
-    #### Gift Requirements (if god doesn't exist)
+    #### Gift Requirements (If you want custom, otherwise it tries to default to first/last gift set)
     * `maxRequirement` (table) - Requirements for maxed friendship.
-    * `minRequirement` (table) - Requirements for initial gift.
-    
+    * `minRequirement` (table) - Requirements to initially unlock the keepsake.
     * `ExtraFields` (table) - Additional trait data fields, where most of the functionality will go.
 
     #### UI/Text Content
-    * `Keepsake` (table) - Display text for keepsake
+    * `Keepsake` (table)
         * `displayName` (string) - Display name
         * `description` (string) - Description
         * `trayDescription` (string) - Description when equipped
@@ -233,7 +232,7 @@ If you wish to add SJSON content, such as the boon drop icons, door preview icon
         * `signoffMax` (string) - Max friendship signoff text
 
     #### Icons
-    * `Icons` (table) - Icon paths
+    * `Icons` (table)
         * `iconPathOverrides` (table) - Define which icons use base game paths
             * `iconPath` (boolean)
             * `maxIcon` (boolean)
@@ -255,6 +254,7 @@ If you wish to add SJSON content, such as the boon drop icons, door preview icon
     <details>
     <summary><strong>Optional Parameters</strong></summary><br>
 
+    * `addToExistingGod` (table/boolean) - Add to existing god's trait list
     * `RarityLevels` (table) - Multipliers for each rarity level
         * `Common` (number/table)
         * `Rare` (number/table)
@@ -268,58 +268,56 @@ If you wish to add SJSON content, such as the boon drop icons, door preview icon
     * `ExtractValues` (table) - Value extraction definitions
     * `displayName` (string) - Display name for the boon
     * `description` (string) - Description for the boon
+    * `flavourText` (string) - Flavor text for the boon (eg if its legendary)
     
     #### Boon Type Inheritance
-    <!-- Elements
-        AirBoon
-        FireBoon
-        EarthBoon
-        WaterBoon
-        AetherBoon
-
-        InPersonOlympianTrait
-        SynergyTrait
-        LegacyTrait
-        UnityTrait
-        WeaponTrait
-        CostumeTrait
-        SpellTalentTrait
-        StorePendingDeliveryItem
-        ChaosCurseTrait
-        ChaosCurseRemainingEncounters
-        ChaosBlessingTrait
-        WeaponEnchantmentTrait
-        GodModeTrait
-        ManaOverTimeSource
-        -- Misc Traits
-        FallbackGold
-        InfernalContractBoon
-        SurfacePenalty
-        ErisCurseTrait
-        UnusedWeaponBonusTrait
-        UnusedWeaponBonusTrait2
-        RoomRewardMaxManaTrait
-        RoomRewardMaxHealthTrait
-        RoomRewardEmptyMaxHealthTrait -->
     * `InheritFrom` (table)
-    
+        ### All types of things you can inherit from, for more information what what they do, look in TraitData.lua
+        - BaseTrait
+        #### Elements
+        - AirBoon
+        - FireBoon
+        - EarthBoon
+        - WaterBoon
+        - AetherBoon
+        #### Others
+        - InPersonOlympianTrait
+        - SynergyTrait
+        - LegacyTrait
+        - UnityTrait
+        - WeaponTrait
+        - CostumeTrait
+        - SpellTalentTrait
+        - StorePendingDeliveryItem
+        - ChaosCurseTrait
+        - ChaosCurseRemainingEncounters
+        - ChaosBlessingTrait
+        - WeaponEnchantmentTrait
+        - GodModeTrait
+        - ManaOverTimeSource
+        - FallbackGold
+        - InfernalContractBoon
+        - SurfacePenalty
+        - ErisCurseTrait
+        - UnusedWeaponBonusTrait
+        - UnusedWeaponBonusTrait2
+        - RoomRewardMaxManaTrait
+        - RoomRewardMaxHealthTrait
+        - RoomRewardEmptyMaxHealthTrait<br> 
     * `ExtraFields` (table)
     * `reuseBaseIcons` (boolean)
     * `boonIconPath` (string)
     
     #### Requirements
     * `requirements` (table) - Trait requirements
-        * `OneOf` (table) - Require one of these traits
-        * `TwoOf` (table) - Require two of these traits
+        * `OneOf` (table) - Require one of x traits
+        * `TwoOf` (table) - Require two of x traits
         * `OneFromEachSet` (table) - Require one from each set
     
-    * `flavourText` (string) - Flavor text for the boon
-    * `addToExistingGod` (table/boolean) - Add to existing god's trait list
-
     #### Custom Stat Line
-    * `customStatLine` (table) - Custom stat line display
-        * `ID` (string) - Stat line ID
-        * `displayName` (string) - Display name
-        * `description` (string) - Description
+    * `customStatLine` (table)
+        * `ID` (string) - Internal name - use it in `StatLines = {}`
+        * `displayName` (string)
+        * `description` (string)
     </details>
 </details>
