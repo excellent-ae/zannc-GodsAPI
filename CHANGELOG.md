@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [2.0.1] - 2025-12-01
+
 - Add missing GodLoot, usefule for other mods to check if GodLoot or not.
 
 ## [2.0.0] - 2025-12-01
@@ -77,7 +80,8 @@
 
 - Initial Release.
 
-[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.0...HEAD
+[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.1...HEAD
+[2.0.1]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.9...2.0.0
 [1.0.9]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.8...1.0.9
 [1.0.8]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.7...1.0.8
