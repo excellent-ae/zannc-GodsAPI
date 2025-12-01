@@ -1,7 +1,3 @@
->[!IMPORTANT]
-> This is still a work in progress, and hasn't been fully written up with information on each field. <br>
-> I will update this note when it is fully up to date.
-
 ## InitializeGod parameters
 <details>
 <summary><strong>Parameters</strong></summary><br>
@@ -25,7 +21,6 @@
     * `UpgradeSelectedSound` (string) - eg `"SFX/Sound"` - default of `nil`
     * `WeaponUpgrades` (table) - Core boons, eg `{"ApolloWeaponBoon", "ApolloCastBoon"}` - default of `{}`
     * `Traits` (table) - Other Boons for the god, so not slotted anywhere - eg `{"PerfectDamageBonusBoon", "BlindChanceBoon"}` - default of `{}`
-    * `TraitSortOrder` (table) - Order to show traits in codex - default of `{}`
 
     #### Colours
     *Colours support `RGB 0-255` ({ 255, 0, 150, 255 }) or `RGB 0-1` ({ 1.0, 0, 0.3, 1.0 }), with an opacity field.*
@@ -45,7 +40,6 @@
     * `DuoPickupTextLines` (table)
     * `InteractTextLineSets` (table)
     * `BoughtTextLines` (table)
-    * `BoughtTextLinesRequirements` (table)
     * `RejectionTextLines` (table)
     * `RejectionVoiceLines` (table)
     * `MakeUpTextLines` (table)
@@ -56,102 +50,118 @@
     * `RarityUpgradeVoiceLines` (table)
     * `BlindBoxOpenedVoiceLines` (table)
 
-    #### Other values which are possible to change, but not needed to be except in rare specific cases.
-    * `BackgroundAnimation` (string)
-    * `GoldifyValue` (integer)
-    * `GoldConversionEligible` (boolean)
-    * `ReplaceSpecialForGoldify` (boolean)
+    #### Other values
     * `Weight` (integer) - The chance of it spawning in the shop.
-    * `NarrativeContextArtFlippable` (boolean)
     * `CanReceiveGift` (boolean)
-    * `TextLinesIgnoreQuests` (boolean)
-    * `UsePromptOffsetX` (integer)
     * `AlwaysShowDefaultUseText` (boolean)
-    * `DestroyOnPickup` (boolean)
-    * `SelectionSound` (string)
-    * `ConfirmSound` (string)
-    * `OnUsedFunctionArgs` table
-    * `BanUnpickedBoonsEligible` (boolean)
-    * `LastRewardEligible` (boolean)
-    * `AnimOffsetZ` (integer)
     * `LootRejectionAnimation` (string)
-    * `NarrativeContextArt` (string)
-    * `BoxAnimation` (string)
-    * `BoxExitAnimation` (string)
-    * `RequireUseToGift` (boolean)
-    * `ManualRecordUse` (boolean)
-    * `UsePromptOffsetY` (integer)
     * `ColorGrade` (string)
-    * `UseText` (string)
-    * `OnUsedFunctionName` (string)
-    * `UseTextTalkAndGift` (string)
-    * `UseTextTalkAndSpecial` (string)
-    * `BlockedLootInteractionText` (string)
-    * `UseTextTalkGiftAndSpecial` (string)
     * `Consumables` (table)
     * `EmoteOffsetX` (integer)
-    * `EmoteOffsetY` (integer) <br>
+    * `EmoteOffsetY` (integer)
     </details>
 </details>
 
-# CreateOlympianSJSONData parameters:
-- `pluginGUID` string **(required)** 
-- `godName` string **(required)** 
-- `godType` string **(required)** 
-- `AmbientSound` string - The ambient sound of the boon drop <br><br>
-- The colours of the physical boon drop - with the inside colour always being white.
-- Supports `RGB 0-255` ({ Red = 255, Green = 0, Blue = 150 }) or `RGB 0-1` { Red = 1.0, Green = 0, Blue = 0.3 }, as well as an Opacity field. **(required)** 
-    - `colorA` table - Inner Ring eg. { Red = 255, Green = 0, Blue = 150, Opacity = 0.7 }
-    - `colorB` table - Outer Ring
-    - `colorC` table - Flare Shootoffs <br><br> <img width="322" height="232" alt="Hades2_SNP4G6SaZi" src="https://github.com/user-attachments/assets/2df94b31-27f1-4fac-ac4a-45175a426499" />
-- `OffsetZBoonDrop` integer - Negative or Positive offset.
-- `BoonDropIconScale` float - 0.0 through to 1.0
-- `BoonDropIconHue` float - Negative or Positive. <br><br>
-- `OffsetZBoonPreview` integer - physical boon drop icon offset
-- `BoonPreviewScale` float - physical boon drop icon scale <br><br>
-- `iconPathOverrides` table - Let's you define which icons you want to be using base game icons.
-- `skipBoonSelectSymbol` boolean
-- `iconSpinPath` string **(required)**  - The series of images which create the little animation of the physical boon, must end in 0001, followed by 0010, 0100, 1000, and have a minimum of 2
-- `previewPath` string **(required)**  - Door Icons, Upgrade Icon
-- `boonSelectSymbolPath` string - Upgrade Menu Icon
-- `boonSelectSymbolOffsetY` integer <br><br>
-- `portraitData` table
-    - `portraitPathOverrides` table - Let's you define which portraits you want to be using base game portraits.
-    - `skipNeutralPortrait` boolean
-    - `NeutralPortraitPath` string
-    - `AnnoyedPortraitPath` string
-    - `SeriousPortraitPath` string
-    - `DialogueAnimations` table
-        - `DialogueEntrance` table
-            * `RedStart` float - The starting colour for the animations. eg. 1.0
-    		* `StartGreen` float
-    		* `StartBlue` float
-    		* `EndRed` float - The starting colour for the animations. eg. 0.1
-    		* `EndGreen` float
-    		* `EndBlue` float
-        - `DialogueEntranceStreaks` table
-            * `RedStart` float
-    		* `StartGreen` float
-    		* `StartBlue` float
-    		* `EndRed` float
-    		* `EndGreen` float
-    		* `EndBlue` float
-        - `DialogueEntranceParticles` table
-            * `RedStart` float
-    		* `StartGreen` float
-    		* `StartBlue` float
-    		* `EndRed` float
-    		* `EndGreen` float
-    		* `EndBlue` float
-        - `DialogueEntranceParticleBurst` table
-          * `RedStart` float
-    		* `StartGreen` float
-    		* `StartBlue` float
-    		* `EndRed` float
-    		* `EndGreen` float
-    		* `EndBlue` float
-<!-- 
-### CreateOlympianSJSONData Paramaters
+## SJSONData parameters
+<details>
+<summary><strong>Parameters</strong></summary><br>
+
+* `params` (table) - A set of options to create the visual elements, colours, portraits, and codex entries.
+    * `godName` (string) **(required)** - The name of the God | eg "Ares", "Zeus" etc.
+    * `godType` (string) **(required)** - The type of God | eg "god" or "npcgod".
+    * `boonSelectSymbolPath` (string) **( OPTIONAL requirement)** - Upgrade Menu Icon path, can be skipped by using: `skipBoonSelectSymbol`
+    * `skipBoonSelectSymbol` (boolean) **(Optional)** - Skip creating the boon select symbol for upgrade menu.
+    * `iconSpinPath` (string) **(required)** - The series of images which create the little animation of the physical boon, must end in 0001, followed by 0010, 0100, 1000, and have a minimum of 2
+    * `previewPath` (string) **(required)** - Door Icons, Upgrade Icon path.<br><br>
+    *Colours support `RGB 0-255` ({ 255, 0, 150, 255 }) or `RGB 0-1` ({ 1.0, 0, 0.3, 1.0 }), with an opacity field.*
+    * `colorA` (table) **(required)** - Inner Ring color - supports RGB 0-255 or 0-1.
+    * `colorB` (table) **(required)** - Outer Ring color.
+    * `colorC` (table) **(required)** - Flare Shootoffs color. <br><br> <img width="322" height="232" alt="Hades2_SNP4G6SaZi" src="https://github.com/user-attachments/assets/2df94b31-27f1-4fac-ac4a-45175a426499" />
+
+    <details>
+    <summary><strong>Optional Parameters</strong></summary><br>
+
+    * `AmbientSound` (string) - The ambient sound of the boon drop.
+    * `OffsetZBoonDrop` (integer) - Z offset for boon drop icon.
+    * `BoonDropIconScale` (float) - Scale for boon drop icon (0.0-1.0).
+    * `BoonDropIconHue` (float) - Hue adjustment for boon drop icon.
+    * `OffsetZBoonPreview` (integer) - Z offset for physical boon preview.
+    * `BoonPreviewScale` (float) - Scale for physical boon preview.<br>
+    * `iconPathOverrides` (table) - Define which icons use base game paths (if reusing icons).
+        * `previewPath` (boolean)
+        * `iconSpinPath` (boolean)
+        * `boonSelectSymbolPath` (boolean)<br>
+    * `boonSelectSymbolOffsetY` (integer) - Y offset for boon select symbol
+    * `boonDropIconCustomFrames` (table) - Custom animation frames for boon drop, useful if you don't want to create multiple frames.
+        * `EndFrame` (integer)
+        * `NumFrames` (integer)
+        * `PlaySpeed` (integer)
+
+    #### Portrait Data
+    * `portraitData` (table) - Portrait configuration
+        * `portraitPathOverrides` (table) - Define which portraits use base game paths
+            * `NeutralPortraitPath` (boolean)
+            * `AnnoyedPortraitPath` (boolean)
+            * `SeriousPortraitPath` (boolean)
+        * `NeutralPortraitPath` (string)
+        * `AnnoyedPortraitPath` (string)
+        * `SeriousPortraitPath` (string)
+        * `OffsetX` (integer) - X offset for portraits
+        * `OffsetY` (integer) - Y offset for portraits
+        * `Scale` (float) - Scale for portraits
+        * `NeutralAnimations` (table) - Animations for portraits, eg blinking etc, its done in frames.<br>
+        * `DialogueAnimations` (table)
+            * `DialogueEntrance` (table)
+                * `RedStart` (float)
+                * `StartGreen` (float)
+                * `StartBlue` (float)
+                * `EndRed` (float)
+                * `EndGreen` (float)
+                * `EndBlue` (float)
+            * `DialogueEntranceStreaks` (table)
+                * `RedStart` (float)
+                * `StartGreen` (float)
+                * `StartBlue` (float)
+                * `EndRed` (float)
+                * `EndGreen` (float)
+                * `EndBlue` (float)
+            * `DialogueEntranceParticles` (table)
+                * `RedStart` (float)
+                * `StartGreen` (float)
+                * `StartBlue` (float)
+                * `EndRed` (float)
+                * `EndGreen` (float)
+                * `EndBlue` (float)
+            * `DialogueEntranceParticleBurst` (table)
+                * `RedStart` (float)
+                * `StartGreen` (float)
+                * `StartBlue` (float)
+                * `EndRed` (float)
+                * `EndGreen` (float)
+                * `EndBlue` (float)
+
+    #### Codex Data
+    * `skipCodex` (boolean) - Skip creating codex entries, only really useful if the codex entry already exists for character.
+    * `extraCodexEntry` (table) - Additional codex entry text (like Cerberus has)
+        * `UnlockGameStateRequirements` (table)
+    * `codexData` (table)
+        * `baseDescription` (string) - First codex description
+        * `secondDescription` (string) - Second codex description
+        * `imageData` (table) - Codex portrait image
+            * `imagePath` (string)
+            * `OffsetY` (integer)
+            * `OffsetZ` (integer)
+            * `Scale` (float)
+
+    #### Text Content
+    * `godDescriptionText` (string) - Subtitle under the GodName during dialogue
+    * `godDescriptionTextFlavour01` (string) - Flavour Text, shown at the top of the screen when selecting boons
+    * `godDescriptionTextFlavour02` (string)
+    * `godDescriptionTextFlavour03` (string)
+    </details>
+</details>
+
+<!-- ### CreateOlympianSJSONData Paramaters
 If you wish to add SJSON content, such as the boon drop icons, door preview icons or portraits, you must call `gods.CreateOlympianSJSONData(sjsonData)`
 
 >[!IMPORTANT]
@@ -186,6 +196,130 @@ If you wish to add SJSON content, such as the boon drop icons, door preview icon
     		* `StartBlue` (float)
     		* `EndRed` (float) - The starting colour for the animations. eg. 0.1
     		* `EndGreen` (float)
-    		* `EndBlue` (float)
+    		* `EndBlue` (float) -->
+
+## CreateKeepsake parameters
+<details>
+<summary><strong>Parameters</strong></summary><br>
+
+* `params` (table) - A set of options to create a keepsake with rarity levels, icons, and text.
+    * `characterName` (string) **(required)** - The name of the character giving the keepsake.
+    * `internalKeepsakeName` (string) **(required)** - Internal name for the keepsake trait.
+    * `RarityLevels` (table) **(required)** - Multipliers for each rarity level.
+        * `Common` (number/table)
+        * `Rare` (number/table)
+        * `Epic` (number/table)
+        * `Heroic` (number/table)
+
+    <details>
+    <summary><strong>Optional Parameters</strong></summary><br>
+
+    * `DoesNotAutomaticallyExpire` (boolean)
+    * `EquipSound` (string) - Sound when equipping keepsake.
+    * `EquipVoiceLines` (table) - Voice lines when equipping.
+    
+    #### Gift Requirements (if god doesn't exist)
+    * `maxRequirement` (table) - Requirements for maxed friendship.
+    * `minRequirement` (table) - Requirements for initial gift.
+    
+    * `ExtraFields` (table) - Additional trait data fields, where most of the functionality will go.
+
+    #### UI/Text Content
+    * `Keepsake` (table) - Display text for keepsake
+        * `displayName` (string) - Display name
+        * `description` (string) - Description
+        * `trayDescription` (string) - Description when equipped
+        * `trayExpired` (string) - Description when expired
+        * `signoffMax` (string) - Max friendship signoff text
+
+    #### Icons
+    * `Icons` (table) - Icon paths
+        * `iconPathOverrides` (table) - Define which icons use base game paths
+            * `iconPath` (boolean)
+            * `maxIcon` (boolean)
+            * `maxCornerIcon` (boolean)<br>
+        * `iconPath` (string) - Main keepsake icon
+        * `maxIcon` (string) - Max friendship icon
+        * `maxCornerIcon` (string) - Max friendship corner icon
     </details>
-</details> -->
+</details>
+
+## CreateBoon parameters
+<details>
+<summary><strong>Parameters</strong></summary><br>
+
+* `params` (table) - A set of options to create a boon with rarity levels, slots, and requirements.
+    * `characterName` (string) **(required)** - The name of the character giving the boon
+    * `internalBoonName` (string) **(required)** - Internal name for the boon trait
+
+    <details>
+    <summary><strong>Optional Parameters</strong></summary><br>
+
+    * `RarityLevels` (table) - Multipliers for each rarity level
+        * `Common` (number/table)
+        * `Rare` (number/table)
+        * `Epic` (number/table)
+        * `Heroic` (number/table)
+        * `Legendary` (number/table)
+    
+    * `Slot` (string) - Boon slot type: "Melee", "Secondary", "Ranged", "Rush", "Mana"
+    * `BlockStacking` (boolean) - Prevent boon from stacking
+    * `StatLines` (table) - Stat line definitions
+    * `ExtractValues` (table) - Value extraction definitions
+    * `displayName` (string) - Display name for the boon
+    * `description` (string) - Description for the boon
+    
+    #### Boon Type Inheritance
+    <!-- Elements
+        AirBoon
+        FireBoon
+        EarthBoon
+        WaterBoon
+        AetherBoon
+
+        InPersonOlympianTrait
+        SynergyTrait
+        LegacyTrait
+        UnityTrait
+        WeaponTrait
+        CostumeTrait
+        SpellTalentTrait
+        StorePendingDeliveryItem
+        ChaosCurseTrait
+        ChaosCurseRemainingEncounters
+        ChaosBlessingTrait
+        WeaponEnchantmentTrait
+        GodModeTrait
+        ManaOverTimeSource
+        -- Misc Traits
+        FallbackGold
+        InfernalContractBoon
+        SurfacePenalty
+        ErisCurseTrait
+        UnusedWeaponBonusTrait
+        UnusedWeaponBonusTrait2
+        RoomRewardMaxManaTrait
+        RoomRewardMaxHealthTrait
+        RoomRewardEmptyMaxHealthTrait -->
+    * `InheritFrom` (table)
+    
+    * `ExtraFields` (table)
+    * `reuseBaseIcons` (boolean)
+    * `boonIconPath` (string)
+    
+    #### Requirements
+    * `requirements` (table) - Trait requirements
+        * `OneOf` (table) - Require one of these traits
+        * `TwoOf` (table) - Require two of these traits
+        * `OneFromEachSet` (table) - Require one from each set
+    
+    * `flavourText` (string) - Flavor text for the boon
+    * `addToExistingGod` (table/boolean) - Add to existing god's trait list
+
+    #### Custom Stat Line
+    * `customStatLine` (table) - Custom stat line display
+        * `ID` (string) - Stat line ID
+        * `displayName` (string) - Display name
+        * `description` (string) - Description
+    </details>
+</details>

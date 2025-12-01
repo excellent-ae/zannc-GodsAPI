@@ -7,8 +7,6 @@ You should only install it if another mod requires it, or if you will be using t
 > *Currently, this library only supports adding in **Olympian** Gods eg. Zeus and **NPC**-type Gods eg. Hermes - as well as custom Keepsakes.* <br>
 > NPC Type means that they will not fill up the `MetGods` table during a run - meaning you can have `Zeus, Aphrodite, Hera, Hestia` and meet `Hermes` and `Your God`.
 
-- I would like to add Spells and proper NPC's such as Dionysus/Athena/Arachne during runs, and Hub NPCS such as Hecate/Hypnos.<br> However, there are a lot of functions that are hard-coded to `SpellDrop`, and I am unsure about the state of adding 3D models.
-
 <br>
 
 > [!NOTE]
@@ -20,8 +18,8 @@ You should only install it if another mod requires it, or if you will be using t
 
 2. In `main.lua`, add:
     ```lua
-    ---@module 'zannc-GodsAPI'
-    gods = mods['zannc-GodsAPI']
+    ---@module 'zannc-GodsAPI-auto'
+    gods = mods['zannc-GodsAPI'].auto()
     ```
     So that it looks like this as an example:
     ```lua
@@ -34,15 +32,16 @@ You should only install it if another mod requires it, or if you will be using t
     reload = mods["SGG_Modding-ReLoad"]
     ---@module 'SGG_Modding-SJSON'
     sjson = mods["SGG_Modding-SJSON"]
-    ---@module 'zannc-GodsAPI'
-    gods = mods["zannc-GodsAPI"]
+    ---@module 'zannc-GodsAPI-auto'
+    gods = mods["zannc-GodsAPI"].auto()
     ```
 
 #### For more in-depth examples of how to use these functions, refer to the [DEV.md](https://github.com/excellent-ae/zannc-GodsAPI/blob/main/DEV.md) file and the [PARAMS.md](https://github.com/excellent-ae/zannc-GodsAPI/blob/main/PARAMS.md) file.
 
-3. To create a god, you must call `gods.InitializeGod(params)`, and optionally followed by `gods.CreateOlympianSJSONData(params)` and provide the required paramaters / sjson paramaters.<br><br>
+3. To create a god, you must call `gods.InitializeGod(params)`, and optionally followed by `gods.SJSONData(params)` and provide the required paramaters / sjson paramaters.<br><br>
 4. To create a Keepsake, you must call `gods.CreateKeepsake(params)`, and pass in the required fields - as well as any custom functions you need to make the keepsake function.<br><br>
 5. To create a Boon, you must call `gods.CreateBoon(params)`, and pass in the required fields - as well as any custom functions you need to make the boon function. <br>
 
 ## Planned Features
-I am looking into the possibility of Hex Gods like Selene, as well as physical 3D NPCs if possible - however to my knowledge, 3D models have not been created yet.
+- I am looking into the possibility of Hex Gods like Selene, as well as physical 3D NPCs if possible - however to my knowledge, 3D models have not been created yet.
+- I would like to add Spells and proper NPC's such as Dionysus/Athena/Arachne during runs, and Hub NPCS such as Hecate/Hypnos.<br> However, there are a lot of functions that are hard-coded to `SpellDrop`, and I am unsure about the state of adding 3D models.

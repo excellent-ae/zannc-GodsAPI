@@ -11,14 +11,13 @@ A lot of values have default values to remove errors if not manually filled, the
 ### InitializeGod Examples
 ```lua
 --[[
-This will add a new God: `Artemis` with the **internal** name `ArtemisUpgrade`.
+This will add a new God: `Artemis` with the **internal** name `<_PLUGIN.guid>-ArtemisUpgrade`.
 ]]
 gods.InitializeGod({
     godName = "Artemis",
     godType = "GOD",
     Gender = "F",
     LoadPackages = { "Artemis" },
-    FlavorTextIds = { "ArtemisUpgrade_FlavorText01", "ArtemisUpgrade_FlavorText02", "ArtemisUpgrade_FlavorText03" }, -- Defined later in SJSON
 
     SFX_Portrait = "/SFX/ArtemisBoonArrow",
     UpgradeSelectedSound = "/SFX/ArtemisBoonArrow",

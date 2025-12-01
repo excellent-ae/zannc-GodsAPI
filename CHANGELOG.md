@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+- Add Data Inheritence to functions // cuts down on params (though can still be changed)
+- Use `InheritFrom` in creation of Boons instead of `isLegendary` // `Elements`
+- No longer need to pass in `_PLUGIN.guid`
 
 ## [1.0.9] - 2025-11-28
 
