@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [2.0.2] - 2025-12-01
+
 - Fix addToExistingGod.
 
 ## [2.0.1] - 2025-12-01
@@ -81,7 +84,8 @@
 
 - Initial Release.
 
-[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.1...HEAD
+[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.2...HEAD
+[2.0.2]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.1...2.0.2
 [2.0.1]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.9...2.0.0
 [1.0.9]: https://github.com/excellent-ae/zannc-GodsAPI/compare/1.0.8...1.0.9
