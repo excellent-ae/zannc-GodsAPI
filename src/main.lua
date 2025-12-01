@@ -1307,12 +1307,12 @@ function definitions.CreateBoon(env, params)
 
 	if params.addToExistingGod then
 		local characterData = nil
-		if game.LootData[params.characterName] then
+		if game.LootData[params.characterName .. "Upgrade"] then
 			characterData = game.LootData[params.characterName]
 		elseif game.LootData[characterUpgrade] then
 			characterData = game.LootData[characterUpgrade]
 		else
-			rom.log.warning("addToExistingGod: LootData for character" .. params.characterName .. " does not exist, cannot add trait.")
+			rom.log.warning("addToExistingGod: LootData for character " .. params.characterName .. " does not exist, cannot add trait.")
 		end
 
 		if characterData then
