@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+- Slight change to defs.
+- Update README.
 
 ## [2.0.3] - 2025-12-01
 

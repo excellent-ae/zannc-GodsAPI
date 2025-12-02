@@ -155,48 +155,11 @@
 
     #### Text Content
     * `godDescriptionText` (string) - Subtitle under the GodName during dialogue
-    * `godDescriptionTextFlavour01` (string) - Flavour Text, shown at the top of the screen when selecting boons
+    * `godDescriptionTextFlavour01` (string) - The subtitle at the top, when the boons are selected eg... `Boons of Artemis, she moves through the woods like...`
     * `godDescriptionTextFlavour02` (string)
     * `godDescriptionTextFlavour03` (string)
     </details>
 </details>
-
-<!-- ### CreateOlympianSJSONData Paramaters
-If you wish to add SJSON content, such as the boon drop icons, door preview icons or portraits, you must call `gods.CreateOlympianSJSONData(sjsonData)`
-
->[!IMPORTANT]
-> When passing in your Icon Paths, you do not need to provide your `_PLUGIN.guid`. <br>
-> `Example:` deppth2 provides: `zannc-GodsAPI\\Icons\\Boons\\img.png`, however you only need to provide `Icons\\Boons\\img.png`.
-> Passing in your `_PLUGIN.guid` will not break anything, but it is not necessary.
-
-* `sjsonData` (table) - A set of options to create the name, colour, text, gender, spawn sound etc.
-    * `pluginGUID` (string) **(required)** - Your plugins GUID, commonly passed with `_PLUGIN.guid`
-    * `godName` (string) **(required)** - The name of the God | eg "Ares", "Zeus" etc.
-    * `godType` (string) **(required)** - The type of God | eg "god" or "npcgod" (God = Zeus, NPC = Hermes)
-    * `skipBoonSelectSymbol` (boolean) **(optional)** - If there is already a Boon Select Symbol (In upgrade screen), you can pass this to skip the creation of one.
-	* `iconSpinPath` (string) - The animation of the physical boon drop.
-	* `previewPath` (string) - The icon to display on doors.
-  	* `colorA` (table) - The colours of the physical boon drop
-	* `colorB` (table)
-	* `colorC` (table)<br><br>
-	* `godDescriptionText` (string) **(optional)** - The subtitle when picking up a boon eg... `Artemis, Goddess of the Hunt`
-	* `godDescriptionTextFlavour01` (string) **(optional)** The subtitle at the top, when the boons are selected eg... `Boons of Artemis, she moves through the woods like...`
-	* `godDescriptionTextFlavour02` (string) **(optional)** 
-	* `godDescriptionTextFlavour03` (string) **(optional)** 
-
-    <details>
-    <summary><strong>Optional Parameters</strong></summary>
-
-	* `portraitData` (table) **(optional)** 
-		* `skipNeutralPortrait` (boolean) **(optional)** - If there is already a neutral portrait for the character in the game.
-        * `AnnoyedPortraitFilePath` (string)
-        * `DialogueEntrance` (boolean) **(optional)** - If you wish to create animations during a portrait entrance.
-            * `RedStart` (float) - The starting colour for the animations. eg. 1.0
-    		* `StartGreen` (float)
-    		* `StartBlue` (float)
-    		* `EndRed` (float) - The starting colour for the animations. eg. 0.1
-    		* `EndGreen` (float)
-    		* `EndBlue` (float) -->
 
 ## CreateKeepsake parameters
 <details>

@@ -1,5 +1,3 @@
---TODO - Documentation on things you NEED to append your plugin_guid to, in order to work correctly.
-
 ---@diagnostic disable: undefined-global
 ---@meta _
 
@@ -1180,7 +1178,7 @@ function definitions.CreateBoon(env, params)
 
 	-- Creating the boon functions itself
 	game.TraitData[intboonName] = {
-		InheritFrom = {}, -- this is where the type of boon really happens
+		InheritFrom = params.InheritFrom or {}, -- this is where the type of boon really happens
 		Name = intboonName, -- eg TycheWeaponBoon
 		BoonInfoTitle = intboonName,
 		Icon = intboonName,

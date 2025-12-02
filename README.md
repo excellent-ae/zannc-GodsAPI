@@ -12,6 +12,7 @@ You should only install it if another mod requires it, or if you will be using t
 > [!NOTE]
 > If there are any requests, anything I missed, or anything working incorrectly, [post an issue](https://github.com/excellent-ae/zannc-GodsAPI/issues/new), or create a help thread in the [Hades Modding Discord](https://discord.gg/AHk3D48WYD).
 
+
 # Developer Documentation
 
 1. Create a dependency in `manifest.json` (if testing locally) by adding `"zannc-GodsAPI-1.0.0"` and in `thunderstore.toml` by adding `zannc-GodsAPI = "1.0.0"` if publishing the mod by adding to respective files.
@@ -19,7 +20,7 @@ You should only install it if another mod requires it, or if you will be using t
 2. In `main.lua`, add:
     ```lua
     ---@module 'zannc-GodsAPI-auto'
-    gods = mods['zannc-GodsAPI'].auto()
+    gods = mods['zannc-GodsAPI'].auto() --! IMPORTANT, you must add in .auto() or else the library will not work.
     ```
     So that it looks like this as an example:
     ```lua
@@ -36,12 +37,17 @@ You should only install it if another mod requires it, or if you will be using t
     gods = mods["zannc-GodsAPI"].auto()
     ```
 
-#### For more in-depth examples of how to use these functions, refer to the [DEV.md](https://github.com/excellent-ae/zannc-GodsAPI/blob/main/DEV.md) file and the [PARAMS.md](https://github.com/excellent-ae/zannc-GodsAPI/blob/main/PARAMS.md) file.
+### For more in-depth examples of how to use these functions, refer to the [DEV.md](https://github.com/excellent-ae/zannc-GodsAPI/blob/main/DEV.md) file and the [PARAMS.md](https://github.com/excellent-ae/zannc-GodsAPI/blob/main/PARAMS.md) file.
 
-3. To create a god, you must call `gods.InitializeGod(params)`, and optionally followed by `gods.SJSONData(params)` and provide the required paramaters / sjson paramaters.<br><br>
+3. To create a God, you must call `gods.InitializeGod(params)`, and optionally followed by `gods.CreateOlympianSJSONData(params)` and provide the required paramaters / sjson paramaters.<br><br>
 4. To create a Keepsake, you must call `gods.CreateKeepsake(params)`, and pass in the required fields - as well as any custom functions you need to make the keepsake function.<br><br>
 5. To create a Boon, you must call `gods.CreateBoon(params)`, and pass in the required fields - as well as any custom functions you need to make the boon function. <br>
 
+> [!IMPORTANT]
+> It is important to note that the internal names for Gods/Traits/Keepsakes will always be appended with your `_PLUGIN.guid` followed by a `-` and then the internal name.
+> This also applies for anything that will be handled internally, such as portrait names, among other sets of data.
+
 ## Planned Features
 - I am looking into the possibility of Hex Gods like Selene, as well as physical 3D NPCs if possible - however to my knowledge, 3D models have not been created yet.
-- I would like to add Spells and proper NPC's such as Dionysus/Athena/Arachne during runs, and Hub NPCS such as Hecate/Hypnos.<br> However, there are a lot of functions that are hard-coded to `SpellDrop`, and I am unsure about the state of adding 3D models.
+- I would like to add Spells and proper NPC's such as Dionysus/Athena/Arachne during runs, and Hub NPCS such as Hecate/Hypnos, however, there are a lot of functions that are hard-coded to `SpellDrop`, and I am unsure about the state of adding 3D models.
+- Ability to add Custom Rarities.
