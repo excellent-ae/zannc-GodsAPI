@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [2.0.5] - 2025-12-08
+
 - Fix issue with NPC God spawning in Shops.
 - Naming Convention for Shop var in NPC.
 - Fix InheritFrom nil check in CreateBoon.
@@ -100,7 +103,8 @@
 
 - Initial Release.
 
-[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.4...HEAD
+[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.5...HEAD
+[2.0.5]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.4...2.0.5
 [2.0.4]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.3...2.0.4
 [2.0.3]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.2...2.0.3
 [2.0.2]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.1...2.0.2
