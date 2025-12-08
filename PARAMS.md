@@ -7,7 +7,7 @@
     * `godType` (string) **(required)** - The type of God | eg "god" or "npcgod" (God = Zeus, NPC = Hermes)<br>
     >[!IMPORTANT]
     `SpawnLikeHermes` is commonly used with a NPCGod, which creates requirements for the god to spawn, just like Hermes, otherwise, they will spawn like normal, but not apply to the `MaxGods` table.<br>
-    NPCGod main use is to not apply to the MetGods table.
+    NPCGod main use is to disable GodLoot, which is used in multiple functions to define rewards / eligible rewards.
     * `SpawnLikeHermes` (boolean) **(optional)** - `default is = nil `
 
     <details>

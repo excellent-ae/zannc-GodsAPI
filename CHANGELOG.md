@@ -1,6 +1,15 @@
 # Changelog
 
 ## [Unreleased]
+- Fix issue with NPC God spawning in Shops.
+- Naming Convention for Shop var in NPC.
+- Fix InheritFrom nil check in CreateBoon.
+- Relaxed need to define plugin.guid for trait requirements, it will try to fall back to `_PLUGIN.guid-internalboonname`, or else throw a warning and remove it from the list.
+- Added `customGUID` to `addToExistingGod` to allow for insertions into god not using your `GUID`.
+- Allow for `godtype = god` and still limit spawns to function like hermes
+- Touched up on docs.
+- DEV: Added Boon Population for `EnemyData` after game loads, makes it easier to add boons to NPCs too.
+- Hopefully fixed issue which was causing NPC/Spawn Limited gods to constantly appear.
 
 ## [2.0.4] - 2025-12-02
 

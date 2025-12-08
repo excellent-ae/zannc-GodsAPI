@@ -123,7 +123,7 @@ gods.InitializeGod({
 })
 
 --[[
-It is possible to also limit the spawning of the God to function like hermes, but still apply to the MetGods table (by using godType = GOD).
+It is possible to also limit the spawning of the God to function like Hermes, but still be GodLoot (by using godType = GOD).
 Doing so however would severly limit the users' to see an additional god.
 ]]
 ```

@@ -1,10 +1,12 @@
+-- TODO, add info to run end
+-- TODO, Damage Meter info PR
+
 ---@diagnostic disable: undefined-global
 ---@meta _
 
 local mods = rom.mods
 envy = mods["SGG_Modding-ENVY"].auto()
 rom = rom
----@diagnostic disable-next-line: undefined-global
 _PLUGIN = PLUGIN
 game = rom.game
 modutil = mods["SGG_Modding-ModUtil"]
@@ -12,7 +14,6 @@ sjson = mods["SGG_Modding-SJSON"]
 
 import_as_fallback(rom.game)
 
-local plugin_data_by_guid = {}
 local definitions = {}
 
 --region SJSON defs
@@ -224,7 +225,6 @@ function definitions.InitializeGod(env, params)
 		SpeakerName = godName,
 		Gender = params.Gender or "X",
 		GodLoot = true,
-
 		TreatAsGodLootByShops = nil,
 		GameStateRequirements = params.GameStateRequirements or {},
 
@@ -233,6 +233,9 @@ function definitions.InitializeGod(env, params)
 		DoorUpgradedIcon = "BoonDrop" .. godName .. "UpgradedPreview",
 		Icon = "BoonSymbol" .. godName,
 		MenuTitle = "UpgradeChoiceMenu_Title_" .. upgradeName,
+		BoonInfoTitleText = "UpgradeChoiceMenu_" .. godName,
+		SurfaceShopIcon = "BoonInfoSymbol" .. godName .. "Icon",
+		SurfaceShopText = upgradeName .. "_Store",
 
 		--! Portraits
 		Portrait = "Portrait_" .. godName .. "_Default_01", -- Default Portrait
@@ -305,6 +308,7 @@ function definitions.InitializeGod(env, params)
 		Consumables = params.Consumables or {},
 		EmoteOffsetX = params.EmoteOffsetX or 30,
 		EmoteOffsetY = params.EmoteOffsetY or -320,
+		PlayInteract = true,
 	}
 
 	if lowGodType == "npcgod" then
@@ -318,119 +322,116 @@ function definitions.InitializeGod(env, params)
 		game.LootData[upgradeName].SpecialInteractCooldown = 60
 		game.LootData[upgradeName].GodLoot = false
 		game.LootData[upgradeName].TreatAsGodLootByShops = true
-		game.LootData[upgradeName].BoonInfoTitleText = "UpgradeChoiceMenu_" .. godName
-		game.LootData[upgradeName].SurfaceShopIcon = "BoonInfoSymbol" .. godName .. "Icon"
-		game.LootData[upgradeName].SurfaceShopText = upgradeName .. "_Store"
+	end
 
-		if params.SpawnLikeHermes then
-			game.NamedRequirementsData[upgradeName .. "Requirements"] = {
-				-- unlock requirements
-				{
-					Path = { "GameState", "TextLinesRecord" },
-					HasAll = { godName .. "FirstPickUp" },
-				},
-				{
-					FunctionName = "RequiredNotInStore",
-					FunctionArgs = { Name = "Shop" .. upgradeName },
-				},
+	if params.SpawnLikeHermes then
+		game.NamedRequirementsData[upgradeName .. "-Requirements"] = {
+			-- unlock requirements
+			-- {
+			-- 	Path = { "GameState", "TextLinesRecord" },
+			-- 	HasAll = { godName .. "FirstPickUp" },
+			-- }, // Not doing this in case someone doesnt have a first pickup text set.
+			-- run requirements
+			{
+				FunctionName = "RequiredNotInStore",
+				FunctionArgs = { Name = "Shop-" .. upgradeName },
+			},
+			{
+				Path = { "CurrentRun", "BiomeUseRecord" },
+				HasNone = { upgradeName, "Shop-" .. upgradeName },
+			},
+			{
+				Path = { "CurrentRun", "LootTypeHistory", upgradeName },
+				Comparison = "<=",
+				Value = 1,
+			},
+		}
+
+		local insertRewards = {
+			Name = upgradeName,
+			GameStateRequirements = {
+				NamedRequirements = { upgradeName .. "-Requirements" },
+			},
+		}
+
+		table.insert(game.RewardStoreData.HubRewards, insertRewards)
+		table.insert(game.RewardStoreData.RunProgress, insertRewards)
+
+		game.ConsumableData["Shop-" .. upgradeName] = {
+			UsePromptOffsetX = 65,
+			UsePromptOffsetY = 0,
+			DebugOnly = false,
+			CanDuplicate = true,
+			ResourceCosts = {
+				Money = 150,
+			},
+			UseText = "UsePurchaseLoot",
+			UseFunctionName = "rom.mods." .. env._PLUGIN.guid .. "-Create" .. params.godName .. "Loot",
+			SurfaceShopText = upgradeName .. "_Store",
+			SurfaceShopIcon = upgradeName .. "Shop",
+			GameStateRequirements = {
 				{
 					Path = { "CurrentRun", "BiomeUseRecord" },
-					HasNone = { upgradeName, "Shop" .. upgradeName },
+					HasNone = { upgradeName, "Shop-" .. upgradeName },
 				},
 				{
 					Path = { "CurrentRun", "LootTypeHistory", upgradeName },
 					Comparison = "<=",
 					Value = 1,
 				},
-			}
+			},
+		}
 
-			local insertRewards = {
-				Name = upgradeName,
-				GameStateRequirements = {
-					NamedRequirements = { upgradeName .. "Requirements" },
-				},
-			}
+		table.insert(game.StoreData.SurfaceShop.GroupsOf[2].OptionsData, { Name = "Shop-" .. upgradeName })
+		table.insert(game.StoreData.WorldShop.GroupsOf[1].OptionsData, { Name = "Shop-" .. upgradeName })
+		table.insert(game.StoreData.I_WorldShop.GroupsOf[4].OptionsData, { Name = "Shop-" .. upgradeName, Cost = 500, UpgradeChance = 1.0, UpgradedCost = 500, ReplaceRequirements = nil })
+		table.insert(game.StoreData.Q_WorldShop.GroupsOf[3].OptionsData, { Name = "Shop-" .. upgradeName, Cost = 500, UpgradeChance = 1.0, UpgradedCost = 500, ReplaceRequirements = nil })
 
-			table.insert(game.RewardStoreData.HubRewards, insertRewards)
-			table.insert(game.RewardStoreData.RunProgress, insertRewards)
-
-			game.ConsumableData["Shop" .. upgradeName] = {
-				UsePromptOffsetX = 65,
-				UsePromptOffsetY = 0,
-				DebugOnly = false,
-				CanDuplicate = true,
-				ResourceCosts = {
-					Money = 150,
-				},
-				UseText = "UsePurchaseLoot",
-				UseFunctionName = "rom.mods." .. env._PLUGIN.guid .. "-Create" .. params.godName .. "Loot",
-				SurfaceShopText = upgradeName .. "_Store",
-				SurfaceShopIcon = upgradeName .. "Shop",
-				GameStateRequirements = {
-					{
-						Path = { "CurrentRun", "BiomeUseRecord" },
-						HasNone = { upgradeName, upgradeName .. "Shop" },
-					},
-					{
-						Path = { "CurrentRun", "LootTypeHistory", upgradeName },
-						Comparison = "<=",
-						Value = 1,
-					},
-				},
-			}
-
-			table.insert(game.StoreData.SurfaceShop.GroupsOf[2].OptionsData, { Name = "Shop" .. upgradeName })
-			table.insert(game.StoreData.WorldShop.GroupsOf[1].OptionsData, { Name = "Shop" .. upgradeName })
-			table.insert(game.StoreData.I_WorldShop.GroupsOf[4].OptionsData, { Name = "Shop" .. upgradeName, Cost = 500, UpgradeChance = 1.0, UpgradedCost = 500, ReplaceRequirements = nil })
-			table.insert(game.StoreData.Q_WorldShop.GroupsOf[3].OptionsData, { Name = "Shop" .. upgradeName, Cost = 500, UpgradeChance = 1.0, UpgradedCost = 500, ReplaceRequirements = nil })
-
-			plugin_data_by_guid[env._PLUGIN.guid][env._PLUGIN.guid .. "-Create" .. params.godName .. "Loot"] = function(args)
-				args = args or {}
-				return CreateLoot(MergeTables(args, { Name = upgradeName, AutoLoadPackages = true }))
-			end
-
-			modutil.mod.Path.Wrap("SpawnStoreItemInWorld", function(base, itemData, kitId)
-				if not itemData then
-					return
-				end
-				local spawnedItem = nil
-				if itemData.Name == "Shop" .. upgradeName then
-					local boonRarities = itemData.BoonRaritiesOverride
-					if not boonRarities and itemData.Args then
-						boonRarities = itemData.Args.BoonRaritiesOverride
-					end
-
-					if plugin_data_by_guid[env._PLUGIN.guid] and plugin_data_by_guid[env._PLUGIN.guid][env._PLUGIN.guid .. "-Create" .. params.godName .. "Loot"] then
-						spawnedItem = plugin_data_by_guid[env._PLUGIN.guid][env._PLUGIN.guid .. "-Create" .. params.godName .. "Loot"]({
-							SpawnPoint = kitId,
-							ResourceCosts = itemData.ResourceCosts or GetProcessedValue(ConsumableData[itemData.Name].ResourceCosts),
-							DoesNotBlockExit = true,
-							SuppressSpawnSounds = true,
-							BoughtFromShop = true,
-							AddBoostedAnimation = itemData.AddBoostedAnimation,
-							BoonRaritiesOverride = itemData.BoonRaritiesOverride,
-						})
-						spawnedItem.CanReceiveGift = false
-						SetThingProperty({ Property = "SortBoundsScale", Value = 1.0, DestinationId = kitId })
-					end
-				end
-				if spawnedItem ~= nil then
-					MapState.RewardPointsUsed[kitId] = spawnedItem.ObjectId
-					spawnedItem.SpawnPointId = kitId
-					if not itemData.PendingShopItem and not itemData.ZagContractItem then
-						SetObstacleProperty({ Property = "MagnetismWhileBlocked", Value = 0, DestinationId = spawnedItem.ObjectId })
-						spawnedItem.UseText = spawnedItem.PurchaseText or "Shop_UseText"
-						spawnedItem.IconPath = spawnedItem.TextIconPath or spawnedItem.IconPath
-						table.insert(CurrentRun.CurrentRoom.Store.SpawnedStoreItems, { KitId = kitId, ObjectId = spawnedItem.ObjectId, OriginalResourceCosts = spawnedItem.BaseResourceCosts, ResourceCosts = spawnedItem.ResourceCosts })
-					else
-						MapState.SurfaceShopItems = MapState.SurfaceShopItems or {}
-						table.insert(MapState.SurfaceShopItems, spawnedItem.Name)
-					end
-					return spawnedItem
-				end
-				return base(itemData, kitId)
-			end)
+		local envFunc = env._PLUGIN.guid .. "-Create" .. params.godName .. "Loot"
+		envFunc = function(args)
+			args = args or {}
+			return CreateLoot(MergeTables(args, { Name = upgradeName, AutoLoadPackages = true }))
 		end
+
+		modutil.mod.Path.Wrap("SpawnStoreItemInWorld", function(base, itemData, kitId)
+			if not itemData then
+				return
+			end
+			local spawnedItem = nil
+			if itemData.Name == "Shop-" .. upgradeName then
+				local boonRarities = itemData.BoonRaritiesOverride
+				if not boonRarities and itemData.Args then
+					boonRarities = itemData.Args.BoonRaritiesOverride
+				end
+
+				spawnedItem = envFunc({
+					SpawnPoint = kitId,
+					ResourceCosts = itemData.ResourceCosts or GetProcessedValue(ConsumableData[itemData.Name].ResourceCosts),
+					DoesNotBlockExit = true,
+					SuppressSpawnSounds = true,
+					BoughtFromShop = true,
+					AddBoostedAnimation = itemData.AddBoostedAnimation,
+					BoonRaritiesOverride = itemData.BoonRaritiesOverride,
+				})
+				spawnedItem.CanReceiveGift = false
+				SetThingProperty({ Property = "SortBoundsScale", Value = 1.0, DestinationId = kitId })
+			end
+			if spawnedItem ~= nil then
+				MapState.RewardPointsUsed[kitId] = spawnedItem.ObjectId
+				spawnedItem.SpawnPointId = kitId
+				if not itemData.PendingShopItem and not itemData.ZagContractItem then
+					SetObstacleProperty({ Property = "MagnetismWhileBlocked", Value = 0, DestinationId = spawnedItem.ObjectId })
+					spawnedItem.UseText = spawnedItem.PurchaseText or "Shop_UseText"
+					spawnedItem.IconPath = spawnedItem.TextIconPath or spawnedItem.IconPath
+					table.insert(CurrentRun.CurrentRoom.Store.SpawnedStoreItems, { KitId = kitId, ObjectId = spawnedItem.ObjectId, OriginalResourceCosts = spawnedItem.BaseResourceCosts, ResourceCosts = spawnedItem.ResourceCosts })
+				else
+					MapState.SurfaceShopItems = MapState.SurfaceShopItems or {}
+					table.insert(MapState.SurfaceShopItems, spawnedItem.Name)
+				end
+				return spawnedItem
+			end
+			return base(itemData, kitId)
+		end)
 	end
 
 	codexReg(env, params, upgradeName, lowGodType)
@@ -728,35 +729,26 @@ function definitions.CreateOlympianSJSONData(env, params)
 	end
 
 	if string.lower(params.godType) == "npcgod" then
-		local configs = {
-			[godName .. "UpgradePreview"] = {
-				InheritFrom = "BoonSymbolBaseIsometric",
-				FilePath = cleanFilePath(pluginGUID, params.previewPath, useBasePathPreview),
-			},
-			[godName .. "UpgradeShop"] = {
-				InheritFrom = godName .. "UpgradePreview",
-				Duration = 0,
-				StartOffsetZ = 0,
-				EndOffsetZ = 0,
-				PingPongShiftOverDuration = false,
-				Sound = null,
-			},
-		}
-
 		local vfxObjects = {}
-		for name, config in pairs(configs) do
-			local object = sjson.to_object({
-				Name = name,
-				InheritFrom = config.InheritFrom,
-				FilePath = config.FilePath,
-				Duration = config.Duration,
-				StartOffsetZ = config.StartOffsetZ,
-				EndOffsetZ = config.EndOffsetZ,
-				PingPongShiftOverDuration = config.PingPongShiftOverDuration,
-				Sound = config.Sound,
-			}, Order)
-			table.insert(vfxObjects, object)
-		end
+
+		local upgradePrev = sjson.to_object({
+			Name = godName .. "UpgradePreview",
+			InheritFrom = "BoonSymbolBaseIsometric",
+			FilePath = cleanFilePath(pluginGUID, params.previewPath, useBasePathPreview),
+		}, Order)
+		table.insert(vfxObjects, upgradePrev)
+
+		local upgradeShop = sjson.to_object({
+			InheritFrom = godName .. "UpgradePreview",
+			Name = godName .. "UpgradeShop",
+
+			Duration = 0,
+			StartOffsetZ = 0,
+			EndOffsetZ = 0,
+			PingPongShiftOverDuration = false,
+			Sound = null,
+		}, Order)
+		table.insert(vfxObjects, upgradeShop)
 
 		sjson.hook(ItemsGeneralVFX, function(data)
 			for _, object in ipairs(vfxObjects) do
@@ -1239,7 +1231,7 @@ function definitions.CreateBoon(env, params)
 	end
 
 	-- just do a check incase nothing is in inheritfrom, fall back to basetrait
-	if game.TraitData[intboonName].InheritFrom == nil then
+	if game.TraitData[intboonName].InheritFrom == {} then
 		game.TraitData[intboonName].InheritFrom = { "BaseTrait", "FireBoon" }
 	end
 
@@ -1304,51 +1296,69 @@ function definitions.CreateBoon(env, params)
 	game.TraitData[intboonName].TraitOrderingValueCache = GetTraitOrderingValue(game.TraitData[intboonName])
 
 	if params.addToExistingGod then
+		local customGUIDLoot = nil
+		if type(params.addToExistingGod) == "table" and params.addToExistingGod.customGUID then
+			customGUIDLoot = params.addToExistingGod.customGUID .. "-" .. params.characterName .. "Upgrade"
+		end
+
 		local characterData = nil
 		if game.LootData[params.characterName .. "Upgrade"] then
 			characterData = game.LootData[params.characterName .. "Upgrade"]
 		elseif game.LootData[characterUpgrade] then
 			characterData = game.LootData[characterUpgrade]
+		elseif customGUIDLoot and game.LootData[customGUIDLoot] then
+			characterData = game.LootData[customGUIDLoot]
 		else
-			rom.log.warning("addToExistingGod: LootData for character " .. params.characterName .. " does not exist, cannot add trait.")
+			local warningMsg = "addToExistingGod: LootData: " .. params.characterName .. "Upgrade / or / " .. characterUpgrade .. " do not exist"
+			if customGUIDLoot then
+				warningMsg = warningMsg .. "/ or / " .. customGUIDLoot .. " does not exist."
+			else
+				warningMsg = warningMsg .. ", attempt to pass in a customGUID."
+			end
+			rom.log.warning(warningMsg)
 		end
 
 		if characterData then
 			if params.Slot == "Melee" or params.Slot == "Secondary" or params.Slot == "Ranged" or params.Slot == "Rush" or params.Slot == "Mana" then
-				if characterData.WeaponUpgrades then
-					local alreadyExists = false
-					for _, existingBoon in ipairs(characterData.WeaponUpgrades) do
-						if existingBoon == intboonName then
-							alreadyExists = true
-							break
-						end
-					end
+				if characterData.WeaponUpgrades == nil then -- we wanna create the weapon tables if it doesnt exist, just in case its not defined
+					characterData.WeaponUpgrades = {}
+				end
+				if characterData.PriorityUpgrades == nil then -- same
+					characterData.PriorityUpgrades = {}
+				end
 
-					if not alreadyExists then
-						if type(params.addToExistingGod) == "table" and params.addToExistingGod.boonPosition then
-							table.insert(characterData.WeaponUpgrades, params.addToExistingGod.boonPosition, intboonName)
-						else
-							table.insert(characterData.WeaponUpgrades, intboonName)
-						end
+				local alreadyExists = false
+				for _, existingBoon in ipairs(characterData.WeaponUpgrades) do
+					if existingBoon == intboonName then
+						alreadyExists = true
+						break
 					end
-				else
-					rom.log.warning("addToExistingGod: Trying to add to WeaponUpgrades but table doesn't exist for " .. params.characterName)
+				end
+
+				if not alreadyExists then
+					if type(params.addToExistingGod) == "table" and params.addToExistingGod.boonPosition then
+						table.insert(characterData.WeaponUpgrades, params.addToExistingGod.boonPosition, intboonName)
+						table.insert(characterData.PriorityUpgrades, params.addToExistingGod.boonPosition, intboonName)
+					else
+						table.insert(characterData.WeaponUpgrades, intboonName)
+						table.insert(characterData.PriorityUpgrades, intboonName)
+					end
 				end
 			else
-				if characterData.Traits then
-					local alreadyExists = false
-					for _, existingTrait in ipairs(characterData.Traits) do
-						if existingTrait == intboonName then
-							alreadyExists = true
-							break
-						end
-					end
+				if characterData.Traits == nil then -- same here
+					characterData.Traits = {}
+				end
 
-					if not alreadyExists then
-						table.insert(characterData.Traits, intboonName)
+				local alreadyExists = false
+				for _, existingTrait in ipairs(characterData.Traits) do
+					if existingTrait == intboonName then
+						alreadyExists = true
+						break
 					end
-				else
-					rom.log.warning("addToExistingGod: Trying to add to Traits but table doesn't exist for " .. params.characterName)
+				end
+
+				if not alreadyExists then
+					table.insert(characterData.Traits, intboonName)
 				end
 			end
 		end
@@ -1378,14 +1388,37 @@ function definitions.CreateBoon(env, params)
 
 	--? requirements
 	if params.requirements then
+		local function checkList(requirementList)
+			local processedList = {}
+
+			for _, req in ipairs(requirementList) do
+				if game.TraitData[req] then
+					table.insert(processedList, req)
+				else
+					local attemptGUID = pluginGUID .. "-" .. req
+					if game.TraitData[attemptGUID] then
+						table.insert(processedList, attemptGUID)
+					else
+						rom.log.warning("Cannot find trait for requirement: " .. req .. ", or for: " .. attemptGUID .. ". This will cause errors!")
+					end
+				end
+			end
+
+			return processedList
+		end
+
 		game.TraitRequirements[intboonName] = {}
+
 		if params.requirements.OneOf then
-			game.TraitRequirements[intboonName].OneOf = params.requirements.OneOf
+			game.TraitRequirements[intboonName].OneOf = checkList(params.requirements.OneOf)
 		end
 		if params.requirements.TwoOf then
-			game.TraitRequirements[intboonName].TwoOf = params.requirements.TwoOf
+			game.TraitRequirements[intboonName].TwoOf = checkList(params.requirements.TwoOf)
 		end
 		if params.requirements.OneFromEachSet then
+			for i, set in ipairs(params.requirements.OneFromEachSet) do
+				params.requirements.OneFromEachSet[i] = checkList(set)
+			end
 			game.TraitRequirements[intboonName].OneFromEachSet = params.requirements.OneFromEachSet
 		end
 	end
@@ -1488,6 +1521,92 @@ end)
 
 mods.on_all_mods_loaded(function()
 	modutil.once_loaded.game(function()
+		for enemyName, enemyData in pairs(EnemyData) do
+			ProcessDataInheritance(enemyData, EnemyData)
+			if enemyData.PropertyChanges ~= nil then
+				for k, propertyChange in pairs(enemyData.PropertyChanges) do
+					AddFormattedPercentageChangeValues(propertyChange)
+				end
+			end
+
+			if enemyData.TreatAsGodLootByShops and not IsEmpty(enemyData.Traits) then
+				local fieldLootEntry = {
+					Name = enemyName,
+					TraitIndex = ToLookup(enemyData.Traits),
+					TreatAsGodLootByShops = enemyData.TreatAsGodLootByShops,
+					IgnoreRestrictBoonChoices = enemyData.IgnoreRestrictBoonChoices,
+					ExcludeFromLastRunBoon = enemyData.ExcludeFromLastRunBoon,
+					GodLoot = enemyData.GodLoot,
+				}
+
+				if not IsEmpty(enemyData.WeaponUpgrades) then
+					fieldLootEntry.TraitIndex = fieldLootEntry.TraitIndex and ToLookup(enemyData.WeaponUpgrades)
+				end
+
+				FieldLootData[enemyName] = fieldLootEntry
+			end
+
+			local traitDictionary = {}
+			ScreenData.BoonInfo.TraitDictionary[enemyName] = {}
+			ScreenData.BoonInfo.TraitSortOrder[enemyName] = {}
+
+			if enemyData.TraitSortOrder then
+				ScreenData.BoonInfo.TraitSortOrder[enemyName] = ShallowCopyTable(enemyData.TraitSortOrder)
+			else
+				if enemyData.WeaponUpgrades then
+					ScreenData.BoonInfo.TraitSortOrder[enemyName] = ConcatTableValuesIPairs(ScreenData.BoonInfo.TraitSortOrder[enemyName], enemyData.WeaponUpgrades)
+				end
+				if enemyData.Traits then
+					ScreenData.BoonInfo.TraitSortOrder[enemyName] = ConcatTableValuesIPairs(ScreenData.BoonInfo.TraitSortOrder[enemyName], enemyData.Traits)
+				end
+			end
+
+			if enemyData.WeaponUpgrades ~= nil then
+				for i, traitName in pairs(enemyData.WeaponUpgrades) do
+					traitDictionary[traitName] = true
+					ScreenData.BoonInfo.TraitDictionary[enemyName][traitName] = true
+				end
+				if IsEmpty(enemyData.PriorityUpgrades) then
+					enemyData.PriorityUpgrades = enemyData.WeaponUpgrades
+				end
+			end
+			if enemyData.Traits ~= nil then
+				for i, traitName in pairs(enemyData.Traits) do
+					traitDictionary[traitName] = true
+					ScreenData.BoonInfo.TraitDictionary[enemyName][traitName] = true
+				end
+			end
+			if enemyData.PermanentTraits ~= nil then
+				for i, traitName in pairs(enemyData.PermanentTraits) do
+					traitDictionary[traitName] = true
+					ScreenData.BoonInfo.TraitDictionary[enemyName][traitName] = true
+				end
+			end
+			if enemyData.TemporaryTraits ~= nil then
+				for i, traitName in pairs(enemyData.TemporaryTraits) do
+					traitDictionary[traitName] = true
+					ScreenData.BoonInfo.TraitDictionary[enemyName][traitName] = true
+				end
+			end
+			if enemyData.Consumables ~= nil then
+				for i, consumableName in pairs(enemyData.Consumables) do
+					ScreenData.BoonInfo.TraitDictionary[enemyName][consumableName] = true
+				end
+			end
+			enemyData.TraitIndex = traitDictionary
+			ProcessTextLines(enemyData, enemyData.InteractTextLineSets, "InteractTextLinePriorities", { DefaultStatusAnimation = StatusAnimations.WantsToTalk })
+			ProcessTextLines(enemyData, enemyData.RejectionTextLines, nil, args)
+			ProcessTextLines(enemyData, enemyData.MakeUpTextLines, nil, args)
+			ProcessTextLines(enemyData, enemyData.BoughtTextLines, nil, args)
+			ProcessTextLines(enemyData, enemyData.DuoPickupTextLines, nil, args)
+			ProcessTextLines(enemyData, enemyData.GiftTextLineSets, "GiftTextLinePriorities", args)
+
+			ProcessTextLines(enemyData, enemyData.BossIntroTextLineSets, "BossIntroTextLinePriorities", args)
+			ProcessTextLines(enemyData, enemyData.BossPhaseChangeTextLineSets, "BossPhaseChangeTextLinePriorities", args)
+			ProcessTextLines(enemyData, enemyData.BossOutroTextLineSets, "BossOutroTextLinePriorities", args)
+			ProcessTextLines(enemyData, enemyData.DeathPresentationTextLineSets, nil, args)
+		end
+
 		for traitName, traitData in pairs(TraitData) do
 			traitData.Name = traitName
 			ProcessDataInheritance(traitData, TraitData)
@@ -1814,7 +1933,6 @@ mods.on_all_mods_loaded(function()
 		end
 
 		for lootName, lootData in pairs(LootData) do
-			lootData.Name = lootName
 			ProcessDataInheritance(lootData, LootData)
 			if lootData.PropertyChanges ~= nil then
 				for k, propertyChange in pairs(lootData.PropertyChanges) do
@@ -1824,8 +1942,8 @@ mods.on_all_mods_loaded(function()
 
 			local traitDictionary = {}
 			ScreenData.BoonInfo.TraitDictionary[lootName] = {}
-
 			ScreenData.BoonInfo.TraitSortOrder[lootName] = {}
+
 			if lootData.TraitSortOrder then
 				ScreenData.BoonInfo.TraitSortOrder[lootName] = ShallowCopyTable(lootData.TraitSortOrder)
 			else
@@ -1841,6 +1959,9 @@ mods.on_all_mods_loaded(function()
 				for i, traitName in pairs(lootData.WeaponUpgrades) do
 					traitDictionary[traitName] = true
 					ScreenData.BoonInfo.TraitDictionary[lootName][traitName] = true
+				end
+				if IsEmpty(lootData.PriorityUpgrades) then -- custom
+					lootData.PriorityUpgrades = lootData.WeaponUpgrades
 				end
 			end
 			if lootData.Traits ~= nil then

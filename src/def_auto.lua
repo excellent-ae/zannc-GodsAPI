@@ -3,9 +3,7 @@ local public = {}
 
 ---@alias GodType "god" | "npcgod"
 
---[[
-    Creates the main LootData for a god, contains traits, dialogue, game spawn requirements, colours.
---]]
+--Creates the main LootData for a god, contains traits, dialogue, game spawn requirements, colours.
 ---@class GodParams
 ---@field godName string
 ---@field godType GodType
@@ -55,9 +53,7 @@ local public = {}
 ---@param params GodParams
 function public.InitializeGod(params) end
 
---[[
-    Creates SJSON data for a God including boon drops, icons, portraits, and text entries.
---]]
+--Creates SJSON data for a God including boon drops, icons, portraits, and text entries.
 ---@class SJSONData
 ---@field godName string
 ---@field godType GodType
@@ -87,9 +83,7 @@ function public.InitializeGod(params) end
 ---@param params SJSONData
 function public.CreateOlympianSJSONData(params) end
 
---[[
-    Creates a Keepsake for a character, doesn't have to be related to a specific God/Character in the game already.
---]]
+--Creates a Keepsake for a character, doesn't have to be related to a specific God/Character in the game already.
 ---@class KeepsakeParams
 ---@field characterName string
 ---@field internalKeepsakeName string
@@ -108,9 +102,7 @@ function public.CreateOlympianSJSONData(params) end
 ---@param params KeepsakeParams
 function public.CreateKeepsake(params) end
 
---[[
-    Creates a Boon for a God/Character.
---]]
+--Creates a Boon for a God/Character.
 ---@class TraitParams
 ---@field characterName string
 ---@field internalBoonName string
@@ -133,68 +125,51 @@ function public.CreateKeepsake(params) end
 ---@param params TraitParams
 function public.CreateBoon(params) end
 
---[[
-    Checks if a God is in LootData, usually for debugging.
---]]
+--Checks if a God is in LootData, usually for debugging.
 ---@param godName string
 ---@param debug? boolean
 ---@return boolean
 function public.IsGodRegistered(godName, debug) end
 
---[[
-    Gets the internal god upgrade name with plugin GUID prefix.
---]]
+--Gets the internal god upgrade name with plugin GUID prefix.
 ---@param godName string
 ---@return string|nil
 function public.GetInternalGodName(godName) end
 
---[[
-    Gets the full god data from LootData.
---]]
+--Gets the full god data from LootData.
+
 ---@param godName string
 ---@return table|nil
 function public.GetGodData(godName) end
 
---[[
-    Checks if a Keepsake is created in TraitData, usually for debugging.
---]]
+--Checks if a Keepsake is created in TraitData, usually for debugging.
 ---@param internalKeepsakeName string
 ---@param debug? boolean
 ---@return boolean
 function public.IsKeepsakeRegistered(internalKeepsakeName, debug) end
 
---[[
-    Gets the internal keepsake name with plugin GUID prefix.
---]]
+--Gets the internal keepsake name with plugin GUID prefix.
 ---@param internalKeepsakeName string
 ---@return string|nil
 function public.GetInternalKeepsakeName(internalKeepsakeName) end
 
---[[
-    Gets the full keepsake data from TraitData.
---]]
+--Gets the full keepsake data from TraitData.
 ---@param internalKeepsakeName string
 ---@return table|nil
 function public.GetKeepsakeData(internalKeepsakeName) end
 
---[[
-    Checks if a Boon is created in TraitData, usually for debugging.
---]]
+--Checks if a Boon is created in TraitData, usually for debugging.
 ---@param internalBoonName string
 ---@param debug? boolean
 ---@return boolean
 function public.IsBoonRegistered(internalBoonName, debug) end
 
---[[
-    Gets the internal boon name with plugin GUID prefix.
---]]
+--Gets the internal boon name with plugin GUID prefix.
 ---@param internalBoonName string
 ---@return string|nil
 function public.GetInternalBoonName(internalBoonName) end
 
---[[
-    Gets the full boon data from TraitData.
---]]
+--Gets the full boon data from TraitData.
 ---@param internalBoonName string
 ---@return table|nil
 function public.GetBoonData(internalBoonName) end
