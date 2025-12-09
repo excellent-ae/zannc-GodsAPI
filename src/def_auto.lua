@@ -45,10 +45,11 @@ local public = {}
 ---@field Consumables? table
 ---@field EmoteOffsetX? number
 ---@field EmoteOffsetY? number
----@field SpawnLikeHermes? boolean
+---@field SpawnLikeHermes? boolean|table
 ---@field skipCodex? boolean
 ---@field extraCodexEntry? table
 ---@field codexData? table
+---@field ExtraFields? table
 
 ---@param params GodParams
 function public.InitializeGod(params) end

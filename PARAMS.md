@@ -8,7 +8,8 @@
     >[!IMPORTANT]
     `SpawnLikeHermes` is commonly used with a NPCGod, which creates requirements for the god to spawn, just like Hermes, otherwise, they will spawn like normal, but not apply to the `MaxGods` table.<br>
     NPCGod main use is to disable GodLoot, which is used in multiple functions to define rewards / eligible rewards.
-    * `SpawnLikeHermes` (boolean) **(optional)** - `default is = nil `
+    * `SpawnLikeHermes` (table) **(optional)**
+        * `maximumSpawns` (integer) - The maximum spawns to allow - using Less than or Equal to check.
 
     <details>
     <summary><strong>Optional Parameters</strong></summary><br>
@@ -218,6 +219,8 @@
     <summary><strong>Optional Parameters</strong></summary><br>
 
     * `addToExistingGod` (table/boolean) - Add to existing god's trait list
+        * `boonPosition` (integer) - Where to insert the trait (eg if weapon boon you want it to be position 1)
+        * `customGUID` (string) - A custom GUID can be passed in if the god has a prefixed GUID to the LootName  
     * `RarityLevels` (table) - Multipliers for each rarity level
         * `Common` (number/table)
         * `Rare` (number/table)

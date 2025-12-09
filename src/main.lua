@@ -234,8 +234,8 @@ function definitions.InitializeGod(env, params)
 		Icon = "BoonSymbol" .. godName,
 		MenuTitle = "UpgradeChoiceMenu_Title_" .. upgradeName,
 		BoonInfoTitleText = "UpgradeChoiceMenu_" .. godName,
-		SurfaceShopIcon = "BoonInfoSymbol" .. godName .. "Icon",
-		SurfaceShopText = upgradeName .. "_Store",
+		-- SurfaceShopIcon = "BoonInfoSymbol" .. godName .. "Icon",
+		-- SurfaceShopText = upgradeName .. "_Store",
 
 		--! Portraits
 		Portrait = "Portrait_" .. godName .. "_Default_01", -- Default Portrait
@@ -311,6 +311,12 @@ function definitions.InitializeGod(env, params)
 		PlayInteract = true,
 	}
 
+	if params.ExtraFields then
+		for k, v in pairs(params.ExtraFields) do
+			game.LootData[upgradeName][k] = v
+		end
+	end
+
 	if lowGodType == "npcgod" then
 		--! Stuff for NPC Gods like Hermes
 		game.LootData[upgradeName].SpecialInteractFunctionName = "SpecialInteractSalute"
@@ -325,6 +331,11 @@ function definitions.InitializeGod(env, params)
 	end
 
 	if params.SpawnLikeHermes then
+		local spawnValue = 1
+		if type(params.SpawnLikeHermes) == "table" and params.SpawnLikeHermes.maximumSpawns then
+			spawnValue = params.SpawnLikeHermes.maximumSpawns or 1
+		end
+
 		game.NamedRequirementsData[upgradeName .. "-Requirements"] = {
 			-- unlock requirements
 			-- {
@@ -334,16 +345,16 @@ function definitions.InitializeGod(env, params)
 			-- run requirements
 			{
 				FunctionName = "RequiredNotInStore",
-				FunctionArgs = { Name = "Shop-" .. upgradeName },
+				FunctionArgs = { Name = "Shop" .. upgradeName },
 			},
 			{
 				Path = { "CurrentRun", "BiomeUseRecord" },
-				HasNone = { upgradeName, "Shop-" .. upgradeName },
+				HasNone = { upgradeName, "Shop" .. upgradeName },
 			},
 			{
 				Path = { "CurrentRun", "LootTypeHistory", upgradeName },
 				Comparison = "<=",
-				Value = 1,
+				Value = spawnValue, -- 1 will be a max of 2 spawns, etc
 			},
 		}
 
@@ -357,7 +368,7 @@ function definitions.InitializeGod(env, params)
 		table.insert(game.RewardStoreData.HubRewards, insertRewards)
 		table.insert(game.RewardStoreData.RunProgress, insertRewards)
 
-		game.ConsumableData["Shop-" .. upgradeName] = {
+		game.ConsumableData["Shop" .. upgradeName] = {
 			UsePromptOffsetX = 65,
 			UsePromptOffsetY = 0,
 			DebugOnly = false,
@@ -368,11 +379,11 @@ function definitions.InitializeGod(env, params)
 			UseText = "UsePurchaseLoot",
 			UseFunctionName = "rom.mods." .. env._PLUGIN.guid .. "-Create" .. params.godName .. "Loot",
 			SurfaceShopText = upgradeName .. "_Store",
-			SurfaceShopIcon = upgradeName .. "Shop",
+			SurfaceShopIcon = "BoonDrop" .. godName .. "Preview",
 			GameStateRequirements = {
 				{
 					Path = { "CurrentRun", "BiomeUseRecord" },
-					HasNone = { upgradeName, "Shop-" .. upgradeName },
+					HasNone = { upgradeName, "Shop" .. upgradeName },
 				},
 				{
 					Path = { "CurrentRun", "LootTypeHistory", upgradeName },
@@ -382,10 +393,10 @@ function definitions.InitializeGod(env, params)
 			},
 		}
 
-		table.insert(game.StoreData.SurfaceShop.GroupsOf[2].OptionsData, { Name = "Shop-" .. upgradeName })
-		table.insert(game.StoreData.WorldShop.GroupsOf[1].OptionsData, { Name = "Shop-" .. upgradeName })
-		table.insert(game.StoreData.I_WorldShop.GroupsOf[4].OptionsData, { Name = "Shop-" .. upgradeName, Cost = 500, UpgradeChance = 1.0, UpgradedCost = 500, ReplaceRequirements = nil })
-		table.insert(game.StoreData.Q_WorldShop.GroupsOf[3].OptionsData, { Name = "Shop-" .. upgradeName, Cost = 500, UpgradeChance = 1.0, UpgradedCost = 500, ReplaceRequirements = nil })
+		table.insert(game.StoreData.SurfaceShop.GroupsOf[2].OptionsData, { Name = "Shop" .. upgradeName })
+		table.insert(game.StoreData.WorldShop.GroupsOf[1].OptionsData, { Name = "Shop" .. upgradeName })
+		table.insert(game.StoreData.I_WorldShop.GroupsOf[4].OptionsData, { Name = "Shop" .. upgradeName, Cost = 500, UpgradeChance = 1.0, UpgradedCost = 500, ReplaceRequirements = nil })
+		table.insert(game.StoreData.Q_WorldShop.GroupsOf[3].OptionsData, { Name = "Shop" .. upgradeName, Cost = 500, UpgradeChance = 1.0, UpgradedCost = 500, ReplaceRequirements = nil })
 
 		local envFunc = env._PLUGIN.guid .. "-Create" .. params.godName .. "Loot"
 		envFunc = function(args)
@@ -398,7 +409,7 @@ function definitions.InitializeGod(env, params)
 				return
 			end
 			local spawnedItem = nil
-			if itemData.Name == "Shop-" .. upgradeName then
+			if itemData.Name == "Shop" .. upgradeName then
 				local boonRarities = itemData.BoonRaritiesOverride
 				if not boonRarities and itemData.Args then
 					boonRarities = itemData.Args.BoonRaritiesOverride
@@ -601,6 +612,30 @@ function definitions.CreateOlympianSJSONData(env, params)
 			table.insert(data.Animations, object)
 		end
 	end)
+
+	-- Name = "ZeusOverlay"
+	-- InheritFrom = "HadesOverlay"
+	-- FilePath = "PortraitsZeusPortraits_Zeus_01"
+	-- OffsetX = 450
+	-- OffsetY = 0
+	-- if params.overlayAnimData then
+	-- 	local overlayVFXobj = {}
+	-- 	local overlayAnim = sjson.to_object({
+	-- 		Name = godName .. "Overlay",
+	-- 		InheritFrom = "BoonOverlay",
+	-- 		FilePath = cleanFilePath(pluginGUID, params.overlayAnimData.FilePath or "", params.overlayAnimData.UseBasePath or false),
+	-- 		OffsetX = params.overlayAnimData.OffsetX or 0,
+	-- 		OffsetY = params.overlayAnimData.OffsetY or 0,
+	-- 		Scale = params.overlayAnimData.Scale or 1,
+	-- 	}, Order)
+	-- 	table.insert(overlayVFXobj, overlayAnim)
+
+	-- 	sjson.hook(GUIBoonsVFXFile, function(data)
+	-- 		for _, object in ipairs(overlayVFXobj) do
+	-- 			table.insert(data.Animations, object)
+	-- 		end
+	-- 	end)
+	-- end
 
 	--* Visuals on doors/boon select
 	local boonInfoConfigs = {}

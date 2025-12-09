@@ -1,6 +1,11 @@
 # Changelog
 
 ## [Unreleased]
+- Add `ExtraFields` param to `CreateGod`.
+- Remove Dash from `Shop .. godName` due to it not adhering to StoreLogic discounts (Travel Deal).
+- Added option for `SpawnLikeHermes` to be a table containing `maximumSpawns`, with a value of **1** being **2** natural spawns maximum per run.
+- Change `SurfaceIcon` for boons to be the **IconPreview** of boons.
+- Small def/params update.
 
 ## [2.0.5] - 2025-12-08
 
