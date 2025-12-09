@@ -613,30 +613,6 @@ function definitions.CreateOlympianSJSONData(env, params)
 		end
 	end)
 
-	-- Name = "ZeusOverlay"
-	-- InheritFrom = "HadesOverlay"
-	-- FilePath = "PortraitsZeusPortraits_Zeus_01"
-	-- OffsetX = 450
-	-- OffsetY = 0
-	-- if params.overlayAnimData then
-	-- 	local overlayVFXobj = {}
-	-- 	local overlayAnim = sjson.to_object({
-	-- 		Name = godName .. "Overlay",
-	-- 		InheritFrom = "BoonOverlay",
-	-- 		FilePath = cleanFilePath(pluginGUID, params.overlayAnimData.FilePath or "", params.overlayAnimData.UseBasePath or false),
-	-- 		OffsetX = params.overlayAnimData.OffsetX or 0,
-	-- 		OffsetY = params.overlayAnimData.OffsetY or 0,
-	-- 		Scale = params.overlayAnimData.Scale or 1,
-	-- 	}, Order)
-	-- 	table.insert(overlayVFXobj, overlayAnim)
-
-	-- 	sjson.hook(GUIBoonsVFXFile, function(data)
-	-- 		for _, object in ipairs(overlayVFXobj) do
-	-- 			table.insert(data.Animations, object)
-	-- 		end
-	-- 	end)
-	-- end
-
 	--* Visuals on doors/boon select
 	local boonInfoConfigs = {}
 	boonInfoConfigs["BoonInfoSymbol" .. godName .. "Icon"] = {
@@ -807,8 +783,19 @@ function definitions.CreateOlympianSJSONData(env, params)
 		local useBaseNeutral = params.portraitPathOverrides and params.portraitPathOverrides.NeutralPortraitPath or false
 		local useBaseAnnoyed = params.portraitPathOverrides and params.portraitPathOverrides.AnnoyedPortraitPath or false
 		local useBaseSerious = params.portraitPathOverrides and params.portraitPathOverrides.SeriousPortraitPath or false
+		local useBaseOverlay = params.portraitPathOverrides and params.portraitPathOverrides.OverlayAnimPath or false
 		--! I have no idea what some of these do lmao.
 		local portraitObj = {}
+
+		local overlayAnim = sjson.to_object({
+			Name = godName .. "Overlay",
+			InheritFrom = "BoonOverlay",
+			FilePath = cleanFilePath(pluginGUID, params.portraitData.OverlayAnimPath or "", useBaseOverlay),
+			OffsetX = params.portraitData.OffsetX,
+			OffsetY = params.portraitData.OffsetY,
+			Scale = params.portraitData.Scale,
+		}, Order)
+		table.insert(portraitObj, overlayAnim)
 
 		local defaultPortrait = sjson.to_object({
 			Name = "Portrait_" .. godName .. "_Default_01",

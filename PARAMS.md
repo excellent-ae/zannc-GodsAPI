@@ -117,9 +117,11 @@
             * `NeutralPortraitPath` (boolean)
             * `AnnoyedPortraitPath` (boolean)
             * `SeriousPortraitPath` (boolean)
+            * `OverlayAnimPath` (boolean)
         * `NeutralPortraitPath` (string)
         * `AnnoyedPortraitPath` (string)
         * `SeriousPortraitPath` (string)
+        * `OverlayAnimPath` (string)
         * `OffsetX` (integer) - X offset for portraits
         * `OffsetY` (integer) - Y offset for portraits
         * `Scale` (float) - Scale for portraits

@@ -6,6 +6,7 @@
 - Added option for `SpawnLikeHermes` to be a table containing `maximumSpawns`, with a value of **1** being **2** natural spawns maximum per run.
 - Change `SurfaceIcon` for boons to be the **IconPreview** of boons.
 - Small def/params update.
+- Added `OverlayAnim` to PortraitData.
 
 ## [2.0.5] - 2025-12-08
 
