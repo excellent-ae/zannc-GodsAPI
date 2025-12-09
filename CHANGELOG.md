@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [2.0.6] - 2025-12-09
+
 - Add `ExtraFields` param to `CreateGod`.
 - Remove Dash from `Shop .. godName` due to it not adhering to StoreLogic discounts (Travel Deal).
 - Added option for `SpawnLikeHermes` to be a table containing `maximumSpawns`, with a value of **1** being **2** natural spawns maximum per run.
@@ -109,7 +112,8 @@
 
 - Initial Release.
 
-[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.5...HEAD
+[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.6...HEAD
+[2.0.6]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.5...2.0.6
 [2.0.5]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.4...2.0.5
 [2.0.4]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.3...2.0.4
 [2.0.3]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.2...2.0.3
