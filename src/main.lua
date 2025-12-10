@@ -3,6 +3,7 @@
 
 ---@diagnostic disable: undefined-global
 ---@meta _
+-- rom.inputs.enable_vanilla_debug_keybinds(true)
 
 local mods = rom.mods
 envy = mods["SGG_Modding-ENVY"].auto()
@@ -368,7 +369,9 @@ function definitions.InitializeGod(env, params)
 		table.insert(game.RewardStoreData.HubRewards, insertRewards)
 		table.insert(game.RewardStoreData.RunProgress, insertRewards)
 
+		local envFunc = env._PLUGIN.guid .. "-Create" .. params.godName .. "Loot"
 		game.ConsumableData["Shop" .. upgradeName] = {
+			Name = "Shop" .. upgradeName,
 			UsePromptOffsetX = 65,
 			UsePromptOffsetY = 0,
 			DebugOnly = false,
@@ -377,7 +380,7 @@ function definitions.InitializeGod(env, params)
 				Money = 150,
 			},
 			UseText = "UsePurchaseLoot",
-			UseFunctionName = "rom.mods." .. env._PLUGIN.guid .. "-Create" .. params.godName .. "Loot",
+			UseFunctionName = "rom.mods." .. envFunc,
 			SurfaceShopText = upgradeName .. "_Store",
 			SurfaceShopIcon = "BoonDrop" .. godName .. "Preview",
 			GameStateRequirements = {
@@ -388,7 +391,7 @@ function definitions.InitializeGod(env, params)
 				{
 					Path = { "CurrentRun", "LootTypeHistory", upgradeName },
 					Comparison = "<=",
-					Value = 1,
+					Value = spawnValue,
 				},
 			},
 		}
@@ -398,8 +401,7 @@ function definitions.InitializeGod(env, params)
 		table.insert(game.StoreData.I_WorldShop.GroupsOf[4].OptionsData, { Name = "Shop" .. upgradeName, Cost = 500, UpgradeChance = 1.0, UpgradedCost = 500, ReplaceRequirements = nil })
 		table.insert(game.StoreData.Q_WorldShop.GroupsOf[3].OptionsData, { Name = "Shop" .. upgradeName, Cost = 500, UpgradeChance = 1.0, UpgradedCost = 500, ReplaceRequirements = nil })
 
-		local envFunc = env._PLUGIN.guid .. "-Create" .. params.godName .. "Loot"
-		envFunc = function(args)
+		rom.mods[envFunc] = function(args)
 			args = args or {}
 			return CreateLoot(MergeTables(args, { Name = upgradeName, AutoLoadPackages = true }))
 		end
@@ -408,25 +410,27 @@ function definitions.InitializeGod(env, params)
 			if not itemData then
 				return
 			end
+
 			local spawnedItem = nil
-			if itemData.Name == "Shop" .. upgradeName then
+			if itemData.Name == "Shop" .. upgradeName or itemData.Name == upgradeName then
 				local boonRarities = itemData.BoonRaritiesOverride
 				if not boonRarities and itemData.Args then
 					boonRarities = itemData.Args.BoonRaritiesOverride
 				end
 
-				spawnedItem = envFunc({
+				spawnedItem = rom.mods[envFunc]({
 					SpawnPoint = kitId,
 					ResourceCosts = itemData.ResourceCosts or GetProcessedValue(ConsumableData[itemData.Name].ResourceCosts),
 					DoesNotBlockExit = true,
 					SuppressSpawnSounds = true,
 					BoughtFromShop = true,
 					AddBoostedAnimation = itemData.AddBoostedAnimation,
-					BoonRaritiesOverride = itemData.BoonRaritiesOverride,
+					BoonRaritiesOverride = boonRarities,
 				})
 				spawnedItem.CanReceiveGift = false
-				SetThingProperty({ Property = "SortBoundsScale", Value = 1.0, DestinationId = kitId })
+				SetThingProperty({ Property = "SortBoundsScale", Value = 1.0, DestinationId = spawnedItem.ObjectId })
 			end
+
 			if spawnedItem ~= nil then
 				MapState.RewardPointsUsed[kitId] = spawnedItem.ObjectId
 				spawnedItem.SpawnPointId = kitId

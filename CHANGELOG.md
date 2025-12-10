@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+- Fix `ConsumableData` issue with Shop of Hermes?
+- Fix ConsumableData maximum spawn chance in shops to adhere to normnal spawn chance of god.
 
 ## [2.0.6] - 2025-12-09
 
