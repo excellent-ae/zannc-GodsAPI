@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [2.0.7] - 2025-12-10
+
 - Fix `ConsumableData` issue with Shop of Hermes?
 - Fix ConsumableData maximum spawn chance in shops to adhere to normnal spawn chance of god.
 
@@ -114,7 +117,8 @@
 
 - Initial Release.
 
-[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.6...HEAD
+[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.7...HEAD
+[2.0.7]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.6...2.0.7
 [2.0.6]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.5...2.0.6
 [2.0.5]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.4...2.0.5
 [2.0.4]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.3...2.0.4
