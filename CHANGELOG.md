@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [2.1.0] - 2025-12-22
+
 - Added `customGiftData` to `CreateKeepsake`
 - Fix `internalKeepsakeName`.
 - Fix `RarityLevel Multiplier`.
@@ -125,7 +128,8 @@
 
 - Initial Release.
 
-[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.7...HEAD
+[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.0...HEAD
+[2.1.0]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.7...2.1.0
 [2.0.7]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.6...2.0.7
 [2.0.6]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.5...2.0.6
 [2.0.5]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.4...2.0.5
