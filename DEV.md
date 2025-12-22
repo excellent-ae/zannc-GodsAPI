@@ -24,7 +24,10 @@ There are a series of functions you can use to retrieve internal names for Gods/
 **Boons**<br>
 `gods.IsBoonRegistered("internalBoonName", debug)`<br>
 `gods.GetInternalBoonName("internalBoonName")`<br>
-`gods.GetBoonData("internalBoonName")`
+`gods.GetBoonData("internalBoonName")`<br><br>
+
+`gods.GetInternalRarityName(internalRarityName)`
+
 
 If you pass in debug (`true`), it will return a warning print for confirmation of creation and that it is in the correct table (`LootData` or `TraitData`)
 
@@ -271,6 +274,23 @@ gods.CreateKeepsake({
 #### WIP
 Although this function exists, a lot of the dirty work will have to be done through external custom functions and or reusing existing functions/wrapping them.
 ```lua
+gods.CreateCustomRarity({
+	Name = "Wrath",
+	BlockStacking = true,
+	BlockInRunRarify = true,
+	BlockMenuRarify = true,
+	RarityLevels = {
+		Legendary = {
+			MinMultiplier = 1,
+			MaxMultiplier = 1,
+		},
+	},
+	Display = {
+		CustomRarityColor = Color.BoonPatchHeroic,
+	},
+})
+local wrathTrait = gods.GetInternalRarityName("Wrath")
+
 --[[
 Required:   "characterName", "internalBoonName"
 Optional:   "RarityLevels", "Slot", "BlockStacking", "StatLines", "ExtractValues", "displayName"
@@ -278,8 +298,7 @@ Optional:   "RarityLevels", "Slot", "BlockStacking", "StatLines", "ExtractValues
 ]]
 gods.CreateBoon({
 	internalBoonName = "AwesomeWeaponBoon",  -- eg TycheWeaponBoon
-	isLegendary = false,
-    Elements = {"Air"},
+    InheritFrom = {wrathTrait},
     characterName = "Tyche",
 	addToExistingGod = { boonPosition = 2 }, -- OR true // Allows you to insert traits into Olympains (Zeus etc) and Daedalus Hammers (characterName = Weapon) --- Chaos and Selene NOT supported ATM.
     --? Everything below is an Optional field

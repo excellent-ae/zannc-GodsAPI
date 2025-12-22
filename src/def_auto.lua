@@ -102,7 +102,7 @@ function public.CreateOlympianSJSONData(params) end
 ---@param params KeepsakeParams
 function public.CreateKeepsake(params) end
 
---Creates a Boon for a God/Character.
+--Creates a Boon for a God/Character, does not automatically apply to character unless `addToExistingGod` is used.
 ---@class TraitParams
 ---@field characterName string
 ---@field internalBoonName string
@@ -124,6 +124,12 @@ function public.CreateKeepsake(params) end
 
 ---@param params TraitParams
 function public.CreateBoon(params) end
+
+---@class CustomRarityParams
+---@field Display? table
+
+---@param params CustomRarityParams
+function public.CreateCustomRarity(params) end
 
 --Checks if a God is in LootData, usually for debugging.
 ---@param godName string
@@ -173,5 +179,10 @@ function public.GetInternalBoonName(internalBoonName) end
 ---@param internalBoonName string
 ---@return table|nil
 function public.GetBoonData(internalBoonName) end
+
+--Gets the internal custom rarityTable name with plugin GUID prefix.
+---@param internalRarityName string
+---@return string|nil
+function public.GetInternalRarityName(internalRarityName) end
 
 return public

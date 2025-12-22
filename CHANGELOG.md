@@ -6,6 +6,9 @@
 - Fix `RarityLevel Multiplier`.
 - Added `ExtraFields` to CreateKeepsake because I missed it somehow.
 - Fixed `Min/MaxRequirements` for Keepsakes.
+- Added new function, `CreateCustomRarity` to be used with `CreateBoon`.
+- Update `customStatLine` to support multiple statlines.
+- Slight ReadME/Dev/Params update.
 
 ## [2.0.7] - 2025-12-10
 

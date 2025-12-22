@@ -22,7 +22,7 @@ local GameplayFile = rom.path.combine(rom.paths.Content, "Game/Obstacles/Gamepla
 local MacroTextFile = rom.path.combine(rom.paths.Content, "Game/Text/en/MacroText.en.sjson")
 local GUIScreensVFXFile = rom.path.combine(rom.paths.Content, "Game/Animations/GUI_Screens_VFX.sjson")
 local ItemsGeneralVFX = rom.path.combine(rom.paths.Content, "Game/Animations/Items_General_VFX.sjson")
-local ScreenText = rom.path.combine(rom.paths.Content, "Game/Text/en/ScreenText.en.sjson")
+local ScreenTextFile = rom.path.combine(rom.paths.Content, "Game/Text/en/ScreenText.en.sjson")
 local TraitTextFile = rom.path.combine(rom.paths.Content, "Game/Text/en/TraitText.en.sjson")
 local PortraitFile = rom.path.combine(rom.paths.Content, "Game/Animations/GUI_Portraits_VFX.sjson")
 local GUIBoonsVFXFile = rom.path.combine(rom.paths.Content, "Game/Animations/GUI_Boons_VFX.sjson")
@@ -91,6 +91,9 @@ local function addGodtoRunData(runData, upgrade)
 end
 
 local function cleanFilePath(pluginGUID, filePath, useBasePath)
+	if filePath == nil then
+		return nil
+	end
 	if useBasePath then
 		return filePath
 	end
@@ -706,7 +709,7 @@ function definitions.CreateOlympianSJSONData(env, params)
 		table.insert(screenTextsobj, object)
 	end
 
-	sjson.hook(ScreenText, function(data)
+	sjson.hook(ScreenTextFile, function(data)
 		for _, object in ipairs(screenTextsobj) do
 			table.insert(data.Texts, object)
 		end
@@ -1192,7 +1195,7 @@ function definitions.CreateBoon(env, params)
 	end
 
 	if not params.RarityLevels then
-		rom.log.warning("No rarity multiplier passed in, falling back to default.")
+		rom.log.warning("No rarity multiplier passed in for Boon: " .. params.internalBoonName .. ", falling back to default.")
 	end
 
 	local pluginGUID = env._PLUGIN.guid
@@ -1306,6 +1309,7 @@ function definitions.CreateBoon(env, params)
 		DisplayName = params.displayName or "Lorem Ipsum DisplayName",
 		Description = params.description or "Lorem Ipsum Description",
 	}, Order)
+
 	sjson.hook(TraitTextFile, function(data)
 		table.insert(data.Texts, traitDisplay)
 		if params.flavourText then
@@ -1314,15 +1318,26 @@ function definitions.CreateBoon(env, params)
 	end)
 
 	if params.customStatLine then
-		local statline = sjson.to_object({
-			Id = params.customStatLine.ID,
-			InheritFrom = "BaseStatLine",
-			DisplayName = params.customStatLine.displayName or "Lorem Ipsum DisplayName",
-			Description = params.customStatLine.description or "Lorem Ipsum Description",
-		}, Order)
+		local statlines = {}
+
+		if params.customStatLine.ID then
+			params.customStatLine = { params.customStatLine }
+		end
+
+		for _, config in ipairs(params.customStatLine) do
+			local statline = sjson.to_object({
+				Id = config.ID,
+				InheritFrom = "BaseStatLine",
+				DisplayName = config.displayName or "Lorem Ipsum DisplayName",
+				Description = config.description or "Lorem Ipsum Description",
+			}, Order)
+			table.insert(statlines, statline)
+		end
 
 		sjson.hook(TraitTextFile, function(data)
-			table.insert(data.Texts, statline)
+			for _, statline in ipairs(statlines) do
+				table.insert(data.Texts, statline)
+			end
 		end)
 	end
 
@@ -1456,20 +1471,68 @@ function definitions.CreateBoon(env, params)
 			game.TraitRequirements[intboonName].OneFromEachSet = params.requirements.OneFromEachSet
 		end
 	end
+end
 
+function definitions.CreateCustomRarity(env, params)
 	-- if params.customRarity then
-	-- 	local rarityName = params.customRarity.Data.Name
+	if not validateParams(params, { "Name" }, "CreateCustomRarity") then
+		return nil
+	end
+	local pluginGUID = env._PLUGIN.guid
+	local rarityName = pluginGUID .. "-" .. params.Name
 
-	-- 	game.TraitData[rarityName] = {}
-	-- 	for k, v in pairs(params.customRarity.Data) do
-	-- 		game.TraitData[rarityName][k] = v
-	-- 	end
+	game.TraitData[rarityName] = {}
+	for k, v in pairs(params) do
+		if k ~= "Display" then
+			game.TraitData[rarityName][k] = v
+		end
+	end
 
-	--     if params.customRarity.Display then
-	--         for k, v in params.customRarity.Display do
+	-- if params.Display then -- colour / sjson stuff, overrides whatever is in data above
+	game.TraitData[rarityName].CustomRarityColor = params.Display and params.Display.CustomRarityColor or Color.BoonPatchElemental --* colour, table
+	game.TraitData[rarityName].CustomRarityName = "Boon_" .. rarityName
+	game.TraitData[rarityName].InfoBackingAnimation = "BoonSlot" .. rarityName
+	game.TraitData[rarityName].UpgradeChoiceBackingAnimation = "BoonSlot" .. rarityName
+	game.TraitData[rarityName].Frame = rarityName
 
-	--         end
-	-- 	end
+	local useBaseIcon = params.Display and params.Display.PathOverrides and params.Display.PathOverrides.framePath or false
+	local useBaseBacking = params.Display and params.Display.PathOverrides and params.Display.PathOverrides.backingPath or false
+
+	local boonIconFrame = sjson.to_object({
+		Name = "BoonIcon_Frame_" .. rarityName,
+		InheritFrom = "BoonTrayFrame",
+		FilePath = cleanFilePath(pluginGUID, params.Display and params.Display.framePath, useBaseIcon) or "GUI\\Screens\\BoonIconFrames\\unity",
+	}, Order)
+
+	local frameBoonMenu = sjson.to_object({
+		Name = "Frame_Boon_Menu_" .. rarityName,
+		InheritFrom = "Menu_Frame",
+		FilePath = cleanFilePath(pluginGUID, params.Display and params.Display.framePath, useBaseIcon) or "GUI\\Screens\\BoonIconFrames\\unity",
+		EndFrame = 1,
+		StartFrame = 1,
+	}, Order)
+
+	local boonBacking = sjson.to_object({
+		Name = "BoonSlot" .. rarityName,
+		InheritFrom = "BoonSlotBase",
+		FilePath = cleanFilePath(pluginGUID, params.Display and params.Display.backingPath, useBaseBacking) or "GUI\\Screens\\BoonSelect\\BoonSlot_Unity",
+	}, Order)
+
+	sjson.hook(GUIScreensVFXFile, function(data)
+		table.insert(data.Animations, boonIconFrame)
+		table.insert(data.Animations, frameBoonMenu)
+		table.insert(data.Animations, boonBacking)
+	end)
+
+	local displayName = sjson.to_object({
+		Id = "Boon_" .. rarityName,
+		DisplayName = params.Name,
+	}, Order)
+
+	sjson.hook(ScreenTextFile, function(data)
+		table.insert(data.Texts, displayName)
+	end)
+	-- end
 	-- end
 end
 
@@ -1547,6 +1610,13 @@ function definitions.GetBoonData(env, internalBoonName)
 	end
 	local fullBoonName = env._PLUGIN.guid .. "-" .. internalBoonName
 	return game.TraitData[fullBoonName]
+end
+
+function definitions.GetInternalRarityName(env, internalRarityName)
+	if not internalRarityName or type(internalRarityName) ~= "string" then
+		return nil
+	end
+	return env._PLUGIN.guid .. "-" .. internalRarityName
 end
 --#endregion
 

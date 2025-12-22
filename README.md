@@ -1,5 +1,5 @@
 # GodsAPI, a library to create Gods.
-This is a very early library made to make it easy for developers to add new Gods/NPC Gods, Keepsakes & Boons.
+This is a very early library made to make it easy for developers to add new Gods/NPC Gods, Keepsakes & Boons w/ custom rarities.
 This library does nothing to the game on its own, without outside function calls.
 You should only install it if another mod requires it, or if you will be using this library to create Gods/Keepsakes/Boons.
 
@@ -41,7 +41,7 @@ You should only install it if another mod requires it, or if you will be using t
 
 3. To create a God, you must call `gods.InitializeGod(params)`, and optionally followed by `gods.CreateOlympianSJSONData(params)` and provide the required paramaters / sjson paramaters.<br><br>
 4. To create a Keepsake, you must call `gods.CreateKeepsake(params)`, and pass in the required fields - as well as any custom functions you need to make the keepsake function.<br><br>
-5. To create a Boon, you must call `gods.CreateBoon(params)`, and pass in the required fields - as well as any custom functions you need to make the boon function. <br>
+5. To create a Boon, you must call `gods.CreateBoon(params)`, as well as the optional `gods.CreateCustomRarity(params)` and pass in the required fields - as well as any custom functions you need to make the boon function. <br>
 
 > [!IMPORTANT]
 > It is important to note that the internal names for Gods/Traits/Keepsakes will always be appended with your `_PLUGIN.guid` followed by a `-` and then the internal name.

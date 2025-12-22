@@ -291,5 +291,24 @@
         * `ID` (string) - Internal name - use it in `StatLines = {}`
         * `displayName` (string)
         * `description` (string)
-    </details>
+</details>
+
+## CreateBoon parameters
+<details>
+<summary><strong>Parameters</strong></summary><br>
+
+* `params` (table) - A set of options to create a boon with rarity levels, slots, and requirements.
+    * `Name` (string) - The name of the Rarity, eg. Infusion, Duo, Legendary, Epic etc.
+
+    <details>
+    <summary><strong>Optional Parameters</strong></summary><br>
+    * `Display` (table) - Colour for the Rarity text, along with frame and backing paths. // Defaults to Elemental Trait Values
+        *Colours support `RGB 0-255` ({ 255, 0, 150, 255 }) or `RGB 0-1` ({ 1.0, 0, 0.3, 1.0 }), with an opacity field.*
+        * `RarityColor` (table) - default of `{255, 75, 255, 255}`
+        * `PathOverrides` (table) - Define which paths use existing game textures.
+            * `framePath` (boolean)
+            * `backingPath` (boolean)<br>
+        * `framePath` (string) 
+        * `backingPath` (string) 
+  </details>
 </details>
