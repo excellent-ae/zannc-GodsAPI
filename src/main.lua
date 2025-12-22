@@ -334,7 +334,7 @@ function definitions.InitializeGod(env, params)
 	if params.SpawnLikeHermes then
 		local spawnValue = 1
 		if type(params.SpawnLikeHermes) == "table" and params.SpawnLikeHermes.maximumSpawns then
-			spawnValue = params.SpawnLikeHermes.maximumSpawns or 1
+			spawnValue = params.SpawnLikeHermes.maximumSpawns
 		end
 
 		game.NamedRequirementsData[upgradeName .. "-Requirements"] = {
@@ -358,16 +358,6 @@ function definitions.InitializeGod(env, params)
 				Value = spawnValue, -- 1 will be a max of 2 spawns, etc
 			},
 		}
-
-		local insertRewards = {
-			Name = upgradeName,
-			GameStateRequirements = {
-				NamedRequirements = { upgradeName .. "-Requirements" },
-			},
-		}
-
-		table.insert(game.RewardStoreData.HubRewards, insertRewards)
-		table.insert(game.RewardStoreData.RunProgress, insertRewards)
 
 		local envFunc = env._PLUGIN.guid .. "-Create" .. params.godName .. "Loot"
 		game.ConsumableData["Shop" .. upgradeName] = {
@@ -395,6 +385,9 @@ function definitions.InitializeGod(env, params)
 				},
 			},
 		}
+
+		table.insert(game.RewardStoreData.HubRewards, { Name = upgradeName, GameStateRequirements = { NamedRequirements = { upgradeName .. "-Requirements" } } })
+		table.insert(game.RewardStoreData.RunProgress, { Name = upgradeName, GameStateRequirements = { NamedRequirements = { upgradeName .. "-Requirements" } } })
 
 		table.insert(game.StoreData.SurfaceShop.GroupsOf[2].OptionsData, { Name = "Shop" .. upgradeName })
 		table.insert(game.StoreData.WorldShop.GroupsOf[1].OptionsData, { Name = "Shop" .. upgradeName })
@@ -958,7 +951,7 @@ function definitions.CreateKeepsake(env, params)
 	end
 
 	local pluginGUID = env._PLUGIN.guid
-	local internalKeepsakeName = pluginGUID .. "-" .. params.internalBoonName -- used when passing into traits
+	local internalKeepsakeName = pluginGUID .. "-" .. params.internalKeepsakeName -- used when passing into traits
 	local characterName = pluginGUID .. "-" .. params.characterName -- used when passing into traits
 
 	game.TraitData[internalKeepsakeName] = {
@@ -975,42 +968,29 @@ function definitions.CreateKeepsake(env, params)
 
 		CustomTrayText = internalKeepsakeName .. "_Tray", -- When you equip it
 		ZeroBonusTrayText = internalKeepsakeName .. "_Expired",
+		ExtractValues = params.ExtractValues,
 	}
 
 	--? I wrote this code and then forgot what it does
 	--really ugly code, but if god exists, do gift text lines for max gift, otherwise, user args for what is max and min req.
-	if game.LootData[characterName .. "Upgrade"] then
-		local giftTextLines = game.LootData[characterName .. "Upgrade"].GiftTextLineSets
-		local lastGiftLineKey = nil
-
-		for key, value in pairs(giftTextLines) do
-			lastGiftLineKey = key
-		end
-		game.GiftData[characterName .. "Upgrade"] = {
+	if params.customGiftData then
+		local giftName = params.customGiftData.customName or ("NPC_" .. characterName .. "_01")
+		-- rom.log.warning(giftName)
+		game.GiftData[giftName] = {
 			InheritFrom = { "DefaultGiftData" },
-			MaxedRequirement = {
-				{
-					PathTrue = { "GameState", "TextLinesRecord", game.LootData[characterName .. "Upgrade"][lastGiftLineKey] },
-				},
-			},
+			MaxedRequirement = { params.customGiftData.maxRequirement },
 			MaxedIcon = "Keepsake_" .. characterName .. "_Corner",
 			MaxedSticker = "Keepsake_" .. characterName,
 			[1] = {
-				GameStateRequirements = {
-					{
-						PathTrue = { "GameState", "TextLinesRecord", game.LootData[characterName .. "Upgrade"][1] },
-					},
-				},
+				GameStateRequirements = { params.customGiftData.minRequirement },
 				Gift = internalKeepsakeName,
 			},
 		}
+		-- rom.log.warning(game.GiftData[giftName].MaxedSticker)
+
 		game.TraitData[internalKeepsakeName].SignOffData = {
 			{
-				GameStateRequirements = {
-					{
-						PathTrue = { "GameState", "TextLinesRecord", game.LootData[characterName .. "Upgrade"][lastGiftLineKey] },
-					},
-				},
+				GameStateRequirements = { params.customGiftData.maxRequirement },
 				Text = "Signoff" .. characterName .. "_Max",
 			},
 			{
@@ -1018,25 +998,51 @@ function definitions.CreateKeepsake(env, params)
 			},
 		}
 	else
-		game.GiftData[characterName .. "Upgrade"] = {
-			InheritFrom = { "DefaultGiftData" },
-			MaxedRequirement = params.maxRequirement,
-			MaxedIcon = "Keepsake_" .. characterName .. "_Corner",
-			MaxedSticker = "Keepsake_" .. characterName,
-			[1] = {
-				GameStateRequirements = params.minRequirement,
-				Gift = internalKeepsakeName,
-			},
-		}
-		game.TraitData[internalKeepsakeName].SignOffData = {
-			{
-				GameStateRequirements = params.maxRequirement,
-				Text = "Signoff" .. characterName .. "_Max",
-			},
-			{
-				Text = "Signoff" .. characterName,
-			},
-		}
+		if game.LootData[characterName .. "Upgrade"] then
+			local giftTextLines = game.LootData[characterName .. "Upgrade"].GiftTextLineSets
+			local lastGiftLineKey = nil
+
+			for key, value in pairs(giftTextLines) do
+				lastGiftLineKey = key
+			end
+			if not lastGiftLineKey then
+				rom.log.warning("LootData GiftTextLineSets for " .. params.characterName .. " (" .. characterName .. ") does not exist.")
+			end
+
+			game.GiftData["NPC_" .. characterName .. "_01"] = {
+				InheritFrom = { "DefaultGiftData" },
+				MaxedRequirement = {
+					{
+						PathTrue = { "GameState", "TextLinesRecord", game.LootData[characterName .. "Upgrade"][lastGiftLineKey] },
+					},
+				},
+				MaxedIcon = "Keepsake_" .. characterName .. "_Corner",
+				MaxedSticker = "Keepsake_" .. characterName,
+				[1] = {
+					GameStateRequirements = {
+						{
+							PathTrue = { "GameState", "TextLinesRecord", game.LootData[characterName .. "Upgrade"][1] },
+						},
+					},
+					Gift = internalKeepsakeName,
+				},
+			}
+			game.TraitData[internalKeepsakeName].SignOffData = {
+				{
+					GameStateRequirements = {
+						{
+							PathTrue = { "GameState", "TextLinesRecord", game.LootData[characterName .. "Upgrade"][lastGiftLineKey] },
+						},
+					},
+					Text = "Signoff" .. characterName .. "_Max",
+				},
+				{
+					Text = "Signoff" .. characterName,
+				},
+			}
+		else
+			rom.log.warning("LootData for " .. params.characterName .. " (" .. characterName .. ") does not exist, and customGiftData for custom charcater was not passed in.")
+		end
 	end
 
 	if params.ExtraFields then
@@ -1054,7 +1060,7 @@ function definitions.CreateKeepsake(env, params)
 				rarity[rarityName] = { Multiplier = value }
 			elseif type(value) == "table" then
 				if value.Multiplier then
-					rarity[rarityName] = value.Multiplier
+					rarity[rarityName] = { Multiplier = value.Multiplier }
 				elseif value.MinMultiplier and value.MaxMultiplier then
 					rarity[rarityName] = {
 						MinMultiplier = value.MinMultiplier,
@@ -1067,6 +1073,7 @@ function definitions.CreateKeepsake(env, params)
 			end
 		end
 	end
+
 	table.insert(game.ScreenData.KeepsakeRack.ItemOrder, internalKeepsakeName)
 
 	-- SJSON stuff now
@@ -1242,7 +1249,7 @@ function definitions.CreateBoon(env, params)
 				rarity[rarityName] = { Multiplier = value }
 			elseif type(value) == "table" then
 				if value.Multiplier then
-					rarity[rarityName] = value
+					rarity[rarityName] = { Multiplier = value.Multiplier }
 				elseif value.MinMultiplier and value.MaxMultiplier then
 					rarity[rarityName] = {
 						MinMultiplier = value.MinMultiplier,
@@ -1389,6 +1396,7 @@ function definitions.CreateBoon(env, params)
 			end
 		end
 	end
+
 	if params.Slot == "Melee" or params.Slot == "Secondary" or params.Slot == "Ranged" or params.Slot == "Rush" or params.Slot == "Mana" then
 		-- if we want to do linkedtraitdata, but we dont really need to, since its only used to create requirements
 		-- i wrote this comment and had to immediately change my mind!
@@ -1448,6 +1456,21 @@ function definitions.CreateBoon(env, params)
 			game.TraitRequirements[intboonName].OneFromEachSet = params.requirements.OneFromEachSet
 		end
 	end
+
+	-- if params.customRarity then
+	-- 	local rarityName = params.customRarity.Data.Name
+
+	-- 	game.TraitData[rarityName] = {}
+	-- 	for k, v in pairs(params.customRarity.Data) do
+	-- 		game.TraitData[rarityName][k] = v
+	-- 	end
+
+	--     if params.customRarity.Display then
+	--         for k, v in params.customRarity.Display do
+
+	--         end
+	-- 	end
+	-- end
 end
 
 --#region Extra func for testing or function checsk
@@ -2036,5 +2059,6 @@ mods.on_all_mods_loaded(function()
 				end
 			end
 		end
+		ProcessDataStore(game.GiftData)
 	end)
 end)

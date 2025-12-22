@@ -1,6 +1,11 @@
 # Changelog
 
 ## [Unreleased]
+- Added `customGiftData` to `CreateKeepsake`
+- Fix `internalKeepsakeName`.
+- Fix `RarityLevel Multiplier`.
+- Added `ExtraFields` to CreateKeepsake because I missed it somehow.
+- Fixed `Min/MaxRequirements` for Keepsakes.
 
 ## [2.0.7] - 2025-12-10
 

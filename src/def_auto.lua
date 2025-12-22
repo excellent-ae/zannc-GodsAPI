@@ -90,15 +90,14 @@ function public.CreateOlympianSJSONData(params) end
 ---@field internalKeepsakeName string
 ---@field RarityLevels table
 ---@field DoesNotAutomaticallyExpire? boolean
+---@field ExtractValues? table
 ---@field EquipSound? string
 ---@field EquipVoiceLines? table
----@field maxRequirement? table
----@field minRequirement? table
+---@field customGiftData? table
 ---@field ExtraFields? table
 ---@field Keepsake? table
 ---@field Icons? table
 ---@field iconPathOverrides? table
----@field customStatLine? table
 
 ---@param params KeepsakeParams
 function public.CreateKeepsake(params) end

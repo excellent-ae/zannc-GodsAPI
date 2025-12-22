@@ -83,7 +83,7 @@ gods.InitializeGod({
 This will add a new npc type God: `Tyche` with the **internal** name `TycheUpgrade`.
 ]]
 
---[[ 
+--[[
 Pretending as if there is a config for users to change how the god will spawn.
 If this is set to false, the god will spawn like other gods, however it will not add to the MetGod pool.
 ]]
@@ -175,7 +175,7 @@ gods.CreateOlympianSJSONData({
         }
 		NeutralPortraitPath = "Portraits\\Portrait1",
 		AnnoyedPortraitPath = "Portraits\\Portrait2",
-    
+
         DialogueAnimations = {
             DialogueEntrance = {
                 RedStart = 1.0,
@@ -222,7 +222,7 @@ gods.CreateOlympianSJSONData({
 
 ```lua
 gods.CreateKeepsake({
-	
+
 	characterName = "Spike",
 	internalKeepsakeName = "CarryingWeightKeepsake",
 
@@ -248,7 +248,7 @@ gods.CreateKeepsake({
             iconPath = true,
             maxIcon = true,
             maxCornerIcon = true,
-        }
+        },
 		iconPath = "Keepsakes\\Icons\\Spiegel",
 		--? Optional
 		maxIcon = "Keepsakes\\Icons\\Spiegel_Max",
@@ -285,7 +285,7 @@ gods.CreateBoon({
     --? Everything below is an Optional field
 
     -- "Melee" or "Secondary" or "Ranged" or "Rush" or "Mana", doesn't need to be passed if not a core boon.
-    Slot = "Special", 
+    Slot = "Special",
     BlockStacking = false, -- Can't be upgraded with poms
     StatLines = { "NearbyDamageStatDisplay1" }, -- The display for damage bonus etc etc.
     ExtractValues = { -- Values to get from ExtraFields eg any damage bonus, which is ued in description and in the stat display.
@@ -324,28 +324,28 @@ gods.CreateBoon({
 	},
 })
 
---[[ Elements you can use: 
-	AirBoon = 
+--[[ Elements you can use:
+	AirBoon =
 	{
 		Elements = { "Air" },
 		DebugOnly = true,
 	},
-	FireBoon = 
+	FireBoon =
 	{
 		Elements = {"Fire"},
 		DebugOnly = true,
 	},
-	EarthBoon = 
+	EarthBoon =
 	{
 		Elements = {"Earth"},
 		DebugOnly = true,
 	},
-	WaterBoon = 
+	WaterBoon =
 	{
 		Elements = {"Water"},
 		DebugOnly = true,
 	},
-	AetherBoon = 
+	AetherBoon =
 	{
 		Elements = {"Aether"},
 		DebugOnly = true,
@@ -374,13 +374,13 @@ gods.CreateBoon({
 		},
 	},
 
-	LegacyTrait = 
+	LegacyTrait =
 	{
 		IsLegacyTrait = true,
 		DebugOnly = true,
 	},
 
-	UnityTrait = 
+	UnityTrait =
 	{
 		IsElementalTrait = true,
 		BlockStacking = true,

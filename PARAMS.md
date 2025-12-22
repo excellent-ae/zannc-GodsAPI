@@ -181,12 +181,16 @@
     <summary><strong>Optional Parameters</strong></summary><br>
 
     * `DoesNotAutomaticallyExpire` (boolean)
+    * `ExtractValues` (table)
     * `EquipSound` (string)
     * `EquipVoiceLines` (table)
-    
+
     #### Gift Requirements (If you want custom, otherwise it tries to default to first/last gift set)
-    * `maxRequirement` (table) - Requirements for maxed friendship.
-    * `minRequirement` (table) - Requirements to initially unlock the keepsake.
+    * `customGiftData` (table)
+        * `customName` (string) - Used in rare cases where naming convention is important (mod to mod compat)
+        * `maxRequirement` (table) - Requirements for maxed friendship.
+        * `minRequirement` (table) - Requirements to initially unlock the keepsake.
+
     * `ExtraFields` (table) - Additional trait data fields, where most of the functionality will go.
 
     #### UI/Text Content
@@ -222,14 +226,14 @@
 
     * `addToExistingGod` (table/boolean) - Add to existing god's trait list
         * `boonPosition` (integer) - Where to insert the trait (eg if weapon boon you want it to be position 1)
-        * `customGUID` (string) - A custom GUID can be passed in if the god has a prefixed GUID to the LootName  
+        * `customGUID` (string) - A custom GUID can be passed in if the god has a prefixed GUID to the LootName
     * `RarityLevels` (table) - Multipliers for each rarity level
         * `Common` (number/table)
         * `Rare` (number/table)
         * `Epic` (number/table)
         * `Heroic` (number/table)
         * `Legendary` (number/table)
-    
+
     * `Slot` (string) - Boon slot type: "Melee", "Secondary", "Ranged", "Rush", "Mana"
     * `BlockStacking` (boolean) - Prevent boon from stacking
     * `StatLines` (table) - Stat line definitions
@@ -237,7 +241,7 @@
     * `displayName` (string) - Display name for the boon
     * `description` (string) - Description for the boon
     * `flavourText` (string) - Flavor text for the boon (eg if its legendary)
-    
+
     #### Boon Type Inheritance
     * `InheritFrom` (table)
         ### All types of things you can inherit from, for more information what what they do, look in TraitData.lua
@@ -271,17 +275,17 @@
         - UnusedWeaponBonusTrait2
         - RoomRewardMaxManaTrait
         - RoomRewardMaxHealthTrait
-        - RoomRewardEmptyMaxHealthTrait<br> 
+        - RoomRewardEmptyMaxHealthTrait<br>
     * `ExtraFields` (table)
     * `reuseBaseIcons` (boolean)
     * `boonIconPath` (string)
-    
+
     #### Requirements
     * `requirements` (table) - Trait requirements
         * `OneOf` (table) - Require one of x traits
         * `TwoOf` (table) - Require two of x traits
         * `OneFromEachSet` (table) - Require one from each set
-    
+
     #### Custom Stat Line
     * `customStatLine` (table)
         * `ID` (string) - Internal name - use it in `StatLines = {}`
