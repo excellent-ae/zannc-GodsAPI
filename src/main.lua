@@ -451,7 +451,7 @@ function definitions.InitializeGod(env, params)
 		addGodtoRunData(game.RewardStoreData.RunProgress, upgradeName)
 		addGodtoRunData(game.RewardStoreData.TartarusRewards, upgradeName)
 	end
-	mod.initGodsName[upgradeName] = true
+	-- mod.initGodsName[upgradeName] = true
 end
 
 function definitions.CreateOlympianSJSONData(env, params)
@@ -1641,7 +1641,7 @@ end
 
 modutil.once_loaded.game(function()
 	mod = modutil.mod.Mod.Register(_PLUGIN.guid)
-	mod.initGodsName = {}
+	-- mod.initGodsName = {}
 	mod.initBoonKeepsakeName = {}
 end)
 
@@ -2062,8 +2062,8 @@ mods.on_all_mods_loaded(function()
             ::traitDataCont::
 		end
 
-		for lootName, lootData in pairs(LootData) do
-			if not mod.initGodsName[lootName] then
+        for lootName, lootData in pairs(LootData) do
+			if lootName == "SpellDrop" then
 				goto lootDataCont
 			end
 

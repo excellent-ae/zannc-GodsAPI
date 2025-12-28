@@ -1,10 +1,11 @@
 # Changelog
 
 ## [Unreleased]
+FIX: Custom boons were not being added to codex/ponymenu unless it is added to a new custom god.
 
 ## [2.1.1] - 2025-12-28
 
-Fix issue where trait index's weren't being created for default game gods (Selene for some reason).
+FIX: issue where trait index's weren't being created for default game gods (Selene for some reason).
 
 ## [2.1.0] - 2025-12-22
 
