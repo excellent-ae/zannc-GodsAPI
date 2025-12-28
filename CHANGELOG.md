@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [2.1.1] - 2025-12-28
+
 Fix issue where trait index's weren't being created for default game gods (Selene for some reason).
 
 ## [2.1.0] - 2025-12-22
@@ -129,7 +132,8 @@ Fix issue where trait index's weren't being created for default game gods (Selen
 
 - Initial Release.
 
-[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.0...HEAD
+[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.1...HEAD
+[2.1.1]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.0...2.1.1
 [2.1.0]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.7...2.1.0
 [2.0.7]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.6...2.0.7
 [2.0.6]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.5...2.0.6
