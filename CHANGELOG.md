@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [2.1.2] - 2025-12-28
+
 FIX: Custom boons were not being added to codex/ponymenu unless it is added to a new custom god.
 
 ## [2.1.1] - 2025-12-28
@@ -133,7 +136,8 @@ FIX: issue where trait index's weren't being created for default game gods (Sele
 
 - Initial Release.
 
-[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.1...HEAD
+[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.2...HEAD
+[2.1.2]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.1...2.1.2
 [2.1.1]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.0...2.1.1
 [2.1.0]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.7...2.1.0
 [2.0.7]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.6...2.0.7
