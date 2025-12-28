@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+Fix issue where trait index's weren't being created for default game gods (Selene for some reason).
 
 ## [2.1.0] - 2025-12-22
 

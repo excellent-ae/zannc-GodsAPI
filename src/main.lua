@@ -451,6 +451,7 @@ function definitions.InitializeGod(env, params)
 		addGodtoRunData(game.RewardStoreData.RunProgress, upgradeName)
 		addGodtoRunData(game.RewardStoreData.TartarusRewards, upgradeName)
 	end
+	mod.initGodsName[upgradeName] = true
 end
 
 function definitions.CreateOlympianSJSONData(env, params)
@@ -959,6 +960,7 @@ function definitions.CreateKeepsake(env, params)
 
 	game.TraitData[internalKeepsakeName] = {
 		InheritFrom = { "GiftTrait" }, -- don't need "BaseBoonUpgradeKeepsake", handled by DoesNotAutomaticallyExpire
+		-- ChamberThresholds = { 25, 50 },
 		Icon = internalKeepsakeName, --! req
 		Name = internalKeepsakeName,
 		Ordered = true,
@@ -1182,6 +1184,7 @@ function definitions.CreateKeepsake(env, params)
 			end
 		end)
 	end
+	mod.initBoonKeepsakeName[internalKeepsakeName] = true
 end
 
 --[[
@@ -1436,41 +1439,43 @@ function definitions.CreateBoon(env, params)
 	end
 
 	--? requirements
-	if params.requirements then
-		local function checkList(requirementList)
-			local processedList = {}
+    if params.requirements then
+        local function checkList(requirementList)
+            local processedList = {}
 
-			for _, req in ipairs(requirementList) do
-				if game.TraitData[req] then
-					table.insert(processedList, req)
-				else
-					local attemptGUID = pluginGUID .. "-" .. req
-					if game.TraitData[attemptGUID] then
-						table.insert(processedList, attemptGUID)
-					else
-						rom.log.warning("Cannot find trait for requirement: " .. req .. ", or for: " .. attemptGUID .. ". This will cause errors!")
-					end
-				end
-			end
+            for _, req in ipairs(requirementList) do
+                if game.TraitData[req] then
+                    table.insert(processedList, req)
+                else
+                    local attemptGUID = pluginGUID .. "-" .. req
+                    if game.TraitData[attemptGUID] then
+                        table.insert(processedList, attemptGUID)
+                    else
+                        rom.log.warning("Cannot find trait for requirement: " .. req .. ", or for: " .. attemptGUID .. ". This will cause errors!")
+                    end
+                end
+            end
 
-			return processedList
-		end
+            return processedList
+        end
 
-		game.TraitRequirements[intboonName] = {}
+        game.TraitRequirements[intboonName] = {}
 
-		if params.requirements.OneOf then
-			game.TraitRequirements[intboonName].OneOf = checkList(params.requirements.OneOf)
-		end
-		if params.requirements.TwoOf then
-			game.TraitRequirements[intboonName].TwoOf = checkList(params.requirements.TwoOf)
-		end
-		if params.requirements.OneFromEachSet then
-			for i, set in ipairs(params.requirements.OneFromEachSet) do
-				params.requirements.OneFromEachSet[i] = checkList(set)
-			end
-			game.TraitRequirements[intboonName].OneFromEachSet = params.requirements.OneFromEachSet
-		end
-	end
+        if params.requirements.OneOf then
+            game.TraitRequirements[intboonName].OneOf = checkList(params.requirements.OneOf)
+        end
+        if params.requirements.TwoOf then
+            game.TraitRequirements[intboonName].TwoOf = checkList(params.requirements.TwoOf)
+        end
+        if params.requirements.OneFromEachSet then
+            for i, set in ipairs(params.requirements.OneFromEachSet) do
+                params.requirements.OneFromEachSet[i] = checkList(set)
+            end
+            game.TraitRequirements[intboonName].OneFromEachSet = params.requirements.OneFromEachSet
+        end
+    end
+
+	mod.initBoonKeepsakeName[intboonName] = true
 end
 
 function definitions.CreateCustomRarity(env, params)
@@ -1636,11 +1641,13 @@ end
 
 modutil.once_loaded.game(function()
 	mod = modutil.mod.Mod.Register(_PLUGIN.guid)
+	mod.initGodsName = {}
+	mod.initBoonKeepsakeName = {}
 end)
 
 mods.on_all_mods_loaded(function()
 	modutil.once_loaded.game(function()
-		for enemyName, enemyData in pairs(EnemyData) do
+		for enemyName, enemyData in pairs(EnemyData) do -- dont want to check for name here cause this is just for people adding xyz boons to NPCS
 			ProcessDataInheritance(enemyData, EnemyData)
 			if enemyData.PropertyChanges ~= nil then
 				for k, propertyChange in pairs(enemyData.PropertyChanges) do
@@ -1726,8 +1733,11 @@ mods.on_all_mods_loaded(function()
 			ProcessTextLines(enemyData, enemyData.DeathPresentationTextLineSets, nil, args)
 		end
 
-		for traitName, traitData in pairs(TraitData) do
-			traitData.Name = traitName
+        for traitName, traitData in pairs(TraitData) do
+            if not mod.initBoonKeepsakeName[traitName] then
+                goto traitDataCont
+            end
+
 			ProcessDataInheritance(traitData, TraitData)
 			local autoExpandProperties = {
 				WeaponProperties = "WeaponProperty",
@@ -2048,10 +2058,15 @@ mods.on_all_mods_loaded(function()
 				end
 			end
 
-			traitData.TraitOrderingValueCache = GetTraitOrderingValue(traitData)
+            traitData.TraitOrderingValueCache = GetTraitOrderingValue(traitData)
+            ::traitDataCont::
 		end
 
 		for lootName, lootData in pairs(LootData) do
+			if not mod.initGodsName[lootName] then
+				goto lootDataCont
+			end
+
 			ProcessDataInheritance(lootData, LootData)
 			if lootData.PropertyChanges ~= nil then
 				for k, propertyChange in pairs(lootData.PropertyChanges) do
@@ -2113,6 +2128,7 @@ mods.on_all_mods_loaded(function()
 			ProcessTextLines(lootData, lootData.BoughtTextLines, nil, args)
 			ProcessTextLines(lootData, lootData.DuoPickupTextLines, nil, args)
 			ProcessTextLines(lootData, lootData.GiftTextLineSets, "GiftTextLinePriorities", args)
+			::lootDataCont::
 		end
 
 		for traitName, linkedData in pairs(TraitRequirements) do
