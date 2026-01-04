@@ -218,7 +218,7 @@
 <summary><strong>Parameters</strong></summary><br>
 
 * `params` (table) - A set of options to create a boon with rarity levels, slots, and requirements.
-    * `characterName` (string) **(required)** - The name of the character giving the boon
+    * `characterName` (string) **(required)** - The name of the character giving the boon, this paramater does not do anything UNLESS you are using `addToExistingGod`.
     * `internalBoonName` (string) **(required)** - Internal name for the boon trait
 
     <details>
@@ -279,6 +279,7 @@
     * `ExtraFields` (table)
     * `reuseBaseIcons` (boolean)
     * `boonIconPath` (string)
+    * `boonIconScale` (integer) - The game wants boon icons to be ~150x150px, but if you are editing and packaging default game icons, you can use this to scale up.
 
     #### Requirements
     * `requirements` (table) - Trait requirements

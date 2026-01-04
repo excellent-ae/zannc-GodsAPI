@@ -1,6 +1,11 @@
 # Changelog
 
 ## [Unreleased]
+DEV: Check if GiftData exists before creating it.
+DEV: Fix issue where most codex entries were generating an `'Offerings'` button.
+DEV: Added `boonPosition` for Traits.
+Added new paramater for Boon icon scaling: `boonIconScale`.
+Documentation update for `characterName` and `addToExistingGod` stating it does not add to a god automatically.
 
 ## [2.1.2] - 2025-12-28
 
