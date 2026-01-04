@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [2.1.3] - 2026-01-04
+
 DEV: Check if GiftData exists before creating it.
 DEV: Fix issue where most codex entries were generating an `'Offerings'` button.
 DEV: Added `boonPosition` for Traits.
@@ -141,7 +144,8 @@ FIX: issue where trait index's weren't being created for default game gods (Sele
 
 - Initial Release.
 
-[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.2...HEAD
+[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.3...HEAD
+[2.1.3]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.2...2.1.3
 [2.1.2]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.1...2.1.2
 [2.1.1]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.0...2.1.1
 [2.1.0]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.0.7...2.1.0
