@@ -300,7 +300,7 @@ gods.CreateBoon({
 	internalBoonName = "AwesomeWeaponBoon",  -- eg TycheWeaponBoon
     InheritFrom = {wrathTrait},
     characterName = "Tyche",
-	addToExistingGod = { boonPosition = 2 }, -- OR true // Allows you to insert traits into Olympains (Zeus etc) and Daedalus Hammers (characterName = Weapon) --- Chaos and Selene NOT supported ATM.
+	addToExistingGod = { boonPosition = 2 }, -- OR true // Allows you to insert trait (WeaponUpgrades and Traits are SEPERATE tables) into Olympains (Zeus etc) and Daedalus Hammers (characterName = Weapon) --- Chaos and Selene NOT supported ATM.
     --? Everything below is an Optional field
 
     -- "Melee" or "Secondary" or "Ranged" or "Rush" or "Mana", doesn't need to be passed if not a core boon.

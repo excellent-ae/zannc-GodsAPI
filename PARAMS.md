@@ -225,8 +225,8 @@
     <summary><strong>Optional Parameters</strong></summary><br>
 
     * `addToExistingGod` (table/boolean) - Add to existing god's trait list
-        * `boonPosition` (integer) - Where to insert the trait (eg if weapon boon you want it to be position 1)
         * `customGUID` (string) - A custom GUID can be passed in if the god has a prefixed GUID to the LootName
+        * `boonPosition` (integer) - Where to insert the trait (eg if weapon boon you want it to be position 1) // NOTE: If you are using slot, the boon position is relative to `WeaponUpgrades`, and if you are adding a basic trait, it is relative to OTHER traits.
     * `RarityLevels` (table) - Multipliers for each rarity level
         * `Common` (number/table)
         * `Rare` (number/table)
