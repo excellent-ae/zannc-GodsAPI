@@ -294,7 +294,7 @@
         * `description` (string)
 </details>
 
-## CreateBoon parameters
+## CustomRarity parameters
 <details>
 <summary><strong>Parameters</strong></summary><br>
 
@@ -309,6 +309,7 @@
         * `PathOverrides` (table) - Define which paths use existing game textures.
             * `framePath` (boolean)
             * `backingPath` (boolean)<br>
+        * `frameScale` (integer)
         * `framePath` (string) 
         * `backingPath` (string) 
   </details>

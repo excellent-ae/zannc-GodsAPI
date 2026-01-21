@@ -1548,12 +1548,14 @@ function definitions.CreateCustomRarity(env, params)
     local boonIconFrame = sjson.to_object({
         Name = "BoonIcon_Frame_" .. rarityName,
         InheritFrom = "BoonTrayFrame",
+        Scale = params.Display.frameScale or nil,
         FilePath = cleanFilePath(pluginGUID, params.Display and params.Display.framePath, useBaseIcon) or "GUI\\Screens\\BoonIconFrames\\unity",
     }, Order)
 
     local frameBoonMenu = sjson.to_object({
         Name = "Frame_Boon_Menu_" .. rarityName,
         InheritFrom = "Menu_Frame",
+        Scale = params.Display.frameScale or nil,
         FilePath = cleanFilePath(pluginGUID, params.Display and params.Display.framePath, useBaseIcon) or "GUI\\Screens\\BoonIconFrames\\unity",
         EndFrame = 1,
         StartFrame = 1,

@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+Added `frameScale` to allow for scaling of custom frames in `CreateCustomRarity`.
 
 ## [2.1.3] - 2026-01-04
 
