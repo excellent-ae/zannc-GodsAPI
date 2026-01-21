@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [2.1.4] - 2026-01-21
+
 Added `frameScale` to allow for scaling of custom frames in `CreateCustomRarity`.
 
 ## [2.1.3] - 2026-01-04
@@ -145,7 +148,8 @@ FIX: issue where trait index's weren't being created for default game gods (Sele
 
 - Initial Release.
 
-[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.3...HEAD
+[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.4...HEAD
+[2.1.4]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.3...2.1.4
 [2.1.3]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.2...2.1.3
 [2.1.2]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.1...2.1.2
 [2.1.1]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.0...2.1.1
