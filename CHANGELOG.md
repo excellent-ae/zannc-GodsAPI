@@ -1,26 +1,27 @@
 # Changelog
 
 ## [Unreleased]
+- DEV: Change PLUGIN to _PLUGIN
 
 ## [2.1.4] - 2026-01-21
 
-Added `frameScale` to allow for scaling of custom frames in `CreateCustomRarity`.
+- Added `frameScale` to allow for scaling of custom frames in `CreateCustomRarity`.
 
 ## [2.1.3] - 2026-01-04
 
-DEV: Check if GiftData exists before creating it.
-DEV: Fix issue where most codex entries were generating an `'Offerings'` button.
-DEV: Added `boonPosition` for Traits.
-Added new paramater for Boon icon scaling: `boonIconScale`.
-Documentation update for `characterName` and `addToExistingGod` stating it does not add to a god automatically.
+- DEV: Check if GiftData exists before creating it.
+- DEV: Fix issue where most codex entries were generating an `'Offerings'` button.
+- DEV: Added `boonPosition` for Traits.
+- Added new paramater for Boon icon scaling: `boonIconScale`.
+- Documentation update for `characterName` and `addToExistingGod` stating it does not add to a god automatically.
 
 ## [2.1.2] - 2025-12-28
 
-FIX: Custom boons were not being added to codex/ponymenu unless it is added to a new custom god.
+- FIX: Custom boons were not being added to codex/ponymenu unless it is added to a new custom god.
 
 ## [2.1.1] - 2025-12-28
 
-FIX: issue where trait index's weren't being created for default game gods (Selene for some reason).
+- FIX: issue where trait index's weren't being created for default game gods (Selene for some reason).
 
 ## [2.1.0] - 2025-12-22
 

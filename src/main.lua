@@ -8,7 +8,7 @@
 local mods = rom.mods
 envy = mods["SGG_Modding-ENVY"].auto()
 rom = rom
-_PLUGIN = PLUGIN
+_PLUGIN = _PLUGIN
 game = rom.game
 modutil = mods["SGG_Modding-ModUtil"]
 sjson = mods["SGG_Modding-SJSON"]

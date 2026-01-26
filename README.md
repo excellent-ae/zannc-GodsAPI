@@ -24,7 +24,7 @@ You should only install it if another mod requires it, or if you will be using t
     ```
     So that it looks like this as an example:
     ```lua
-    _PLUGIN = PLUGIN
+    _PLUGIN = _PLUGIN
     game = rom.game
 
     ---@module 'SGG_Modding-ModUtil'
