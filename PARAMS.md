@@ -187,7 +187,7 @@
 
     #### Gift Requirements (If you want custom, otherwise it tries to default to first/last gift set)
     * `customGiftData` (table)
-        * `customName` (string) - Used in rare cases where naming convention is important (mod to mod compat)
+        * `customName` (string) - Used in rare cases where naming convention is important, eg if you have defined GiftData on your own, or if you need mod to mod compat.
         * `maxRequirement` (table) - Requirements for maxed friendship.
         * `minRequirement` (table) - Requirements to initially unlock the keepsake.
 
