@@ -1,7 +1,10 @@
 # Changelog
 
 ## [Unreleased]
-- DEV: Change PLUGIN to _PLUGIN
+
+## [2.1.5] - 2026-01-26
+
+- DEV: Change PLUGIN to \_PLUGIN
 
 ## [2.1.4] - 2026-01-21
 
@@ -149,7 +152,8 @@
 
 - Initial Release.
 
-[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.4...HEAD
+[unreleased]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.5...HEAD
+[2.1.5]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.4...2.1.5
 [2.1.4]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.3...2.1.4
 [2.1.3]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.2...2.1.3
 [2.1.2]: https://github.com/excellent-ae/zannc-GodsAPI/compare/2.1.1...2.1.2
